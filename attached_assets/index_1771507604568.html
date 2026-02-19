@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nama Kamu — Personal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #FAFAF8;
+      --black: #0A0A0A;
+      --ink: #1A1A1A;
+      --muted: #888;
+      --rule: #E0DDD8;
+      --accent: #C8392B;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--white);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 3rem;
+      background: rgba(250,250,248,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+    nav.scrolled { border-color: var(--rule); }
+
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--black);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 80px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 3rem 6rem 3rem;
+      border-right: 1px solid var(--rule);
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+
+    .hero-name {
+      font-family: var(--serif);
+      font-size: clamp(3.5rem, 7vw, 7rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: var(--black);
+      margin-bottom: 2rem;
+    }
+
+    .hero-name em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-bio {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 34ch;
+      line-height: 1.75;
+      margin-bottom: 3rem;
+      font-weight: 300;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+      border-bottom: 2px solid var(--black);
+      padding-bottom: 0.2rem;
+      transition: gap 0.2s;
+    }
+    .hero-cta:hover { gap: 1.2rem; }
+    .hero-cta::after { content: '→'; }
+
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+      background: #F0EDE8;
+    }
+
+    .hero-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(20%);
+      transition: transform 6s ease;
+    }
+    .hero-right:hover .hero-photo { transform: scale(1.03); }
+
+    .hero-photo-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #E8E4DE 0%, #D4CFC7 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .hero-photo-placeholder .icon { font-size: 3rem; opacity: 0.3; }
+    .hero-photo-placeholder p {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .hero-tag {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      background: var(--white);
+      border: 1px solid var(--rule);
+      padding: 0.7rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    /* ─── SECTION COMMONS ─── */
+    section { position: relative; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 4rem 3rem 2rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .section-number {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .section-link {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+    .section-link:hover { color: var(--black); }
+
+    /* ─── GALLERY ─── */
+    #gallery .section-header { margin-bottom: 0; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto;
+      gap: 1px;
+      background: var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .gallery-item {
+      background: var(--white);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .gallery-item:nth-child(1) { grid-column: 1 / 6; grid-row: 1 / 3; aspect-ratio: unset; min-height: 420px; }
+    .gallery-item:nth-child(2) { grid-column: 6 / 9; grid-row: 1 / 2; }
+    .gallery-item:nth-child(3) { grid-column: 9 / 13; grid-row: 1 / 2; }
+    .gallery-item:nth-child(4) { grid-column: 6 / 10; grid-row: 2 / 3; }
+    .gallery-item:nth-child(5) { grid-column: 10 / 13; grid-row: 2 / 3; }
+    .gallery-item:nth-child(6) { grid-column: 1 / 4; grid-row: 3 / 4; }
+    .gallery-item:nth-child(7) { grid-column: 4 / 8; grid-row: 3 / 4; }
+    .gallery-item:nth-child(8) { grid-column: 8 / 13; grid-row: 3 / 4; }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease, filter 0.3s;
+      filter: grayscale(10%);
+    }
+
+    .gallery-item:hover .gallery-img {
+      transform: scale(1.05);
+      filter: grayscale(0%);
+    }
+
+    .gallery-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      background: #EFECE6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.3s;
+    }
+
+    .gallery-item:nth-child(odd) .gallery-placeholder { background: #E8E4DE; }
+    .gallery-item:nth-child(3n) .gallery-placeholder { background: #E2DDD5; }
+    .gallery-item:hover .gallery-placeholder { background: #DAD5CC; }
+
+    .gallery-placeholder span { font-size: 2rem; opacity: 0.25; }
+    .gallery-placeholder p {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.5rem 1rem 0.8rem;
+      background: linear-gradient(to top, rgba(10,10,10,0.7) 0%, transparent 100%);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .gallery-item:hover .gallery-caption { opacity: 1; }
+
+    /* ─── WRITING ─── */
+    #writing {
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .writing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--rule);
+    }
+
+    .article-card {
+      padding: 2.5rem 3rem;
+      border-right: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .article-card:last-child { border-right: none; }
+    .article-card:hover { background: #F5F2ED; }
+
+    .article-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .article-title {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      color: var(--black);
+    }
+
+    .article-excerpt {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 300;
+      flex-grow: 1;
+    }
+
+    .article-meta {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: #BBB;
+      text-transform: uppercase;
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .article-meta::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    /* ─── FEATURED ARTICLE ─── */
+    .article-featured {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .article-featured-img {
+      background: #E8E4DE;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--rule);
+    }
+
+    .article-featured-img span { font-size: 3rem; opacity: 0.2; }
+
+    .article-featured-content {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+
+    .article-featured-content .article-title {
+      font-size: 2.2rem;
+    }
+
+    .featured-badge {
+      display: inline-block;
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      width: fit-content;
+    }
+
+    /* ─── NEWS / LIPUTAN ─── */
+    #news { border-bottom: 1px solid var(--rule); }
+
+    .news-list {
+      border-top: 1px solid var(--rule);
+    }
+
+    .news-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.8rem 3rem;
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .news-item:hover { background: #F5F2ED; }
+
+    .news-num {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--rule);
+      line-height: 1;
+    }
+
+    .news-source {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .news-headline {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+
+    .news-date {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .news-arrow {
+      font-size: 1rem;
+      color: var(--rule);
+      transition: color 0.2s, transform 0.2s;
+    }
+    .news-item:hover .news-arrow { color: var(--black); transform: translateX(4px); }
+
+    /* ─── THOUGHT / MANIFESTO ─── */
+    #thought {
+      padding: 0;
+      background: var(--black);
+      color: var(--white);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .thought-inner {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      min-height: 80vh;
+    }
+
+    .thought-left {
+      padding: 6rem 3rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .thought-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .thought-num {
+      font-family: var(--serif);
+      font-size: 8rem;
+      font-weight: 900;
+      line-height: 1;
+      color: rgba(255,255,255,0.07);
+      letter-spacing: -0.05em;
+    }
+
+    .thought-right {
+      padding: 6rem 4rem 6rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3rem;
+    }
+
+    .thought-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .thought-title {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .thought-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .manifesto-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .manifesto-item {
+      padding: 1.8rem 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .manifesto-item:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .manifesto-index {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.3);
+      padding-top: 0.2rem;
+    }
+
+    .manifesto-text {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+    }
+
+    .manifesto-sub {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      margin-top: 0.5rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 4rem 3rem;
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 3rem;
+      background: var(--white);
+    }
+
+    .footer-brand .nav-logo { font-size: 1.5rem; display: block; margin-bottom: 1rem; }
+
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 28ch;
+    }
+
+    .footer-col-title {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .footer-links a {
+      font-size: 0.88rem;
+      color: var(--ink);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-bottom {
+      grid-column: 1 / -1;
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,0.95);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .lightbox.active { opacity: 1; pointer-events: all; }
+
+    .lightbox-img {
+      max-width: 85vw;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      font-family: var(--mono);
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .lightbox-close:hover { opacity: 1; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-left > * {
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-left > *:nth-child(1) { animation-delay: 0.1s; }
+    .hero-left > *:nth-child(2) { animation-delay: 0.25s; }
+    .hero-left > *:nth-child(3) { animation-delay: 0.4s; }
+    .hero-left > *:nth-child(4) { animation-delay: 0.55s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+
+      #hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 4rem 1.5rem 3rem; border-right: none; border-bottom: 1px solid var(--rule); }
+      .hero-right { min-height: 50vw; }
+      .hero-photo-placeholder { min-height: 50vw; }
+
+      .section-header { padding: 3rem 1.5rem 1.5rem; flex-wrap: wrap; gap: 1rem; }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .gallery-item:nth-child(n) { grid-column: unset; grid-row: unset; }
+
+      .writing-grid { grid-template-columns: 1fr; }
+      .article-featured { grid-template-columns: 1fr; }
+      .article-featured-img { min-height: 200px; }
+      .article-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 2rem 1.5rem; }
+      .article-featured-content { padding: 2rem 1.5rem; }
+
+      .news-item { padding: 1.5rem; grid-template-columns: 50px 1fr; }
+      .news-date { display: none; }
+
+      .thought-inner { grid-template-columns: 1fr; }
+      .thought-left { display: none; }
+      .thought-right { padding: 4rem 1.5rem; }
+
+      footer { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#hero" class="nav-logo">Nama<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#writing">Tulisan</a></li>
+      <li><a href="#news">Liputan</a></li>
+      <li><a href="#thought">Thought</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">— Penulis & Praktisi</p>
+      <h1 class="hero-name">Nama<br><em>Kamu</em></h1>
+      <p class="hero-bio">Satu kalimat kuat tentang siapa kamu — apa yang kamu perjuangkan, dan kenapa dunia perlu mendengarnya.</p>
+      <a href="#writing" class="hero-cta">Baca Tulisan Saya</a>
+    </div>
+    <div class="hero-right">
+      <!-- Ganti src di bawah dengan foto kamu -->
+      <!-- <img src="foto-kamu.jpg" alt="Foto" class="hero-photo"> -->
+      <div class="hero-photo-placeholder">
+        <span>◻</span>
+        <p>Foto Kamu Di Sini</p>
+      </div>
+      <div class="hero-tag">Jakarta, Indonesia — 2025</div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="gallery">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-number">01 — Gallery</p>
+        <h2 class="section-title">Momen &<br>Aktivitas</h2>
+      </div>
+      <a href="#" class="section-link">Lihat semua →</a>
+    </div>
+
+    <div class="gallery-grid">
+      <!-- Item 1 — Hero besar kiri -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Foto Utama</p></div>
+        <div class="gallery-caption">Keterangan foto aktivitas utama</div>
+      </div>
+      <!-- Item 2 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Aktivitas</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 3 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Kegiatan</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 4 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Momen</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 5 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Perjalanan</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 6 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Dokumentasi</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 7 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Foto</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+      <!-- Item 8 -->
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <div class="gallery-placeholder"><span>🖼</span><p>Momen</p></div>
+        <div class="gallery-caption">Keterangan foto</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WRITING -->
+  <section id="writing">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-number">02 — Tulisan</p>
+        <h2 class="section-title">Esai &<br>Opini</h2>
+      </div>
+      <a href="#" class="section-link">Semua tulisan →</a>
+    </div>
+
+    <div class="writing-grid">
+      <!-- Featured -->
+      <div class="article-featured">
+        <div class="article-featured-img">
+          <!-- <img src="..." class="gallery-img"> -->
+          <span>✦</span>
+        </div>
+        <div class="article-featured-content">
+          <span class="featured-badge">Terbaru</span>
+          <p class="article-tag">Opini · Sosial</p>
+          <h3 class="article-title">Judul Tulisan Terbaru yang Menarik dan Kuat</h3>
+          <p class="article-excerpt">Paragraf pembuka tulisan ini yang merangkum isu utama — cukup satu atau dua kalimat yang langsung menggaet perhatian pembaca dan membuat mereka ingin melanjutkan.</p>
+          <p class="article-meta">14 Januari 2025 · 8 menit baca</p>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <a href="#" class="article-card">
+        <p class="article-tag">Politik</p>
+        <h3 class="article-title">Judul Tulisan Kedua yang Berkesan</h3>
+        <p class="article-excerpt">Kalimat pembuka yang merangkum argumen utama tulisan ini secara ringkas.</p>
+        <p class="article-meta">10 Jan 2025 · 6 mnt</p>
+      </a>
+
+      <a href="#" class="article-card">
+        <p class="article-tag">Ekonomi</p>
+        <h3 class="article-title">Judul Tulisan Ketiga yang Tajam</h3>
+        <p class="article-excerpt">Kalimat pembuka yang merangkum argumen utama tulisan ini secara ringkas.</p>
+        <p class="article-meta">3 Jan 2025 · 5 mnt</p>
+      </a>
+
+      <a href="#" class="article-card">
+        <p class="article-tag">Budaya</p>
+        <h3 class="article-title">Judul Tulisan Keempat yang Berbobot</h3>
+        <p class="article-excerpt">Kalimat pembuka yang merangkum argumen utama tulisan ini secara ringkas.</p>
+        <p class="article-meta">28 Des 2024 · 7 mnt</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- NEWS -->
+  <section id="news">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-number">03 — Liputan</p>
+        <h2 class="section-title">Potongan<br>Berita</h2>
+      </div>
+      <a href="#" class="section-link">Lihat semua →</a>
+    </div>
+
+    <div class="news-list">
+      <a href="#" class="news-item">
+        <span class="news-num">01</span>
+        <div>
+          <p class="news-source">Kompas</p>
+          <p class="news-headline">"Judul Berita atau Kutipan Tentang Kamu Yang Dimuat di Media Nasional"</p>
+        </div>
+        <span class="news-date">12 Jan 2025</span>
+        <span class="news-arrow">→</span>
+      </a>
+      <a href="#" class="news-item">
+        <span class="news-num">02</span>
+        <div>
+          <p class="news-source">Tempo</p>
+          <p class="news-headline">"Nama Kamu Dalam Konteks Berita Atau Wawancara Media"</p>
+        </div>
+        <span class="news-date">5 Des 2024</span>
+        <span class="news-arrow">→</span>
+      </a>
+      <a href="#" class="news-item">
+        <span class="news-num">03</span>
+        <div>
+          <p class="news-source">CNN Indonesia</p>
+          <p class="news-headline">"Kutipan Atau Headline Berita Yang Menyebut Atau Meliput Kamu"</p>
+        </div>
+        <span class="news-date">20 Nov 2024</span>
+        <span class="news-arrow">→</span>
+      </a>
+      <a href="#" class="news-item">
+        <span class="news-num">04</span>
+        <div>
+          <p class="news-source">Detik</p>
+          <p class="news-headline">"Judul Liputan Media Online Yang Relevan Dengan Aktivitasmu"</p>
+        </div>
+        <span class="news-date">8 Okt 2024</span>
+        <span class="news-arrow">→</span>
+      </a>
+      <a href="#" class="news-item">
+        <span class="news-num">05</span>
+        <div>
+          <p class="news-source">The Jakarta Post</p>
+          <p class="news-headline">"Another Media Coverage Headline That Reflects Your Work and Voice"</p>
+        </div>
+        <span class="news-date">15 Sep 2024</span>
+        <span class="news-arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- THOUGHT / MANIFESTO -->
+  <section id="thought">
+    <div class="thought-inner">
+      <div class="thought-left">
+        <span class="thought-label">Thought — Manifesto</span>
+        <span class="thought-num">04</span>
+      </div>
+      <div class="thought-right">
+        <p class="thought-eyebrow">— Cara pandang saya</p>
+        <h2 class="thought-title">Saya percaya<br><em>kata adalah</em><br>tindakan.</h2>
+        <div class="manifesto-items">
+          <div class="manifesto-item">
+            <span class="manifesto-index">I.</span>
+            <div>
+              <p class="manifesto-text">Pernyataan keyakinan pertama yang singkat, tegas, dan berkarakter.</p>
+              <p class="manifesto-sub">Elaborasi singkat — mengapa ini penting, apa artinya dalam praktik sehari-hari.</p>
+            </div>
+          </div>
+          <div class="manifesto-item">
+            <span class="manifesto-index">II.</span>
+            <div>
+              <p class="manifesto-text">Pernyataan keyakinan kedua yang berani dan tidak takut kontroversial.</p>
+              <p class="manifesto-sub">Elaborasi singkat — konteks, latar belakang, atau implikasi dari keyakinan ini.</p>
+            </div>
+          </div>
+          <div class="manifesto-item">
+            <span class="manifesto-index">III.</span>
+            <div>
+              <p class="manifesto-text">Pernyataan ketiga tentang cara kamu melihat dunia dan peran kamu di dalamnya.</p>
+              <p class="manifesto-sub">Elaborasi singkat — bagaimana ini tercermin dalam tulisan dan tindakanmu.</p>
+            </div>
+          </div>
+          <div class="manifesto-item">
+            <span class="manifesto-index">IV.</span>
+            <div>
+              <p class="manifesto-text">Pernyataan terakhir yang merangkum visi besar — warisan yang ingin kamu tinggalkan.</p>
+              <p class="manifesto-sub">Elaborasi singkat — penutup yang meninggalkan kesan kuat pada pembaca.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      <a href="#hero" class="nav-logo">Nama<span style="color:var(--accent)">.</span></a>
+      <p class="footer-tagline">Penulis, pemikir, dan praktisi yang percaya bahwa kata-kata bisa mengubah cara kita melihat dunia.</p>
+    </div>
+    <div>
+      <p class="footer-col-title">Navigasi</p>
+      <ul class="footer-links">
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#writing">Tulisan</a></li>
+        <li><a href="#news">Liputan</a></li>
+        <li><a href="#thought">Thought</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Kontak</p>
+      <ul class="footer-links">
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Twitter / X</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Email</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 Nama Kamu. All rights reserved.</p>
+      <p class="footer-copy">Dibuat dengan niat.</p>
+    </div>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">✕ Tutup</span>
+    <img src="" alt="" class="lightbox-img" id="lightbox-img">
+  </div>
+
+  <script>
+    // Navbar scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          // stagger children
+          const children = e.target.parentElement.querySelectorAll('.gallery-item, .article-card, .news-item, .manifesto-item');
+          children.forEach((child, i) => {
+            child.style.transitionDelay = `${i * 0.07}s`;
+            child.classList.add('reveal');
+            setTimeout(() => child.classList.add('visible'), i * 70);
+          });
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Lightbox
+    function openLightbox(el) {
+      const img = el.querySelector('img');
+      if (!img) return;
+      document.getElementById('lightbox-img').src = img.src;
+      document.getElementById('lightbox').classList.add('active');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>
