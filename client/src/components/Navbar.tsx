@@ -71,7 +71,7 @@ export default function Navbar() {
               </a>
             ))}
             <a 
-              href="mailto:contact@ahmadzulfikar.com" 
+              href="mailto:contact@dewivalentin.com" 
               className="bg-primary text-white px-5 py-2 text-sm font-mono hover:bg-primary/90 transition-colors"
               data-testid="link-nav-contact"
             >
