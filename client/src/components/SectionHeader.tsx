@@ -12,7 +12,7 @@ export default function SectionHeader({ title, subtitle, centered }: SectionHead
           {subtitle}
         </span>
       )}
-      <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
+      <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
         {title}
       </h2>
       <div className={`h-1 w-20 bg-primary mt-6 ${centered ? "mx-auto" : ""}`} />

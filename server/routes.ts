@@ -40,30 +40,30 @@ async function seedDatabase() {
   const existingArticles = await storage.getArticles();
   if (existingArticles.length === 0) {
     await storage.createArticle({
-      title: "The Art of Simplicity",
-      slug: "art-of-simplicity",
-      excerpt: "Why less is more in modern design and development.",
-      content: "Full content here...",
-      tag: "DESIGN",
-      date: "OCT 2023",
+      title: "Seni Kesederhanaan",
+      slug: "seni-kesederhanaan",
+      excerpt: "Mengapa lebih sedikit berarti lebih banyak dalam desain dan pengembangan modern.",
+      content: "Konten lengkap di sini...",
+      tag: "DESAIN",
+      date: "OKT 2023",
       isFeatured: true,
     });
     await storage.createArticle({
-      title: "Building for the Future",
-      slug: "building-future",
-      excerpt: "Technologies that will shape the next decade.",
-      content: "Full content here...",
-      tag: "TECH",
+      title: "Membangun untuk Masa Depan",
+      slug: "membangun-masa-depan",
+      excerpt: "Teknologi yang akan membentuk dekade berikutnya.",
+      content: "Konten lengkap di sini...",
+      tag: "TEKNOLOGI",
       date: "SEP 2023",
       isFeatured: false,
     });
     await storage.createArticle({
-      title: "Sustainable Architecture",
-      slug: "sustainable-architecture",
-      excerpt: "How we can build better homes for everyone.",
-      content: "Full content here...",
-      tag: "ARCH",
-      date: "AUG 2023",
+      title: "Arsitektur Berkelanjutan",
+      slug: "arsitektur-berkelanjutan",
+      excerpt: "Bagaimana kita bisa membangun rumah yang lebih baik untuk semua orang.",
+      content: "Konten lengkap di sini...",
+      tag: "ARSITEKTUR",
+      date: "AGU 2023",
       isFeatured: false,
     });
   }
@@ -72,22 +72,22 @@ async function seedDatabase() {
   if (existingNews.length === 0) {
     await storage.createNews({
       source: "TechCrunch",
-      headline: "Ahmad Zulfikar launches new design studio",
-      date: "2 DAYS AGO",
+      headline: "Ahmad Zulfikar meluncurkan studio desain baru",
+      date: "2 HARI LALU",
       url: "#",
       order: 1,
     });
     await storage.createNews({
       source: "Architectural Digest",
-      headline: "Top 10 minimalists to watch in 2024",
-      date: "1 WEEK AGO",
+      headline: "10 minimalis teratas yang patut diperhatikan di tahun 2024",
+      date: "1 MINGGU LALU",
       url: "#",
       order: 2,
     });
     await storage.createNews({
       source: "The Verge",
-      headline: "Interview: The future of digital interfaces",
-      date: "2 WEEKS AGO",
+      headline: "Wawancara: Masa depan antarmuka digital",
+      date: "2 MINGGU LALU",
       url: "#",
       order: 3,
     });
@@ -99,7 +99,7 @@ async function seedDatabase() {
     for (let i = 1; i <= 8; i++) {
       await storage.createGalleryItem({
         image: `https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&w=800&q=80`, // Placeholder
-        caption: `Project ${i} - 2023`,
+        caption: `Proyek ${i} - 2023`,
         colSpan: i === 1 ? "col-span-5 row-span-2" : "col-span-3", // Simplified logic, frontend handles classes better
       });
     }

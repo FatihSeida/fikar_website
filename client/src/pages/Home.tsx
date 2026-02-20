@@ -18,16 +18,16 @@ const HeroSection = () => {
           transition={{ duration: 0.8 }}
         >
           <span className="font-mono text-sm tracking-widest text-primary mb-4 block">
-            EST. 2024
+            BERDIRI 2024
           </span>
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-8 text-foreground">
+          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-black leading-[0.9] mb-8 text-foreground">
             Ahmad <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">
               Zulfikar
             </span>
           </h1>
           <p className="font-sans text-lg md:text-xl text-muted-foreground leading-relaxed max-w-md mb-10">
-            A multidisciplinary designer and frontend engineer crafting digital experiences with precision and soul. Currently building the future of web interfaces.
+            Seorang desainer multidisiplin dan insinyur frontend yang menciptakan pengalaman digital dengan presisi dan jiwa. Saat ini sedang membangun masa depan antarmuka web.
           </p>
           
           <div className="flex gap-6 items-center">
@@ -35,13 +35,13 @@ const HeroSection = () => {
               href="#profile" 
               className="group flex items-center gap-3 font-mono text-sm tracking-widest hover:text-primary transition-colors"
             >
-              READ BIO <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              BACA BIO <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
             <a 
               href="#writing" 
               className="group flex items-center gap-3 font-mono text-sm tracking-widest hover:text-primary transition-colors"
             >
-              LATEST WORK <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              KARYA TERBARU <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
         </motion.div>
@@ -72,12 +72,12 @@ const HeroSection = () => {
 const GallerySection = () => {
   const { data: galleryItems, isLoading } = useGallery();
 
-  if (isLoading) return <div className="py-20 text-center font-mono">Loading Gallery...</div>;
+  if (isLoading) return <div className="py-20 text-center font-mono">Memuat Galeri...</div>;
 
   return (
     <section id="gallery" className="py-20 md:py-32 bg-white">
       <div className="container mx-auto px-6">
-        <SectionHeader title="Visual Journal" subtitle="SELECTED WORKS" />
+        <SectionHeader title="Jurnal Visual" subtitle="KARYA TERPILIH" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[300px] md:auto-rows-[400px]">
           {galleryItems?.map((item, idx) => (
@@ -108,7 +108,7 @@ const GallerySection = () => {
 const WritingSection = () => {
   const { data: articles, isLoading } = useArticles();
   
-  if (isLoading) return <div className="py-20 text-center font-mono">Loading Articles...</div>;
+  if (isLoading) return <div className="py-20 text-center font-mono">Memuat Artikel...</div>;
 
   const featured = articles?.find(a => a.isFeatured) || articles?.[0];
   const others = articles?.filter(a => a.id !== featured?.id) || [];
@@ -116,7 +116,7 @@ const WritingSection = () => {
   return (
     <section id="writing" className="py-20 md:py-32 bg-background border-t border-border">
       <div className="container mx-auto px-6">
-        <SectionHeader title="Thoughts & Ideas" subtitle="WRITING" />
+        <SectionHeader title="Pemikiran & Ide" subtitle="TULISAN" />
 
         {/* Featured Article */}
         {featured && (
@@ -124,7 +124,7 @@ const WritingSection = () => {
             <div className="aspect-[4/3] bg-muted relative overflow-hidden group">
                {/* Minimalist placeholder for article image */}
                <div className="absolute inset-0 bg-neutral-200 group-hover:bg-neutral-300 transition-colors flex items-center justify-center">
-                  <span className="font-serif italic text-4xl text-neutral-400">Featured</span>
+                  <span className="font-serif italic text-4xl text-neutral-400">Unggulan</span>
                </div>
             </div>
             <div>
@@ -140,7 +140,7 @@ const WritingSection = () => {
                 {featured.excerpt}
               </p>
               <a href={`/article/${featured.slug}`} className="inline-flex items-center gap-2 font-mono text-sm border-b border-foreground pb-1 hover:text-primary hover:border-primary transition-colors">
-                READ ARTICLE <ArrowRight className="w-4 h-4" />
+                BACA ARTIKEL <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </div>
@@ -161,7 +161,7 @@ const WritingSection = () => {
                 {article.excerpt}
               </p>
               <a href={`/article/${article.slug}`} className="text-primary font-mono text-xs hover:underline inline-flex items-center gap-1">
-                READ MORE <ArrowUpRight className="w-3 h-3" />
+                BACA SELENGKAPNYA <ArrowUpRight className="w-3 h-3" />
               </a>
             </article>
           ))}
@@ -181,11 +181,11 @@ const NewsSection = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-white/20 pb-8">
           <div>
-            <span className="block font-mono text-xs text-primary tracking-widest mb-4 uppercase">UPDATES</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-white">Press & News</h2>
+            <span className="block font-mono text-xs text-primary tracking-widest mb-4 uppercase">PEMBARUAN</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-white">Pers & Berita</h2>
           </div>
           <a href="#" className="hidden md:block font-mono text-xs border-b border-white pb-1 hover:text-primary hover:border-primary transition-colors mt-8 md:mt-0">
-            VIEW ARCHIVE
+            LIHAT ARSIP
           </a>
         </div>
 
@@ -229,17 +229,17 @@ const ContactSection = () => {
     <section id="contact" className="py-24 bg-background border-t border-border">
       <div className="container mx-auto px-6 text-center max-w-4xl">
         <h2 className="font-serif text-5xl md:text-7xl font-bold mb-8 text-foreground">
-          Let's create something <br />
-          <span className="italic text-primary">extraordinary.</span>
+          Mari ciptakan sesuatu <br />
+          <span className="italic text-primary">luar biasa.</span>
         </h2>
         <p className="font-sans text-xl text-muted-foreground mb-12 max-w-xl mx-auto">
-          Available for select freelance opportunities and collaborations. Drop me a line if you have a project in mind.
+          Tersedia untuk peluang lepas dan kolaborasi pilihan. Hubungi saya jika Anda memiliki proyek dalam pikiran.
         </p>
         <a 
           href="mailto:hello@ahmadzulfikar.com"
           className="inline-block px-10 py-5 bg-foreground text-background font-mono text-sm tracking-widest hover:bg-primary transition-colors duration-300 shadow-lg hover:shadow-primary/25"
         >
-          START A CONVERSATION
+          MULAI PERCAKAPAN
         </a>
       </div>
     </section>
@@ -252,7 +252,7 @@ const Footer = () => {
       <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="text-center md:text-left">
           <p className="font-serif text-lg font-bold">Ahmad Zulfikar</p>
-          <p className="font-mono text-xs text-muted-foreground mt-1">© {new Date().getFullYear()} All Rights Reserved.</p>
+          <p className="font-mono text-xs text-muted-foreground mt-1">© {new Date().getFullYear()} Hak Cipta Dilindungi.</p>
         </div>
         
         <div className="flex gap-8">

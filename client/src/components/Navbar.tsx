@@ -16,10 +16,10 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "HOME", href: "#hero" },
-    { name: "PROFILE", href: "#profile" },
-    { name: "WRITING", href: "#writing" },
-    { name: "CONTACT", href: "#contact" },
+    { name: "BERANDA", href: "#hero" },
+    { name: "PROFIL", href: "#profile" },
+    { name: "TULISAN", href: "#writing" },
+    { name: "KONTAK", href: "#contact" },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -55,16 +55,16 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="font-mono text-sm tracking-wider text-white hover:text-primary transition-colors duration-200"
+                className="font-mono text-xs tracking-wider text-white hover:text-primary transition-colors duration-200"
               >
                 {link.name}
               </a>
             ))}
             <a 
               href="mailto:contact@ahmadzulfikar.com" 
-              className="bg-primary text-white px-5 py-2 text-sm font-mono hover:bg-primary/90 transition-colors"
+              className="bg-primary text-white px-5 py-2 text-xs font-mono hover:bg-primary/90 transition-colors"
             >
-              LET'S TALK
+              MARI BICARA
             </a>
           </div>
 
@@ -101,7 +101,7 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className="font-serif text-3xl font-bold hover:text-primary transition-colors"
+                  className="font-serif text-3xl font-bold hover:text-primary transition-colors uppercase"
                 >
                   {link.name}
                 </a>
