@@ -55,7 +55,7 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="font-mono text-sm tracking-wider hover:text-primary transition-colors duration-200"
+                className="font-mono text-sm tracking-wider text-white hover:text-primary transition-colors duration-200"
               >
                 {link.name}
               </a>
