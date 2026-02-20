@@ -55,7 +55,7 @@ export default function Navbar() {
       >
         <div className="container mx-auto px-6 flex justify-between items-center">
           <Link href="/" className="text-2xl font-serif font-bold tracking-tight" data-testid="link-logo">
-            Ahmad <span className="text-primary">Zulfikar</span>
+            Dewi <span className="text-primary">Valentin</span>
           </Link>
 
           <div className="hidden md:flex gap-8 items-center">
