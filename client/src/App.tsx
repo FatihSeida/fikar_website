@@ -5,14 +5,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
-import ArticleDetail from "@/pages/ArticleDetail";
+import NoteDetail from "@/pages/NoteDetail";
+import PemikiranPage from "@/pages/PemikiranPage";
+import Admin from "@/pages/Admin";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/article/:slug" component={ArticleDetail} />
-      {/* Fallback to 404 */}
+      <Route path="/catatan/:slug" component={NoteDetail} />
+      <Route path="/pemikiran-ide" component={PemikiranPage} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

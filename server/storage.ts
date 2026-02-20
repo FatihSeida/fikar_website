@@ -1,48 +1,72 @@
 import { db } from "./db";
-import { articles, news, gallery, type Article, type InsertArticle, type News, type InsertNews, type GalleryItem, type InsertGalleryItem } from "@shared/schema";
+import { gallery, notes, pages, type GalleryItem, type InsertGalleryItem, type Note, type InsertNote, type Page, type InsertPage } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getArticles(): Promise<Article[]>;
-  getArticle(slug: string): Promise<Article | undefined>;
-  getNews(): Promise<News[]>;
   getGalleryItems(): Promise<GalleryItem[]>;
-  createArticle(article: InsertArticle): Promise<Article>;
-  createNews(newsItem: InsertNews): Promise<News>;
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
+  deleteGalleryItem(id: number): Promise<void>;
+
+  getNotes(): Promise<Note[]>;
+  getNote(slug: string): Promise<Note | undefined>;
+  createNote(note: InsertNote): Promise<Note>;
+  updateNote(id: number, note: Partial<InsertNote>): Promise<Note>;
+  deleteNote(id: number): Promise<void>;
+
+  getPage(slug: string): Promise<Page | undefined>;
+  upsertPage(slug: string, data: { title: string; content: string }): Promise<Page>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getArticles(): Promise<Article[]> {
-    return await db.select().from(articles);
-  }
-
-  async getArticle(slug: string): Promise<Article | undefined> {
-    const [article] = await db.select().from(articles).where(eq(articles.slug, slug));
-    return article;
-  }
-
-  async getNews(): Promise<News[]> {
-    return await db.select().from(news);
-  }
-
   async getGalleryItems(): Promise<GalleryItem[]> {
     return await db.select().from(gallery);
-  }
-
-  async createArticle(insertArticle: InsertArticle): Promise<Article> {
-    const [article] = await db.insert(articles).values(insertArticle).returning();
-    return article;
-  }
-
-  async createNews(insertNews: InsertNews): Promise<News> {
-    const [newsItem] = await db.insert(news).values(insertNews).returning();
-    return newsItem;
   }
 
   async createGalleryItem(insertItem: InsertGalleryItem): Promise<GalleryItem> {
     const [item] = await db.insert(gallery).values(insertItem).returning();
     return item;
+  }
+
+  async deleteGalleryItem(id: number): Promise<void> {
+    await db.delete(gallery).where(eq(gallery.id, id));
+  }
+
+  async getNotes(): Promise<Note[]> {
+    return await db.select().from(notes);
+  }
+
+  async getNote(slug: string): Promise<Note | undefined> {
+    const [note] = await db.select().from(notes).where(eq(notes.slug, slug));
+    return note;
+  }
+
+  async createNote(insertNote: InsertNote): Promise<Note> {
+    const [note] = await db.insert(notes).values(insertNote).returning();
+    return note;
+  }
+
+  async updateNote(id: number, data: Partial<InsertNote>): Promise<Note> {
+    const [note] = await db.update(notes).set(data).where(eq(notes.id, id)).returning();
+    return note;
+  }
+
+  async deleteNote(id: number): Promise<void> {
+    await db.delete(notes).where(eq(notes.id, id));
+  }
+
+  async getPage(slug: string): Promise<Page | undefined> {
+    const [page] = await db.select().from(pages).where(eq(pages.slug, slug));
+    return page;
+  }
+
+  async upsertPage(slug: string, data: { title: string; content: string }): Promise<Page> {
+    const existing = await this.getPage(slug);
+    if (existing) {
+      const [page] = await db.update(pages).set(data).where(eq(pages.slug, slug)).returning();
+      return page;
+    }
+    const [page] = await db.insert(pages).values({ slug, ...data }).returning();
+    return page;
   }
 }
 
