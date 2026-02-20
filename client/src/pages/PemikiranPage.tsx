@@ -24,8 +24,6 @@ export default function PemikiranPage() {
     );
   }
 
-  const paragraphs = page.content.split("\n").filter(p => p.trim());
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NoiseOverlay />
@@ -50,13 +48,10 @@ export default function PemikiranPage() {
             <div className="h-1 w-20 bg-primary mt-6"></div>
           </header>
 
-          <div className="space-y-6">
-            {paragraphs.map((p, i) => (
-              <p key={i} className="text-lg text-foreground/80 font-sans leading-8">
-                {p}
-              </p>
-            ))}
-          </div>
+          <div
+            className="prose prose-lg prose-invert max-w-none font-sans [&_p]:mb-6 [&_p]:leading-8 [&_p]:text-foreground/80 [&_h1]:font-serif [&_h2]:font-serif [&_h3]:font-serif [&_img]:rounded-lg [&_img]:my-8 [&_blockquote]:border-l-primary [&_blockquote]:text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: page.content }}
+          />
         </div>
       </motion.div>
     </div>

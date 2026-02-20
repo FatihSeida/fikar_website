@@ -6,6 +6,21 @@ import path from "path";
 import fs from "fs";
 import { insertGallerySchema, insertNoteSchema, insertPageSchema } from "@shared/schema";
 import { z } from "zod";
+import { JSDOM } from "jsdom";
+import DOMPurify from "dompurify";
+
+const window = new JSDOM("").window;
+const purify = DOMPurify(window as any);
+
+function sanitizeHtml(html: string): string {
+  return purify.sanitize(html, {
+    ALLOWED_TAGS: [
+      "p", "br", "strong", "em", "u", "s", "h1", "h2", "h3",
+      "ul", "ol", "li", "blockquote", "img", "hr", "span", "div",
+    ],
+    ALLOWED_ATTR: ["src", "alt", "class", "style", "width", "height"],
+  });
+}
 
 const uploadDir = path.join(process.cwd(), "client", "public", "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -21,10 +36,40 @@ const multerStorage = multer.diskStorage({
 });
 const upload = multer({ storage: multerStorage, limits: { fileSize: 10 * 1024 * 1024 } });
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+
+function requireAdmin(req: any, res: any, next: any) {
+  if (req.session?.isAdmin) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // --- Admin Auth ---
+  app.post("/api/admin/login", (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+      req.session.isAdmin = true;
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ message: "Password salah" });
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/admin/check", (req, res) => {
+    res.json({ isAdmin: !!req.session?.isAdmin });
+  });
 
   // --- Gallery ---
   app.get("/api/gallery", async (_req, res) => {
@@ -32,14 +77,14 @@ export async function registerRoutes(
     res.json(items);
   });
 
-  app.post("/api/gallery", async (req, res) => {
+  app.post("/api/gallery", requireAdmin, async (req, res) => {
     const parsed = insertGallerySchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
     const item = await storage.createGalleryItem(parsed.data);
     res.json(item);
   });
 
-  app.delete("/api/gallery/:id", async (req, res) => {
+  app.delete("/api/gallery/:id", requireAdmin, async (req, res) => {
     await storage.deleteGalleryItem(Number(req.params.id));
     res.json({ success: true });
   });
@@ -56,21 +101,23 @@ export async function registerRoutes(
     res.json(note);
   });
 
-  app.post("/api/notes", async (req, res) => {
+  app.post("/api/notes", requireAdmin, async (req, res) => {
     const parsed = insertNoteSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
-    const note = await storage.createNote(parsed.data);
+    const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
+    const note = await storage.createNote(data);
     res.json(note);
   });
 
-  app.put("/api/notes/:id", async (req, res) => {
+  app.put("/api/notes/:id", requireAdmin, async (req, res) => {
     const parsed = insertNoteSchema.partial().safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
-    const note = await storage.updateNote(Number(req.params.id), parsed.data);
+    const data = parsed.data.content ? { ...parsed.data, content: sanitizeHtml(parsed.data.content) } : parsed.data;
+    const note = await storage.updateNote(Number(req.params.id), data);
     res.json(note);
   });
 
-  app.delete("/api/notes/:id", async (req, res) => {
+  app.delete("/api/notes/:id", requireAdmin, async (req, res) => {
     await storage.deleteNote(Number(req.params.id));
     res.json({ success: true });
   });
@@ -82,16 +129,17 @@ export async function registerRoutes(
     res.json(page);
   });
 
-  app.put("/api/pages/:slug", async (req, res) => {
+  app.put("/api/pages/:slug", requireAdmin, async (req, res) => {
     const pageSchema = z.object({ title: z.string().min(1), content: z.string().min(1) });
     const parsed = pageSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
-    const page = await storage.upsertPage(req.params.slug, parsed.data);
+    const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
+    const page = await storage.upsertPage(req.params.slug, data);
     res.json(page);
   });
 
   // --- File Upload ---
-  app.post("/api/upload", upload.single("file"), (req, res) => {
+  app.post("/api/upload", requireAdmin, upload.single("file"), (req, res) => {
     if (!req.file) return res.status(400).json({ message: "File tidak ditemukan" });
     const url = `/uploads/${req.file.filename}`;
     res.json({ url });

@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import session from "express-session";
 
 const app = express();
 const httpServer = createServer(app);
@@ -9,6 +10,12 @@ const httpServer = createServer(app);
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
+  }
+}
+
+declare module "express-session" {
+  interface SessionData {
+    isAdmin: boolean;
   }
 }
 
@@ -21,6 +28,19 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "fallback-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

@@ -64,13 +64,10 @@ export default function NoteDetail() {
             </div>
           )}
 
-          <div className="prose prose-lg prose-neutral max-w-none mx-auto font-sans">
-             {note.content.split('\n').map((paragraph, idx) => (
-                <p key={idx} className="mb-6 leading-8 text-foreground/80">
-                  {paragraph}
-                </p>
-             ))}
-          </div>
+          <div
+            className="prose prose-lg prose-invert max-w-none mx-auto font-sans [&_p]:mb-6 [&_p]:leading-8 [&_p]:text-foreground/80 [&_h1]:font-serif [&_h2]:font-serif [&_h3]:font-serif [&_img]:rounded-lg [&_img]:my-8 [&_blockquote]:border-l-primary [&_blockquote]:text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: note.content }}
+          />
 
           <div className="mt-16 pt-8 border-t border-border flex justify-between items-center">
              <div className="font-serif italic text-muted-foreground">
