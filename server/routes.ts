@@ -189,7 +189,7 @@ async function seedDatabase() {
         "<p>PB HMI menilai pelayanan kepemudaan di Kementerian Pemuda dan Olahraga berjalan lambat dan menuntut evaluasi terhadap Deputi I.</p><p>Persoalannya bukan sekadar satu program yang tersendat, melainkan kelemahan pelayanan yang sudah berlangsung terlalu lama.</p>",
       tag: "Liputan",
       date: "Desember 2025",
-      coverImage: null,
+      coverImage: "/liputan/potret-03.webp",
       sourceUrl: "https://kumparan.com/berita-sampit/kinerja-dinilai-buruk-pb-hmi-tuntut-deputi-i-kemenpora-dicopot-26NijjExF32",
       sourceName: "Kumparan",
     });
@@ -202,7 +202,7 @@ async function seedDatabase() {
         "<p>Bidang Pariwisata dan Ekonomi Kreatif PB HMI menyampaikan apresiasi atas arah kepemimpinan Menteri Pariwisata Widiyanti Putri Wardhana, khususnya pada perhatian terhadap pemberdayaan pemuda di sektor pariwisata.</p>",
       tag: "Liputan",
       date: "Oktober 2025",
-      coverImage: null,
+      coverImage: "/liputan/potret-01.webp",
       sourceUrl: "https://mediumnews.id/bidang-pariwisata-pb-hmi-apresiasi-kepemimpinan-menteri-widiyanti-dorong-kemajuan-pariwisata-dan-pemberdayaan-pemuda/",
       sourceName: "Mediumnews.id",
     });
@@ -241,7 +241,7 @@ async function seedDatabase() {
         "<p>Kajian pustaka mengenai pengaruh tarif pajak efektif dan profitabilitas terhadap manajemen perpajakan.</p><p>Tulisan ini merangkum temuan penelitian terdahulu untuk menyusun hipotesis yang dapat diuji secara empiris, dan menyimpulkan bahwa keduanya berpengaruh terhadap strategi manajemen perpajakan perusahaan.</p><p>Dimuat di Jurnal Manajemen, Akuntansi dan Logistik (JUMATI) Vol. 1 No. 4.</p>",
       tag: "Publikasi",
       date: "2023",
-      coverImage: null,
+      coverImage: "/liputan/potret-04.webp",
       sourceUrl: "https://ciptakind-publisher.com/jumati/index.php/ojs/article/view/97",
       sourceName: "JUMATI",
     });
@@ -254,7 +254,7 @@ async function seedDatabase() {
         "<p>Tulisan tentang peranan perempuan dalam penerapan civil society menurut perspektif Islam.</p><p>Perempuan memiliki hak sekaligus tanggung jawab sosial sebagai anggota masyarakat, dan terbuka ruang untuk berperan di ranah publik sepanjang memiliki kompetensi yang relevan.</p>",
       tag: "Publikasi",
       date: "HMI Cabang Palangka Raya",
-      coverImage: null,
+      coverImage: "/liputan/potret-02.webp",
       sourceUrl: "https://www.scribd.com/document/618359209/ARTIKEL-PERANAN-PEREMPUAN-TERHADAP-PENERAPAN-CIVIL-SOCIETY-MENURUT-PRESFEKTIF-ISLAM-NUR-GHINA-MUSLIMAH-CABANG-PALANGKA-RAYA",
       sourceName: "Scribd",
     });
