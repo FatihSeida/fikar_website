@@ -30,16 +30,27 @@ export default function Contact() {
               Untuk diskusi, undangan menulis, atau sekadar bertukar kabar.
             </p>
 
-            <a
-              href={site.instagram.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 border border-foreground px-8 py-4 text-xs uppercase tracking-[0.18em] text-foreground transition-colors duration-500 hover:bg-foreground hover:text-background"
-              data-testid="link-cta-kontak"
-            >
-              {site.instagram.pengguna}
-              <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:-translate-y-0.5" />
-            </a>
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+              <a
+                href={`mailto:${site.email}`}
+                className="inline-flex items-center border border-foreground px-8 py-4 text-xs uppercase tracking-[0.18em] text-foreground transition-colors duration-500 hover:bg-foreground hover:text-background"
+                data-testid="link-cta-kontak"
+              >
+                {site.email}
+              </a>
+
+              <a
+                href={site.instagram.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 text-sm text-primary transition-colors hover:text-foreground"
+                data-testid="link-kontak-instagram"
+              >
+                {site.instagram.pengguna}
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:-translate-y-0.5" />
+                <span className="sr-only">(membuka Instagram di tab baru)</span>
+              </a>
+            </div>
           </div>
         </motion.div>
       </div>

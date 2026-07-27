@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import NoteDetail from "@/pages/NoteDetail";
 import PemikiranPage from "@/pages/PemikiranPage";
+import TentangPage from "@/pages/TentangPage";
 import Admin from "@/pages/Admin";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/catatan/:slug" component={NoteDetail} />
       <Route path="/pemikiran-ide" component={PemikiranPage} />
+      <Route path="/tentang" component={TentangPage} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

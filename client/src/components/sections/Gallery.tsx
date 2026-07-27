@@ -51,9 +51,10 @@ export default function Gallery() {
                     className="h-full w-full object-cover object-top transition-transform [transition-duration:1200ms] ease-out hover:scale-[1.03]"
                   />
                 </div>
-                <figcaption className="mt-4 text-sm text-muted-foreground">
-                  {item.caption}
-                </figcaption>
+                {/* Keterangan tidak ditampilkan — foto-foto ini berbicara
+                    sendiri dan labelnya justru mengganggu. Nilainya tetap
+                    dipakai sebagai teks alternatif untuk pembaca layar, dan
+                    tetap bisa disunting lewat panel admin. */}
               </motion.figure>
             );
           })}

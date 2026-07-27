@@ -1,14 +1,20 @@
 /**
  * Identitas situs. Diubah di sini, bukan di tiap komponen.
  *
- * Catatan: alamat surel belum diketahui, jadi kontak diarahkan ke
- * Instagram. Bila nanti ada surel, tambahkan field `email` di sini dan
- * tampilkan di Contact.tsx serta SiteFooter.tsx.
+ * Nomor telepon dan alamat rumah dari CV sengaja tidak dicantumkan: situs
+ * ini publik dan terindeks mesin pencari, sedangkan CV dikirim ke pihak
+ * tertentu saja. Surel dicantumkan karena memang berfungsi sebagai titik
+ * kontak yang diniatkan terbuka.
  */
 export const site = {
   nama: "Ghina Nur Muslimah",
   namaDepan: "Ghina",
   namaBelakang: "Nur Muslimah",
+  gelar: "S.E.",
+  lahir: "Palangka Raya, 14 Agustus 1999",
+  asal: "Palangka Raya, Kalimantan Tengah",
+  domisili: "Jakarta Selatan, DKI Jakarta",
+  email: "nurghinamuslimah@gmail.com",
   instagram: {
     label: "Instagram",
     pengguna: "@nurghinaa",

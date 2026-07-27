@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 /**
  * Tentang / Filosofi. Naskah berbasis profil publik dan dapat disunting
@@ -7,11 +8,12 @@ import { motion } from "framer-motion";
  */
 
 const keterangan = [
-  { label: "Organisasi", nilai: "PB HMI 2024–2026" },
+  { label: "Lahir", nilai: "Palangka Raya, 14 Agustus 1999" },
+  { label: "Domisili", nilai: "Jakarta Selatan" },
+  { label: "Pendidikan", nilai: "S-2 Magister Akuntansi, PERBANAS Institute" },
+  { label: "Amanah", nilai: "Kepala Bidang Parekraf PB HMI" },
   { label: "Organisasi", nilai: "OIC Youth Indonesia" },
   { label: "Beasiswa", nilai: "Awardee Beasiswa Unggulan" },
-  { label: "Pendidikan", nilai: "UIN Palangka Raya" },
-  { label: "Domisili", nilai: "Konya, Turki" },
 ];
 
 export default function About() {
@@ -44,8 +46,15 @@ export default function About() {
               Kalimat itu yang saya bawa ke mana-mana.
             </p>
             <p className="measure mb-6 text-lg text-muted-foreground">
-              Saya Ghina. Aktif di pergerakan mahasiswa, sedang menempuh studi
-              magister akuntansi, dan saat ini tinggal di Konya, Turki.
+              Saya Ghina, lahir dan tumbuh di Palangka Raya, Kalimantan Tengah,
+              dan kini berdomisili di Jakarta Selatan. Lulusan Sarjana Ekonomi
+              dari IAIN Palangka Raya, sedang menempuh Magister Akuntansi di
+              PERBANAS Institute.
+            </p>
+            <p className="measure mb-6 text-lg text-muted-foreground">
+              Sejak 2017 saya bergerak bersama HMI dan KOHATI, dari komisariat
+              sampai pengurus besar. Sekarang memegang Bidang Pariwisata dan
+              Ekonomi Kreatif di PB HMI.
             </p>
             <p className="measure mb-12 text-lg text-muted-foreground">
               Sebagian besar yang saya kerjakan berpusat pada satu hal:
@@ -64,6 +73,15 @@ export default function About() {
                 </div>
               ))}
             </dl>
+
+            <a
+              href="/tentang"
+              className="group mt-10 inline-flex items-center gap-3 text-sm text-primary transition-colors hover:text-foreground"
+              data-testid="link-riwayat-lengkap"
+            >
+              Riwayat lengkap
+              <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
+            </a>
           </div>
         </motion.div>
       </div>
