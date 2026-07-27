@@ -9,7 +9,8 @@
     "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "optimize-photos": "tsx script/optimize-photos.ts"
+    "optimize-photos": "tsx script/optimize-photos.ts",
+    "optimize-liputan": "tsx script/optimize-liputan.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -78,6 +78,18 @@ export default function NoteDetail() {
 
           <div className={proseKelas} dangerouslySetInnerHTML={{ __html: note.content }} />
 
+          {note.sourceUrl && (
+            <a
+              href={note.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-12 inline-flex items-center gap-3 border border-foreground px-8 py-4 text-xs uppercase tracking-[0.18em] text-foreground transition-colors duration-500 hover:bg-foreground hover:text-background"
+              data-testid="link-note-source"
+            >
+              Baca di {note.sourceName ?? "sumber asli"}
+            </a>
+          )}
+
           <p className="mt-20 border-t border-border pt-8 font-serif italic text-muted-foreground">
             Terima kasih telah membaca.
           </p>

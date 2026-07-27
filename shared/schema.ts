@@ -18,6 +18,8 @@ export const notes = pgTable("notes", {
   tag: text("tag").notNull(),
   date: text("date").notNull(),
   coverImage: text("cover_image"),
+  sourceUrl: text("source_url"),
+  sourceName: text("source_name"),
 });
 
 export const pages = pgTable("pages", {

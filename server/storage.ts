@@ -126,6 +126,8 @@ export class MemStorage implements IStorage {
       tag: insertNote.tag,
       date: insertNote.date,
       coverImage: insertNote.coverImage ?? null,
+      sourceUrl: insertNote.sourceUrl ?? null,
+      sourceName: insertNote.sourceName ?? null,
     };
     this.noteItems.push(note);
     return note;

@@ -156,37 +156,107 @@ async function seedDatabase() {
   const existingNotes = await storage.getNotes();
   if (existingNotes.length === 0) {
     await storage.createNote({
-      title: "Menulis sebagai Cara Mendengar",
-      slug: "menulis-sebagai-cara-mendengar",
-      excerpt:
-        "Kenapa saya menuliskan kembali apa yang saya dengar, bukan langsung menanggapinya.",
+      title: "Dari Kalteng ke Panggung Dunia: Wakili Indonesia di OIC Youth Capital 2026",
+      slug: "oic-youth-capital-2026-konya",
+      excerpt: "Hadir di pembukaan resmi Konya OIC Youth Capital 2026, Turki, mewakili Indonesia dan Kalimantan Tengah.",
       content:
-        "<p>Menulis bukan cara saya bicara, melainkan cara saya mendengar dengan lebih pelan. Ada jarak yang muncul antara mendengar dan menuliskan, dan di jarak itulah biasanya saya menemukan apa yang sebenarnya sedang dikatakan orang lain.</p><p>Karena itu catatan-catatan di sini jarang berupa kesimpulan. Sebagian besar hanya rekaman dari proses yang belum selesai.</p>",
-      tag: "Catatan",
-      date: "Juli 2026",
-      coverImage: null,
-    });
-
-    await storage.createNote({
-      title: "Belajar di Kota yang Tidak Terburu-buru",
-      slug: "belajar-di-kota-yang-tidak-terburu-buru",
-      excerpt: "Catatan singkat dari hari-hari menempuh studi di Konya.",
-      content:
-        "<p>Konya mengajarkan satu hal yang tidak saya dapat dari tempat lain: bahwa kecepatan bukan ukuran kesungguhan. Kota ini bergerak pelan, dan lama-lama saya ikut menyesuaikan diri.</p><p>Banyak hal yang dulu terasa mendesak ternyata bisa menunggu. Sebagian bahkan hilang sendiri ketika tidak buru-buru ditanggapi.</p>",
+        "<p>Indonesia turut hadir dalam pembukaan resmi Konya OIC Youth Capital 2026 di Turki, 9–12 Mei 2026. Forum ini mempertemukan perwakilan pemuda dari negara-negara anggota Organisasi Kerja Sama Islam.</p><p>Dalam kegiatan tersebut saya mewakili Kementerian Pemuda dan Olahraga sekaligus membawa nama Kalimantan Tengah, memperkenalkan identitas budaya Indonesia kepada delegasi negara lain.</p>",
       tag: "Aktivitas",
-      date: "Juni 2026",
-      coverImage: null,
+      date: "Mei 2026",
+      coverImage: "/liputan/oic-youth-capital.webp",
+      sourceUrl: "https://intimnews.com/dari-kalteng-ke-panggung-dunia-ghina-muslimah-wakili-indonesia-di-oic-youth-capital-2026-turki/",
+      sourceName: "Intim News",
     });
 
     await storage.createNote({
-      title: "Organisasi dan Kesabaran",
-      slug: "organisasi-dan-kesabaran",
-      excerpt: "Tentang bekerja bersama orang yang tidak selalu sependapat.",
+      title: "UMKM sebagai Fondasi Masa Depan",
+      slug: "umkm-sebagai-fondasi-masa-depan",
+      excerpt: "Catatan tentang pandangan Teguh Anantawikrama yang menempatkan UMKM sebagai fondasi ekonomi Indonesia.",
       content:
-        "<p>Bekerja di organisasi mengajarkan bahwa keputusan paling baik jarang datang dari orang yang paling cepat bicara. Ia biasanya muncul setelah semua orang selesai didengarkan.</p><p>Kesabaran, dalam konteks itu, bukan sifat pasif. Ia kerja yang menuntut perhatian penuh.</p>",
-      tag: "Pemikiran",
-      date: "Mei 2026",
+        "<p>Catatan tentang pandangan Teguh Anantawikrama yang menempatkan UMKM sebagai fondasi ekonomi Indonesia ke depan.</p><p>Yang menarik dari pendekatannya adalah upaya menyeimbangkan kepentingan bisnis dengan pemerataan sosial, serta kesediaannya melibatkan generasi muda dalam prosesnya.</p>",
+      tag: "Liputan",
+      date: "Desember 2025",
+      coverImage: "/liputan/umkm-fondasi.webp",
+      sourceUrl: "https://www.amaspersadanews.com/2025/12/ketua-bidang-di-pb-hmi-nur-ghina.html",
+      sourceName: "Amas Persada News",
+    });
+
+    await storage.createNote({
+      title: "Evaluasi Pelayanan Kepemudaan di Kemenpora",
+      slug: "evaluasi-pelayanan-kepemudaan",
+      excerpt: "PB HMI menilai pelayanan kepemudaan berjalan lambat dan menuntut evaluasi terhadap Deputi I.",
+      content:
+        "<p>PB HMI menilai pelayanan kepemudaan di Kementerian Pemuda dan Olahraga berjalan lambat dan menuntut evaluasi terhadap Deputi I.</p><p>Persoalannya bukan sekadar satu program yang tersendat, melainkan kelemahan pelayanan yang sudah berlangsung terlalu lama.</p>",
+      tag: "Liputan",
+      date: "Desember 2025",
       coverImage: null,
+      sourceUrl: "https://kumparan.com/berita-sampit/kinerja-dinilai-buruk-pb-hmi-tuntut-deputi-i-kemenpora-dicopot-26NijjExF32",
+      sourceName: "Kumparan",
+    });
+
+    await storage.createNote({
+      title: "Apresiasi Kepemimpinan Menteri Pariwisata",
+      slug: "apresiasi-kepemimpinan-menteri-pariwisata",
+      excerpt: "Catatan atas arah kepemimpinan Menteri Widiyanti Putri Wardhana, khususnya pada pemberdayaan pemuda.",
+      content:
+        "<p>Bidang Pariwisata dan Ekonomi Kreatif PB HMI menyampaikan apresiasi atas arah kepemimpinan Menteri Pariwisata Widiyanti Putri Wardhana, khususnya pada perhatian terhadap pemberdayaan pemuda di sektor pariwisata.</p>",
+      tag: "Liputan",
+      date: "Oktober 2025",
+      coverImage: null,
+      sourceUrl: "https://mediumnews.id/bidang-pariwisata-pb-hmi-apresiasi-kepemimpinan-menteri-widiyanti-dorong-kemajuan-pariwisata-dan-pemberdayaan-pemuda/",
+      sourceName: "Mediumnews.id",
+    });
+
+    await storage.createNote({
+      title: "Delapan Dekade Indonesia: Pariwisata sebagai Pilar Kesejahteraan",
+      slug: "pariwisata-pilar-kesejahteraan",
+      excerpt: "Sektor pariwisata dan ekonomi kreatif layak diperlakukan sebagai pilar kesejahteraan, bukan pelengkap.",
+      content:
+        "<p>Memasuki delapan dekade kemerdekaan, sektor pariwisata dan ekonomi kreatif layak diperlakukan sebagai pilar kesejahteraan rakyat — bukan pelengkap.</p><p>Bidang Pariwisata dan Ekonomi Kreatif PB HMI mendorong inovasi anak muda dan penguatan potensi lokal sebagai jalan menuju daya saing yang lebih baik.</p>",
+      tag: "Liputan",
+      date: "Agustus 2025",
+      coverImage: "/liputan/dirgahayu-80.webp",
+      sourceUrl: "https://www.indonesiafolks.com/kabar-indonesia/86915744818/berusia-delapan-dekade-indonesia-pb-hmi-menjadikan-sektor-pariwisata-dan-ekonomi-kreatif-sebagai-pilar-penting-dalam-mewujudkan-kesejahteraan-rakyat",
+      sourceName: "Indonesia Folks",
+    });
+
+    await storage.createNote({
+      title: "Mitigasi Bencana di Destinasi Wisata Alam",
+      slug: "mitigasi-destinasi-wisata-alam",
+      excerpt: "Letusan Gunung Lewotobi sebagai momentum evaluasi keselamatan destinasi wisata alam.",
+      content:
+        "<p>Letusan Gunung Lewotobi di Flores Timur menjadi pengingat bahwa banyak destinasi wisata alam Indonesia berdiri di kawasan rawan bencana.</p><p>Sistem tanggap bencana perlu benar-benar terintegrasi di destinasi-destinasi itu. Mahasiswa dan komunitas pemuda punya ruang untuk terlibat dalam advokasi keselamatan wisata dan mendorong gerakan wisata tangguh bencana.</p>",
+      tag: "Liputan",
+      date: "Juni 2025",
+      coverImage: "/liputan/mitigasi-wisata.webp",
+      sourceUrl: "https://www.indonesiafolks.com/kabar-indonesia/86915374502/ketua-bidang-pariwisata-pb-hmi-letusan-gunung-lewotobi-momentum-evaluasi-dan-penguatan-mitigasi-di-destinasi-wisata-alam",
+      sourceName: "Indonesia Folks",
+    });
+
+    await storage.createNote({
+      title: "Pengaruh Tarif Pajak Efektif dan Profitabilitas terhadap Manajemen Perpajakan",
+      slug: "tarif-pajak-efektif-manajemen-perpajakan",
+      excerpt: "Kajian pustaka yang dimuat di Jurnal Manajemen, Akuntansi dan Logistik (JUMATI).",
+      content:
+        "<p>Kajian pustaka mengenai pengaruh tarif pajak efektif dan profitabilitas terhadap manajemen perpajakan.</p><p>Tulisan ini merangkum temuan penelitian terdahulu untuk menyusun hipotesis yang dapat diuji secara empiris, dan menyimpulkan bahwa keduanya berpengaruh terhadap strategi manajemen perpajakan perusahaan.</p><p>Dimuat di Jurnal Manajemen, Akuntansi dan Logistik (JUMATI) Vol. 1 No. 4.</p>",
+      tag: "Publikasi",
+      date: "2023",
+      coverImage: null,
+      sourceUrl: "https://ciptakind-publisher.com/jumati/index.php/ojs/article/view/97",
+      sourceName: "JUMATI",
+    });
+
+    await storage.createNote({
+      title: "Peranan Perempuan terhadap Penerapan Civil Society menurut Perspektif Islam",
+      slug: "peranan-perempuan-civil-society",
+      excerpt: "Tulisan tentang hak dan tanggung jawab sosial perempuan dalam membangun masyarakat madani.",
+      content:
+        "<p>Tulisan tentang peranan perempuan dalam penerapan civil society menurut perspektif Islam.</p><p>Perempuan memiliki hak sekaligus tanggung jawab sosial sebagai anggota masyarakat, dan terbuka ruang untuk berperan di ranah publik sepanjang memiliki kompetensi yang relevan.</p>",
+      tag: "Publikasi",
+      date: "HMI Cabang Palangka Raya",
+      coverImage: null,
+      sourceUrl: "https://www.scribd.com/document/618359209/ARTIKEL-PERANAN-PEREMPUAN-TERHADAP-PENERAPAN-CIVIL-SOCIETY-MENURUT-PRESFEKTIF-ISLAM-NUR-GHINA-MUSLIMAH-CABANG-PALANGKA-RAYA",
+      sourceName: "Scribd",
     });
   }
 

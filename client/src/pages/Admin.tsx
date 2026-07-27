@@ -211,12 +211,12 @@ function NotesManager() {
   const { data: items, isLoading } = useQuery<Note[]>({ queryKey: ["/api/notes"] });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "" });
+  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "", sourceUrl: "", sourceName: "" });
   const [coverUploading, setCoverUploading] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof form) => {
-      await apiRequest("POST", "/api/notes", { ...data, coverImage: data.coverImage || null });
+      await apiRequest("POST", "/api/notes", { ...data, coverImage: data.coverImage || null, sourceUrl: data.sourceUrl || null, sourceName: data.sourceName || null });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
@@ -227,7 +227,7 @@ function NotesManager() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof form }) => {
-      await apiRequest("PUT", `/api/notes/${id}`, { ...data, coverImage: data.coverImage || null });
+      await apiRequest("PUT", `/api/notes/${id}`, { ...data, coverImage: data.coverImage || null, sourceUrl: data.sourceUrl || null, sourceName: data.sourceName || null });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
@@ -247,7 +247,7 @@ function NotesManager() {
   });
 
   const resetForm = () => {
-    setForm({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "" });
+    setForm({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "", sourceUrl: "", sourceName: "" });
     setEditingNote(null);
     setDialogOpen(false);
   };
@@ -262,6 +262,8 @@ function NotesManager() {
       tag: note.tag,
       date: note.date,
       coverImage: note.coverImage || "",
+      sourceUrl: note.sourceUrl ?? "",
+      sourceName: note.sourceName ?? "",
     });
     setDialogOpen(true);
   };
@@ -355,6 +357,26 @@ function NotesManager() {
                   placeholder="Ringkasan singkat catatan"
                   data-testid="input-note-excerpt"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Tautan Sumber (opsional)</Label>
+                  <Input
+                    value={form.sourceUrl}
+                    onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
+                    placeholder="https://..."
+                    data-testid="input-note-source-url"
+                  />
+                </div>
+                <div>
+                  <Label>Nama Media (opsional)</Label>
+                  <Input
+                    value={form.sourceName}
+                    onChange={(e) => setForm({ ...form, sourceName: e.target.value })}
+                    placeholder="Kumparan"
+                    data-testid="input-note-source-name"
+                  />
+                </div>
               </div>
               <div>
                 <Label>Konten</Label>
