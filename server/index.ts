@@ -4,6 +4,18 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
+
+if (process.env.NODE_ENV === "production") {
+  for (const nama of ["SESSION_SECRET", "ADMIN_PASSWORD", "DATABASE_URL"]) {
+    if (!process.env[nama]) {
+      throw new Error(
+        `${nama} wajib diatur di produksi. Isi berkas .env sebelum menjalankan npm start.`,
+      );
+    }
+  }
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -30,8 +42,15 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+const PgSession = connectPgSimple(session);
+
 app.use(
   session({
+    store: new PgSession({ pool, createTableIfMissing: true }),
     secret: process.env.SESSION_SECRET || "fallback-secret-key",
     resave: false,
     saveUninitialized: false,
@@ -39,6 +58,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     },
   })
 );

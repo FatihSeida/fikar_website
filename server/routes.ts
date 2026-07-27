@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
@@ -22,7 +22,7 @@ function sanitizeHtml(html: string): string {
   });
 }
 
-const uploadDir = path.join(process.cwd(), "client", "public", "uploads");
+const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -144,6 +144,8 @@ export async function registerRoutes(
     const url = `/uploads/${req.file.filename}`;
     res.json({ url });
   });
+
+  app.use("/uploads", express.static(uploadDir));
 
   await seedDatabase();
 

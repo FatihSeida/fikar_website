@@ -56,7 +56,7 @@ npm start
 5. Jalankan sebagai layanan yang otomatis restart, misalnya lewat systemd atau pm2.
 6. Letakkan di belakang reverse proxy (nginx/Caddy) yang menangani HTTPS.
 
-Berkas yang diunggah lewat panel admin disimpan di `client/public/uploads/`. Sertakan direktori ini dalam cadangan.
+Berkas yang diunggah lewat panel admin disimpan di `uploads/` pada akar proyek. Direktori ini tidak masuk repositori dan tidak terhapus saat build, jadi sertakan dalam cadangan.
 
 ## Struktur
 
