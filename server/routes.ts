@@ -154,30 +154,36 @@ async function seedDatabase() {
   const existingNotes = await storage.getNotes();
   if (existingNotes.length === 0) {
     await storage.createNote({
-      title: "Seni Kesederhanaan",
-      slug: "seni-kesederhanaan",
-      excerpt: "Mengapa lebih sedikit berarti lebih banyak dalam desain dan pengembangan modern.",
-      content: "Dalam dunia yang semakin kompleks, kesederhanaan menjadi seni tersendiri. Setiap elemen yang kita hapus memberi ruang bagi yang tersisa untuk bersinar lebih terang.\n\nDesain minimalis bukan berarti kosong atau hampa, melainkan sebuah pilihan sadar untuk menyaring esensi dari setiap karya. Ketika kita menghilangkan yang tidak perlu, kita memberi penekanan pada apa yang benar-benar penting.",
-      tag: "DESAIN",
-      date: "OKT 2023",
+      title: "Menulis sebagai Cara Mendengar",
+      slug: "menulis-sebagai-cara-mendengar",
+      excerpt:
+        "Kenapa saya menuliskan kembali apa yang saya dengar, bukan langsung menanggapinya.",
+      content:
+        "<p>Menulis bukan cara saya bicara, melainkan cara saya mendengar dengan lebih pelan. Ada jarak yang muncul antara mendengar dan menuliskan, dan di jarak itulah biasanya saya menemukan apa yang sebenarnya sedang dikatakan orang lain.</p><p>Karena itu catatan-catatan di sini jarang berupa kesimpulan. Sebagian besar hanya rekaman dari proses yang belum selesai.</p>",
+      tag: "Catatan",
+      date: "Juli 2026",
       coverImage: null,
     });
+
     await storage.createNote({
-      title: "Membangun untuk Masa Depan",
-      slug: "membangun-masa-depan",
-      excerpt: "Teknologi yang akan membentuk dekade berikutnya.",
-      content: "Teknologi berkembang dengan kecepatan yang belum pernah terjadi sebelumnya. Sebagai pengembang dan desainer, kita harus selalu siap beradaptasi.\n\nDari kecerdasan buatan hingga web3, setiap inovasi membawa peluang dan tantangan baru. Yang penting adalah bagaimana kita memanfaatkan teknologi ini untuk menciptakan pengalaman yang lebih baik bagi pengguna.",
-      tag: "TEKNOLOGI",
-      date: "SEP 2023",
+      title: "Belajar di Kota yang Tidak Terburu-buru",
+      slug: "belajar-di-kota-yang-tidak-terburu-buru",
+      excerpt: "Catatan singkat dari hari-hari menempuh studi di Konya.",
+      content:
+        "<p>Konya mengajarkan satu hal yang tidak saya dapat dari tempat lain: bahwa kecepatan bukan ukuran kesungguhan. Kota ini bergerak pelan, dan lama-lama saya ikut menyesuaikan diri.</p><p>Banyak hal yang dulu terasa mendesak ternyata bisa menunggu. Sebagian bahkan hilang sendiri ketika tidak buru-buru ditanggapi.</p>",
+      tag: "Aktivitas",
+      date: "Juni 2026",
       coverImage: null,
     });
+
     await storage.createNote({
-      title: "Arsitektur Berkelanjutan",
-      slug: "arsitektur-berkelanjutan",
-      excerpt: "Bagaimana kita bisa membangun rumah yang lebih baik untuk semua orang.",
-      content: "Arsitektur berkelanjutan bukan hanya tren, melainkan kebutuhan mendesak. Bangunan yang kita ciptakan hari ini akan menentukan kualitas hidup generasi mendatang.\n\nDengan menggunakan material ramah lingkungan dan desain yang efisien energi, kita bisa menciptakan ruang yang indah sekaligus bertanggung jawab terhadap lingkungan.",
-      tag: "ARSITEKTUR",
-      date: "AGU 2023",
+      title: "Organisasi dan Kesabaran",
+      slug: "organisasi-dan-kesabaran",
+      excerpt: "Tentang bekerja bersama orang yang tidak selalu sependapat.",
+      content:
+        "<p>Bekerja di organisasi mengajarkan bahwa keputusan paling baik jarang datang dari orang yang paling cepat bicara. Ia biasanya muncul setelah semua orang selesai didengarkan.</p><p>Kesabaran, dalam konteks itu, bukan sifat pasif. Ia kerja yang menuntut perhatian penuh.</p>",
+      tag: "Pemikiran",
+      date: "Mei 2026",
       coverImage: null,
     });
   }
@@ -185,15 +191,17 @@ async function seedDatabase() {
   const existingGallery = await storage.getGalleryItems();
   if (existingGallery.length === 0) {
     const gallerySeeds = [
-      { image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&q=80", caption: "Proyek Digital 1" },
-      { image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80", caption: "Proyek Digital 2" },
-      { image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80", caption: "Proyek Koding" },
-      { image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80", caption: "Ruang Kerja" },
-      { image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80", caption: "Proyek Frontend" },
-      { image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80", caption: "Desain UI" },
+      { image: "/galeri/galeri-01.webp", caption: "Hormat" },
+      { image: "/galeri/galeri-02.webp", caption: "Sejenak menoleh" },
+      { image: "/galeri/galeri-03.webp", caption: "Berdiri tenang" },
+      { image: "/galeri/galeri-04.webp", caption: "Jeda" },
     ];
     for (const seed of gallerySeeds) {
-      await storage.createGalleryItem({ image: seed.image, caption: seed.caption, colSpan: "col-span-1" });
+      await storage.createGalleryItem({
+        image: seed.image,
+        caption: seed.caption,
+        colSpan: "col-span-1",
+      });
     }
   }
 
@@ -201,7 +209,8 @@ async function seedDatabase() {
   if (!pemikiranPage) {
     await storage.upsertPage("pemikiran-ide", {
       title: "Pemikiran & Ide",
-      content: "Halaman ini berisi pemikiran dan ide saya tentang desain, teknologi, dan kehidupan. Konten ini bersifat statis dan akan diperbarui secara berkala.\n\nSaya percaya bahwa desain yang baik adalah desain yang tidak terlihat — yang secara alami membimbing pengguna menuju tujuan mereka tanpa hambatan.\n\nTeknologi seharusnya melayani manusia, bukan sebaliknya. Setiap baris kode yang kita tulis, setiap piksel yang kita tempatkan, harus memiliki tujuan yang jelas."
+      content:
+        "<p>Halaman ini berisi hal-hal yang sedang saya pikirkan — sebagian sudah matang, sebagian besar belum.</p><p>Saya percaya bahwa gagasan yang baik tidak perlu diucapkan dengan keras. Ia cukup diletakkan dengan jelas, lalu dibiarkan bekerja pada orang yang membacanya.</p><p>Isi halaman ini akan berubah dari waktu ke waktu.</p>",
     });
   }
 }
