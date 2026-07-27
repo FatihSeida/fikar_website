@@ -48,7 +48,7 @@ export default function Gallery() {
                     src={item.image}
                     alt={item.caption}
                     loading="lazy"
-                    className="h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-out hover:scale-[1.03]"
+                    className="h-full w-full object-cover object-top transition-transform [transition-duration:1200ms] ease-out hover:scale-[1.03]"
                   />
                 </div>
                 <figcaption className="mt-4 text-sm text-muted-foreground">
