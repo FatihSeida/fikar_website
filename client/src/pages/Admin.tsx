@@ -62,7 +62,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
                 autoFocus
               />
             </div>
-            {error && <p className="text-sm text-red-500" data-testid="text-login-error">{error}</p>}
+            {error && <p className="text-sm text-destructive" data-testid="text-login-error">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading || !password} data-testid="button-admin-login">
               {loading ? "Memverifikasi..." : "Masuk"}
             </Button>
@@ -372,7 +372,7 @@ function NotesManager() {
                     <img src={form.coverImage} alt="Cover" className="w-full h-40 object-cover rounded" />
                     <button
                       onClick={() => setForm(prev => ({ ...prev, coverImage: "" }))}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
+                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded-full"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -408,7 +408,7 @@ function NotesManager() {
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-mono text-primary">{note.tag}</span>
+                    <span className="text-xs uppercase tracking-[0.14em] text-primary">{note.tag}</span>
                     <span className="text-xs text-muted-foreground">{note.date}</span>
                   </div>
                   <h3 className="font-serif font-bold text-lg truncate">{note.title}</h3>

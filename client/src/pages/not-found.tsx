@@ -1,28 +1,28 @@
 import { Link } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import PaperGrain from "@/components/PaperGrain";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md mx-4 shadow-xl border-border bg-card">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-foreground font-serif">404 Page Not Found</h1>
-          </div>
+    <div className="flex min-h-screen w-full items-center justify-center bg-background px-6">
+      <PaperGrain />
+      <div className="max-w-md text-center">
+        <span className="eyebrow mb-6 block">404</span>
 
-          <p className="mt-4 text-sm text-muted-foreground font-sans">
-            The page you are looking for does not exist. It might have been moved or deleted.
-          </p>
+        <h1 className="mb-6 font-serif text-3xl text-foreground md:text-4xl">
+          Halaman tidak ditemukan
+        </h1>
 
-          <div className="mt-6">
-            <Link href="/" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors w-full font-mono">
-              Return to Home
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+        <p className="mb-10 text-base text-muted-foreground">
+          Halaman yang Anda cari tidak ada. Mungkin sudah dipindahkan atau dihapus.
+        </p>
+
+        <Link
+          href="/"
+          className="inline-flex items-center border border-foreground px-8 py-4 text-xs uppercase tracking-[0.18em] text-foreground transition-colors duration-500 hover:bg-foreground hover:text-background"
+        >
+          Kembali ke beranda
+        </Link>
+      </div>
     </div>
   );
 }
