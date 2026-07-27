@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
-import Gallery from "@/components/sections/Gallery";
+import Perjalanan from "@/components/sections/Perjalanan";
 import Pemikiran from "@/components/sections/Pemikiran";
 import Notes from "@/components/sections/Notes";
 import Contact from "@/components/sections/Contact";
@@ -16,7 +16,7 @@ export default function Home() {
       <main>
         <Hero />
         <About />
-        <Gallery />
+        <Perjalanan />
         <Pemikiran />
         <Notes />
         <Contact />

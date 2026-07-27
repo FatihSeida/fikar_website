@@ -25,6 +25,12 @@
   /* Pale moss. Kontras 1.7:1 — HANYA elemen non-teks. */
   --moss: 91 16% 67%;              /* #A9B79C */
 
+  /* Latar kartu riwayat organisasi, dibedakan per lembaga. Ketiganya
+     terang, sehingga teks ink di atasnya tetap di kisaran 12–14:1. */
+  --lembaga-oic: 48 79% 81%;       /* #F5E6A8 kuning */
+  --lembaga-hmi: 90 34% 86%;       /* #DCE8D0 hijau muda */
+  --lembaga-lain: 28 46% 86%;      /* #EBD9C9 peach lebih pekat */
+
   --card: 0 0% 100%;
   --card-foreground: 36 10% 10%;
 

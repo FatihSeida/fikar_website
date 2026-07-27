@@ -2,8 +2,23 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
-import { kelompok } from "@/lib/riwayat";
+import { kelompok, type BarisRiwayat, type WarnaLembaga } from "@/lib/riwayat";
 import { site } from "@/lib/site";
+
+/**
+ * Latar tiap kartu riwayat organisasi. Ketiganya terang, jadi teks ink di
+ * atasnya tetap jauh di atas ambang WCAG AA.
+ */
+const latar: Record<WarnaLembaga, string> = {
+  oic: "bg-[hsl(var(--lembaga-oic))]",
+  hmi: "bg-[hsl(var(--lembaga-hmi))]",
+  lain: "bg-[hsl(var(--lembaga-lain))]",
+};
+
+/** Hanya riwayat organisasi yang tampil sebagai kartu berwarna. */
+function berkartu(baris: readonly BarisRiwayat[]): boolean {
+  return baris.length > 0 && "warna" in baris[0];
+}
 
 /**
  * Riwayat lengkap. Dipisah dari beranda karena isinya dua puluh baris
@@ -72,27 +87,35 @@ export default function TentangPage() {
                 {bagian.judul}
               </h2>
 
-              <dl className="border-t border-border">
-                {bagian.baris.map((baris, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col gap-1 border-b border-border py-5 md:flex-row md:gap-10"
-                  >
-                    <dt className="eyebrow md:w-40 md:shrink-0 md:pt-1">
-                      {baris.periode}
-                    </dt>
-                    <dd>
-                      <span className="block text-base text-foreground">
-                        {baris.lembaga}
-                      </span>
-                      {baris.peran && (
-                        <span className="block text-sm text-muted-foreground">
-                          {baris.peran}
+              <dl className={berkartu(bagian.baris) ? "space-y-3" : "border-t border-border"}>
+                {bagian.baris.map((baris, i) => {
+                  const warna = "warna" in baris ? latar[baris.warna] : null;
+
+                  return (
+                    <div
+                      key={i}
+                      className={
+                        warna
+                          ? `flex flex-col gap-1 px-6 py-5 md:flex-row md:gap-10 ${warna}`
+                          : "flex flex-col gap-1 border-b border-border py-5 md:flex-row md:gap-10"
+                      }
+                    >
+                      <dt className="eyebrow md:w-40 md:shrink-0 md:pt-1">
+                        {baris.periode}
+                      </dt>
+                      <dd>
+                        <span className="block text-base text-foreground">
+                          {baris.lembaga}
                         </span>
-                      )}
-                    </dd>
-                  </div>
-                ))}
+                        {baris.peran && (
+                          <span className="block text-sm text-foreground/70">
+                            {baris.peran}
+                          </span>
+                        )}
+                      </dd>
+                    </div>
+                  );
+                })}
               </dl>
             </section>
           ))}

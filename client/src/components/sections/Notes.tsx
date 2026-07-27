@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useNotes } from "@/hooks/use-content";
+import { tujuanCatatan } from "@/lib/catatan";
 
 export default function Notes() {
   const { data: noteItems, isLoading } = useNotes();
@@ -19,12 +20,12 @@ export default function Notes() {
 
         <div className="border-t border-border">
           {noteItems?.map((item, index) => {
-            const external = Boolean(item.sourceUrl);
+            const { href, eksternal: external } = tujuanCatatan(item);
 
             return (
               <motion.a
                 key={item.id}
-                href={item.sourceUrl ?? `/catatan/${item.slug}`}
+                href={href}
                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}

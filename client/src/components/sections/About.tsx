@@ -11,8 +11,10 @@ const keterangan = [
   { label: "Lahir", nilai: "Palangka Raya, 14 Agustus 1999" },
   { label: "Domisili", nilai: "Jakarta Selatan" },
   { label: "Pendidikan", nilai: "S-2 Magister Akuntansi, PERBANAS Institute" },
-  { label: "Amanah", nilai: "Kepala Bidang Parekraf PB HMI" },
-  { label: "Organisasi", nilai: "OIC Youth Indonesia" },
+  // Keduanya sama-sama amanah organisasi, jadi didaftar berdampingan di
+  // bawah satu label alih-alih dipisah "Amanah" dan "Organisasi".
+  { label: "Organisasi", nilai: "Ketua Bidang Parekraf PB HMI" },
+  { label: "Organisasi", nilai: "Ketua Bidang Parekraf OIC Youth Indonesia" },
   { label: "Beasiswa", nilai: "Awardee Beasiswa Unggulan" },
 ];
 

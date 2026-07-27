@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 const navLinks = [
   { name: "Beranda", href: "#hero" },
   { name: "Tentang", href: "#tentang" },
-  { name: "Galeri", href: "#galeri" },
+  { name: "Perjalanan", href: "#perjalanan" },
   { name: "Pemikiran", href: "#pemikiran" },
   { name: "Catatan", href: "#catatan" },
 ];
