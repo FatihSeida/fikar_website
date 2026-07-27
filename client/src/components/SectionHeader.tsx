@@ -1,21 +1,18 @@
 interface SectionHeaderProps {
   title: string;
   subtitle?: string;
-  centered?: boolean;
 }
 
-export default function SectionHeader({ title, subtitle, centered }: SectionHeaderProps) {
+/**
+ * Judul section. Garis tipis clay menggantikan balok tebal merah pada
+ * versi lama — aksen, bukan penekanan.
+ */
+export default function SectionHeader({ title, subtitle }: SectionHeaderProps) {
   return (
-    <div className={`mb-12 ${centered ? "text-center" : ""}`}>
-      {subtitle && (
-        <span className="block font-mono text-xs text-primary tracking-widest mb-4 uppercase">
-          {subtitle}
-        </span>
-      )}
-      <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-        {title}
-      </h2>
-      <div className={`h-1 w-20 bg-primary mt-6 ${centered ? "mx-auto" : ""}`} />
+    <div className="mb-16">
+      {subtitle && <span className="eyebrow mb-5 block">{subtitle}</span>}
+      <h2 className="font-serif text-3xl text-foreground md:text-4xl">{title}</h2>
+      <div className="mt-7 h-px w-16 bg-accent" />
     </div>
   );
 }
