@@ -1,61 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* HSL Values */
-  --background: 0 0% 98%;      /* #FAFAFA */
-  --foreground: 0 0% 10%;      /* #1A1A1A */
-  
-  --primary: 6 64% 48%;        /* #C8392B - The Red Accent */
-  --primary-foreground: 0 0% 98%;
-  
-  --muted: 0 0% 92%;
-  --muted-foreground: 0 0% 40%;
-  
-  --accent: 6 64% 48%;         /* Red Accent alias */
-  --accent-foreground: 0 0% 98%;
-  
+  /* Japanese minimalism — nilai HSL, rasio kontras terverifikasi.
+     Lihat docs/superpowers/plans untuk tabel kontras lengkap. */
+
+  --background: 38 41% 95%;        /* #F7F3EC rice paper */
+  --foreground: 36 10% 10%;        /* #1C1A17 ink — 15.7:1 */
+
+  --muted: 23 53% 88%;             /* #F1DDD1 peach */
+  --muted-foreground: 41 12% 32%;  /* #5B5548 — 6.8:1 */
+
+  /* Clay pekat. Aman untuk teks kecil (5.4:1). Dipakai untuk eyebrow,
+     tautan, dan CTA. */
+  --primary: 19 43% 39%;           /* #8F5539 */
+  --primary-foreground: 38 41% 95%;
+
+  /* Clay terang. Kontras 3.3:1 — HANYA untuk garis, teks besar, dan
+     elemen non-teks. Jangan dipakai untuk body atau label kecil. */
+  --accent: 19 42% 53%;            /* #B97455 */
+  --accent-foreground: 36 10% 10%;
+
+  /* Pale moss. Kontras 1.7:1 — HANYA elemen non-teks. */
+  --moss: 91 16% 67%;              /* #A9B79C */
+
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 6 64% 48%;
+  --card-foreground: 36 10% 10%;
 
-  /* Radii */
-  --radius: 0rem; /* Sharp edges for this minimalist aesthetic */
+  --popover: 0 0% 100%;
+  --popover-foreground: 36 10% 10%;
 
-  /* Fonts - mapped to CSS variables for Tailwind usage if config allows, or raw CSS */
-  --font-serif: 'Playfair Display', serif;
-  --font-sans: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --secondary: 23 53% 88%;
+  --secondary-foreground: 36 10% 10%;
+
+  --destructive: 0 55% 42%;
+  --destructive-foreground: 38 41% 95%;
+
+  --border: 38 30% 84%;            /* #E3DACB */
+  --input: 38 30% 84%;
+  --ring: 19 43% 39%;
+
+  --radius: 0rem;
+
+  --font-serif: 'Noto Serif', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  /* Beberapa komponen shadcn/ui memakai font-mono. Diarahkan ke DM Sans
+     agar tidak ada keluarga font ketiga yang ikut terunduh. */
+  --font-mono: 'DM Sans', system-ui, sans-serif;
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    selection-background: hsl(var(--primary));
-    selection-color: white;
+    font-size: 16px;
+    line-height: 1.8;
   }
-  
+
   ::selection {
-    background-color: hsl(var(--primary));
-    color: white;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-    @apply font-bold tracking-tight;
+    @apply font-semibold tracking-tight;
+    line-height: 1.2;
   }
 
-  /* Typography Utilities */
+  /* Fokus keyboard harus selalu terlihat. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 3px;
+  }
+
   .font-serif { font-family: var(--font-serif); }
   .font-sans { font-family: var(--font-sans); }
   .font-mono { font-family: var(--font-mono); }
@@ -65,23 +88,39 @@
   .text-balance {
     text-wrap: balance;
   }
-  
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
+
+  /* Lebar baca nyaman untuk teks panjang. */
+  .measure {
+    max-width: 68ch;
+  }
+
+  /* Label kecil: huruf kapital berjarak lebar, menggantikan peran font mono. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+  }
+
+  /* Bayangan alami yang menyebar, bukan bayangan tajam. */
+  .shadow-paper {
+    box-shadow: 0 18px 48px -24px hsl(36 10% 10% / 0.18);
   }
 }
 
-/* Custom Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+html {
+  scroll-behavior: smooth;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
+/* Seluruh animasi dinonaktifkan bila pengguna memintanya. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
