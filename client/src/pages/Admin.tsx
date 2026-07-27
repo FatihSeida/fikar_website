@@ -189,7 +189,7 @@ function GalleryManager() {
                 <img src={item.image} alt={item.caption} className="w-full h-full object-cover" />
                 <button
                   onClick={() => deleteMutation.mutate(item.id)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   data-testid={`button-delete-gallery-${item.id}`}
                 >
                   <Trash2 className="w-3 h-3" />
@@ -522,7 +522,7 @@ export default function Admin() {
             <h1 className="text-xl font-serif font-bold">Panel Admin</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-mono text-xs text-muted-foreground hover:text-primary transition-colors" data-testid="link-view-site">
+            <Link href="/" className="text-xs text-muted-foreground hover:text-primary transition-colors" data-testid="link-view-site">
               Lihat Situs →
             </Link>
             <Button variant="outline" size="sm" onClick={handleLogout} data-testid="button-logout">
