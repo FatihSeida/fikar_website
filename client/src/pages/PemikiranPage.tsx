@@ -1,57 +1,61 @@
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { usePage } from "@/hooks/use-content";
 import Navbar from "@/components/Navbar";
-import NoiseOverlay from "@/components/NoiseOverlay";
-import { ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import PaperGrain from "@/components/PaperGrain";
+import { proseKelas } from "@/pages/NoteDetail";
 
 export default function PemikiranPage() {
   const { data: page, isLoading } = usePage("pemikiran-ide");
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="font-mono text-lg animate-pulse">Memuat halaman...</span>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <span className="text-muted-foreground">Memuat halaman…</span>
       </div>
     );
   }
 
   if (!page) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <h1 className="font-serif text-4xl">Halaman tidak ditemukan</h1>
-        <a href="/" className="text-primary hover:underline font-mono" data-testid="link-back-home">Kembali ke Beranda</a>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background px-6">
+        <h1 className="font-serif text-3xl">Halaman tidak ditemukan</h1>
+        <a href="/" className="text-primary hover:underline" data-testid="link-back-home">
+          Kembali ke beranda
+        </a>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <NoiseOverlay />
+      <PaperGrain />
       <Navbar />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="pt-32 pb-24 px-6"
+        transition={{ duration: 0.9, ease: "easeOut" }}
+        className="px-6 pb-28 pt-36"
       >
-        <div className="container mx-auto max-w-3xl">
-          <a href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-mono text-xs mb-12" data-testid="link-back-home">
-            <ArrowLeft className="w-4 h-4" /> KEMBALI KE BERANDA
+        <div className="container mx-auto max-w-2xl">
+          <a
+            href="/"
+            className="mb-14 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+            data-testid="link-back-home"
+          >
+            <ArrowLeft className="h-4 w-4" /> Kembali ke beranda
           </a>
 
-          <header className="mb-12">
-            <span className="block font-mono text-xs text-primary tracking-widest mb-4 uppercase">PEMIKIRAN</span>
-            <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-4">
+          <header className="mb-14">
+            <span className="eyebrow mb-6 block">Pemikiran</span>
+            <h1 className="font-serif text-4xl leading-[1.15] md:text-5xl">
               {page.title}
             </h1>
-            <div className="h-1 w-20 bg-primary mt-6"></div>
+            <div className="mt-9 h-px w-16 bg-accent" />
           </header>
 
-          <div
-            className="prose prose-lg prose-invert max-w-none font-sans [&_p]:mb-6 [&_p]:leading-8 [&_p]:text-foreground/80 [&_h1]:font-serif [&_h2]:font-serif [&_h3]:font-serif [&_img]:rounded-lg [&_img]:my-8 [&_blockquote]:border-l-primary [&_blockquote]:text-muted-foreground"
-            dangerouslySetInnerHTML={{ __html: page.content }}
-          />
+          <div className={proseKelas} dangerouslySetInnerHTML={{ __html: page.content }} />
         </div>
       </motion.div>
     </div>
