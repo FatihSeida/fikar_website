@@ -1,21 +1,11 @@
-import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import { isProduction, usesInMemoryStorage } from "./env";
 import { pool } from "./db";
-
-if (process.env.NODE_ENV === "production") {
-  for (const nama of ["SESSION_SECRET", "ADMIN_PASSWORD", "DATABASE_URL"]) {
-    if (!process.env[nama]) {
-      throw new Error(
-        `${nama} wajib diatur di produksi. Isi berkas .env sebelum menjalankan npm start.`,
-      );
-    }
-  }
-}
 
 const app = express();
 const httpServer = createServer(app);
@@ -42,23 +32,30 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
-if (process.env.NODE_ENV === "production") {
+if (isProduction) {
   app.set("trust proxy", 1);
 }
 
-const PgSession = connectPgSimple(session);
+/**
+ * Session disimpan di PostgreSQL bila tersedia, sehingga admin tetap login
+ * setelah server dimulai ulang. Tanpa database, express-session memakai
+ * MemoryStore bawaannya — cukup untuk pengembangan lokal.
+ */
+const sessionStore = pool
+  ? new (connectPgSimple(session))({ pool, createTableIfMissing: true })
+  : undefined;
 
 app.use(
   session({
-    store: new PgSession({ pool, createTableIfMissing: true }),
-    secret: process.env.SESSION_SECRET || "fallback-secret-key",
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || "kunci-pengembangan-tidak-untuk-produksi",
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: isProduction,
     },
   })
 );
@@ -101,6 +98,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  if (usesInMemoryStorage) {
+    log("DATABASE_URL kosong — memakai penyimpanan dalam memori.");
+    log("Data akan hilang saat server dimatikan. Isi DATABASE_URL agar menetap.");
+  }
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
@@ -119,26 +121,24 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
+  if (isProduction) {
     serveStatic(app);
   } else {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
+  // Satu port melayani API sekaligus klien.
+  //
+  // Di produksi diikat ke 0.0.0.0 supaya reverse proxy bisa menjangkaunya.
+  // Di pengembangan cukup localhost — mengikat ke semua antarmuka akan
+  // memicu peringatan firewall Windows tanpa memberi manfaat apa pun.
+  //
+  // Opsi reusePort milik Replit dihapus: Windows menolaknya dengan ENOTSUP,
+  // dan di VPS satu proses saja yang mengikat port ini.
   const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
+  const host = isProduction ? "0.0.0.0" : "127.0.0.1";
+  httpServer.listen(port, host, () => {
+    log(`serving on http://${host}:${port}`);
+  });
 })();

@@ -1,14 +1,19 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
+import { databaseUrl } from "./env";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
+/**
+ * Keduanya null bila DATABASE_URL tidak diatur — kondisi yang hanya mungkin
+ * terjadi di pengembangan, karena ./env sudah menggagalkan boot produksi
+ * tanpa DATABASE_URL. Lihat ./storage untuk penyimpanan penggantinya.
+ */
+export const pool = databaseUrl
+  ? new Pool({ connectionString: databaseUrl })
+  : null;
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+export type Db = ReturnType<typeof drizzle<typeof schema>>;
+
+export const db: Db | null = pool ? drizzle(pool, { schema }) : null;

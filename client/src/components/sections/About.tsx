@@ -31,7 +31,7 @@ export default function About() {
                 pembaca layar yang menelusuri per-heading tidak melewati
                 seluruh bagian Tentang. */}
             <h2 className="font-serif text-2xl leading-snug text-foreground md:text-3xl">
-              fatum brutum,
+              fatum brutum,{" "}
               <br />
               amor fati
             </h2>

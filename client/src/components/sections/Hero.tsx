@@ -24,7 +24,9 @@ export default function Hero() {
           </span>
 
           <h1 className="mb-8 font-serif text-4xl leading-[1.15] text-foreground md:text-5xl lg:text-6xl">
-            {site.namaDepan}
+            {/* Spasi eksplisit: JSX membuang whitespace di sekitar <br/>,
+                sehingga nama terbaca menyatu oleh pembaca layar. */}
+            {site.namaDepan}{" "}
             <br />
             {site.namaBelakang}
           </h1>

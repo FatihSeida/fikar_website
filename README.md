@@ -10,23 +10,40 @@ Situs personal untuk membaca dan menulis catatan, pemikiran, dan aktivitas.
 
 ## Menjalankan secara lokal
 
-Butuh Node.js 20+ dan PostgreSQL.
+Butuh Node.js 20+. PostgreSQL tidak wajib untuk sekadar melihat situsnya.
 
 ```bash
 npm install
-cp .env.example .env      # lalu isi nilainya
-npm run db:push           # buat tabel
+cp .env.example .env
 npm run dev               # http://localhost:5000
 ```
 
+Tanpa `DATABASE_URL`, situs berjalan memakai penyimpanan dalam memori dan
+mengisi dirinya dengan data contoh saat boot. Cukup untuk mengembangkan
+tampilan, tetapi setiap perubahan lewat panel admin hilang saat server
+dimatikan.
+
+Bila ingin data menetap saat pengembangan, isi `DATABASE_URL` di `.env`
+lalu jalankan `npm run db:push` sekali untuk membuat tabelnya.
+
 ## Variabel lingkungan
 
-| Nama | Keterangan |
-|---|---|
-| `DATABASE_URL` | Connection string PostgreSQL |
-| `SESSION_SECRET` | Kunci penandatanganan session. Nilai acak panjang untuk produksi. |
-| `ADMIN_PASSWORD` | Password panel admin di `/admin` |
-| `PORT` | Port HTTP, default 5000 |
+| Nama | Pengembangan | Produksi |
+|---|---|---|
+| `DATABASE_URL` | Opsional — kosong berarti penyimpanan dalam memori | **Wajib** |
+| `SESSION_SECRET` | Opsional | **Wajib**, nilai acak panjang |
+| `ADMIN_PASSWORD` | Opsional | **Wajib**, password kuat |
+| `PORT` | Opsional, default 5000 | Opsional, default 5000 |
+
+Di produksi server sengaja menolak menyala bila salah satu dari ketiga
+variabel wajib itu kosong, supaya situs tidak pernah berjalan memakai
+password bawaan atau kunci session yang bisa ditebak.
+
+Perbedaan lain antara kedua lingkungan: di produksi server mengikat
+`0.0.0.0` (agar terjangkau reverse proxy), memercayai satu lapis proxy,
+menandai cookie session sebagai `secure`, dan menyimpan session di
+PostgreSQL. Di pengembangan server mengikat `127.0.0.1` dan menyimpan
+session di memori.
 
 ## Perintah
 
@@ -43,7 +60,16 @@ npm run dev               # http://localhost:5000
 
 1. Pasang Node.js 20+ dan PostgreSQL di server.
 2. Buat database, lalu salin repositori ke server.
-3. Buat `.env` berisi nilai produksi. Gunakan `SESSION_SECRET` acak dan `ADMIN_PASSWORD` yang kuat — jangan pakai nilai contoh.
+3. Atur environment variable di panel hosting — bukan lewat berkas `.env` yang di-commit:
+
+   ```
+   NODE_ENV=production
+   DATABASE_URL=postgresql://pengguna:sandi@host:5432/nama_basis_data
+   SESSION_SECRET=<hasil node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
+   ADMIN_PASSWORD=<password kuat>
+   ```
+
+   Jangan memakai nilai contoh. Server akan menolak menyala bila salah satunya kosong.
 4. Bangun dan jalankan:
 
 ```bash
