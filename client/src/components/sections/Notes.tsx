@@ -29,7 +29,7 @@ export default function Notes() {
               className="group flex flex-col gap-4 border-b border-border py-9 md:flex-row md:items-baseline md:gap-12"
               data-testid={`note-item-${item.id}`}
             >
-              <span className="font-serif text-sm text-accent md:w-10 md:shrink-0">
+              <span className="font-serif text-sm text-primary md:w-10 md:shrink-0">
                 {String(index + 1).padStart(2, "0")}
               </span>
 

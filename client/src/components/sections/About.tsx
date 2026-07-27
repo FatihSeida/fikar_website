@@ -27,11 +27,14 @@ export default function About() {
         >
           <div>
             <span className="eyebrow mb-6 block">Tentang</span>
-            <p className="font-serif text-2xl leading-snug text-foreground md:text-3xl">
+            {/* Kutipan ini sekaligus judul section — dijadikan h2 agar
+                pembaca layar yang menelusuri per-heading tidak melewati
+                seluruh bagian Tentang. */}
+            <h2 className="font-serif text-2xl leading-snug text-foreground md:text-3xl">
               fatum brutum,
               <br />
               amor fati
-            </p>
+            </h2>
             <div className="mt-7 h-px w-16 bg-accent" />
           </div>
 
@@ -51,9 +54,9 @@ export default function About() {
             </p>
 
             <dl className="border-t border-border">
-              {keterangan.map((item) => (
+              {keterangan.map((item, i) => (
                 <div
-                  key={item.nilai}
+                  key={i}
                   className="flex flex-col gap-1 border-b border-border py-4 sm:flex-row sm:items-baseline sm:gap-8"
                 >
                   <dt className="eyebrow sm:w-32 sm:shrink-0">{item.label}</dt>

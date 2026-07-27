@@ -11,13 +11,21 @@ import { usePage } from "@/hooks/use-content";
 export default function Pemikiran() {
   const { data: page, isLoading } = usePage("pemikiran-ide");
 
-  if (isLoading || !page) return null;
-
+  // Section-nya selalu dirender supaya jangkar #pemikiran tetap ada. Navbar
+  // dan CTA hero menautkannya, dan keduanya mati bila elemen ini hilang saat
+  // data belum termuat atau gagal diambil.
   return (
     <section id="pemikiran" className="border-t border-border py-24 md:py-36">
       <div className="container mx-auto px-6">
-        <SectionHeader title={page.title} subtitle="Pemikiran" />
+        <SectionHeader title={page?.title ?? "Pemikiran & Ide"} subtitle="Pemikiran" />
 
+        {isLoading && <p className="text-muted-foreground">Memuat halaman…</p>}
+
+        {!isLoading && !page && (
+          <p className="text-muted-foreground">Belum ada tulisan.</p>
+        )}
+
+        {page && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -41,6 +49,7 @@ export default function Pemikiran() {
             </a>
           </div>
         </motion.div>
+        )}
       </div>
     </section>
   );
