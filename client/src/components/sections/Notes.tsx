@@ -69,6 +69,23 @@ export default function Notes() {
                   )}
                 </div>
 
+                {/* alt kosong dan disembunyikan dari pembaca layar: judul di
+                    sebelahnya sudah menjelaskan isi tautan, jadi gambar ini
+                    murni pendamping visual. */}
+                {item.coverImage && (
+                  <div
+                    aria-hidden="true"
+                    className="w-full overflow-hidden bg-muted md:w-44 md:shrink-0 md:self-center"
+                  >
+                    <img
+                      src={item.coverImage}
+                      alt=""
+                      loading="lazy"
+                      className="h-44 w-full object-cover object-top transition-transform [transition-duration:1200ms] ease-out group-hover:scale-[1.04] md:h-28"
+                    />
+                  </div>
+                )}
+
                 <ArrowUpRight className="h-5 w-5 shrink-0 text-accent transition-transform duration-500 group-hover:-translate-y-1 md:self-center" />
               </motion.a>
             );
