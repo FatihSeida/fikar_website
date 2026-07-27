@@ -2,6 +2,15 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { site } from "@/lib/site";
+
+const navLinks = [
+  { name: "Beranda", href: "#hero" },
+  { name: "Tentang", href: "#tentang" },
+  { name: "Galeri", href: "#galeri" },
+  { name: "Pemikiran", href: "#pemikiran" },
+  { name: "Catatan", href: "#catatan" },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -9,82 +18,66 @@ export default function Navbar() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "BERANDA", href: "#hero" },
-    { name: "GALERI", href: "#gallery" },
-    { name: "PEMIKIRAN", href: "#pemikiran" },
-    { name: "CATATAN", href: "#catatan" },
-  ];
-
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    
+
     if (window.location.pathname !== "/") {
       setLocation("/");
       setTimeout(() => {
-        const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
+        document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
       }, 100);
       return;
     }
 
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
+        className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500 ${
           isScrolled
-            ? "bg-background/80 backdrop-blur-md border-border/50 py-4 shadow-sm"
-            : "bg-transparent border-transparent py-6"
+            ? "border-border/70 bg-background/90 py-4 backdrop-blur-md"
+            : "border-transparent bg-transparent py-6"
         }`}
       >
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-serif font-bold tracking-tight" data-testid="link-logo">
-            Dewi <span className="text-primary">Valentin</span>
+        <div className="container mx-auto flex items-center justify-between px-6">
+          <Link
+            href="/"
+            className="font-serif text-lg tracking-tight text-foreground"
+            data-testid="link-logo"
+          >
+            {site.namaDepan}{" "}
+            <span className="text-muted-foreground">{site.namaBelakang}</span>
           </Link>
 
-          <div className="hidden md:flex gap-8 items-center">
+          <div className="hidden items-center gap-9 md:flex">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="font-mono text-xs tracking-wider text-white hover:text-primary transition-colors duration-200"
+                className="text-sm text-muted-foreground transition-colors duration-300 hover:text-primary"
                 data-testid={`link-nav-${link.name.toLowerCase()}`}
               >
                 {link.name}
               </a>
             ))}
-            <a 
-              href="mailto:contact@dewivalentin.com" 
-              className="bg-primary text-white px-5 py-2 text-sm font-mono hover:bg-primary/90 transition-colors"
-              data-testid="link-nav-contact"
-            >
-              MARI BICARA
-            </a>
           </div>
 
           <button
-            className="md:hidden text-foreground"
+            className="text-foreground md:hidden"
             onClick={() => setMobileMenuOpen(true)}
+            aria-label="Buka menu navigasi"
             data-testid="button-mobile-menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="h-6 w-6" />
           </button>
         </div>
       </nav>
@@ -92,18 +85,19 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "tween", duration: 0.3 }}
-            className="fixed inset-0 z-[60] bg-background flex flex-col items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-background"
           >
             <button
-              className="absolute top-6 right-6 p-2 hover:bg-muted rounded-full"
+              className="absolute right-6 top-6 p-2"
               onClick={() => setMobileMenuOpen(false)}
+              aria-label="Tutup menu navigasi"
               data-testid="button-close-menu"
             >
-              <X className="w-8 h-8" />
+              <X className="h-7 w-7" />
             </button>
 
             <div className="flex flex-col gap-8 text-center">
@@ -112,7 +106,7 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className="font-serif text-3xl font-bold hover:text-primary transition-colors"
+                  className="font-serif text-2xl text-foreground transition-colors hover:text-primary"
                 >
                   {link.name}
                 </a>
