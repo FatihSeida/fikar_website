@@ -1,4 +1,4 @@
-# Situs Ghina Nur Muslimah
+# Situs Nur Ghina Muslimah
 
 Situs personal untuk membaca dan menulis catatan, pemikiran, dan aktivitas.
 

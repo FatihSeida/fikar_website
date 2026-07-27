@@ -7,9 +7,9 @@
  * kontak yang diniatkan terbuka.
  */
 export const site = {
-  nama: "Ghina Nur Muslimah",
-  namaDepan: "Ghina",
-  namaBelakang: "Nur Muslimah",
+  nama: "Nur Ghina Muslimah",
+  namaDepan: "Nur Ghina",
+  namaBelakang: "Muslimah",
   gelar: "S.E.",
   lahir: "Palangka Raya, 14 Agustus 1999",
   asal: "Palangka Raya, Kalimantan Tengah",
