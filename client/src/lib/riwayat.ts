@@ -4,6 +4,12 @@ export interface BarisRiwayat {
   peran?: string;
 }
 
+export const jenjangTraining: BarisRiwayat[] = [
+  { periode: "2014", lembaga: "Basic Training", peran: "HMI Komisariat Ushuluddin, Filsafat dan Politik, Cabang Gowa Raya" },
+  { periode: "2016", lembaga: "Intermediate Training", peran: "HMI Cabang Kuningan" },
+  { periode: "2024", lembaga: "Advance Training", peran: "HMI Badko Jawa Barat" },
+];
+
 export const pendidikan: BarisRiwayat[] = [
   { periode: "Magister", lembaga: "Universitas Trisakti", peran: "Magister Ilmu Hukum" },
   { periode: "Sarjana", lembaga: "UIN Alauddin Makassar", peran: "Sarjana Ilmu Hukum" },
@@ -24,7 +30,20 @@ export const organisasiLain: BarisRiwayat[] = [
 ];
 
 export const kelompok = [
-  { judul: "Perjalanan di HMI", baris: organisasiHmi },
-  { judul: "Kepemimpinan dan Profesi", baris: organisasiLain },
-  { judul: "Pendidikan", baris: pendidikan },
+  {
+    judul: "Jenjang Training di HMI",
+    baris: jenjangTraining,
+  },
+  {
+    judul: "Perjalanan di HMI",
+    baris: organisasiHmi,
+  },
+  {
+    judul: "Pendidikan",
+    baris: pendidikan,
+  },
+  {
+    judul: "Organisasi Non-HMI",
+    baris: organisasiLain,
+  },
 ] as const;

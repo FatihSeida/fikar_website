@@ -13,6 +13,11 @@ const photos = [
   { src: "/ahmad/gallery-03.webp", alt: "Ahmad Zulfikar dalam sesi wawancara", className: "md:col-span-6 md:aspect-video" },
   { src: "/ahmad/gallery-04.webp", alt: "Dokumentasi Ahmad Zulfikar", className: "md:col-span-6 md:aspect-video" },
   { src: "/ahmad/gallery-06.webp", alt: "Potret dokumenter Ahmad Zulfikar", className: "md:col-span-6 md:aspect-video" },
+  { src: "/ahmad/journey-training.webp", alt: "Ahmad Zulfikar menyampaikan materi dalam forum perkaderan HMI", className: "md:col-span-4 md:aspect-[4/5]" },
+  { src: "/ahmad/journey-hmi-pinrang.webp", alt: "Ahmad Zulfikar berbicara dalam kegiatan HMI Cabang Pinrang", className: "md:col-span-8 md:aspect-[16/9]" },
+  { src: "/ahmad/journey-hmi-tv.webp", alt: "Ahmad Zulfikar menyampaikan laporan dalam forum nasional HMI", className: "md:col-span-6 md:aspect-video" },
+  { src: "/ahmad/journey-court-wide.webp", alt: "Ahmad Zulfikar bersama tim dalam kegiatan advokasi", className: "md:col-span-6 md:aspect-video" },
+  { src: "/ahmad/journey-court-detail.webp", alt: "Ahmad Zulfikar dalam kegiatan profesi hukum", className: "md:col-span-12 md:aspect-[21/9]" },
 ];
 
 export default function GalleryPage() {

@@ -56,11 +56,11 @@ export default function TentangPage() {
           <div className="container mx-auto">
             <span className="eyebrow mb-6 block">Jejak Perjalanan</span>
             <h2 className="max-w-3xl font-serif text-4xl md:text-6xl">Berangkat dari proses, bertumbuh melalui tanggung jawab.</h2>
-            <div className="mt-16 grid gap-14 md:grid-cols-3">
-              {kelompok.map((bagian) => (
-                <section key={bagian.judul}>
-                  <h3 className="mb-7 border-b border-foreground pb-4 font-serif text-2xl">{bagian.judul}</h3>
-                  <ol className="space-y-7">
+            <div className="mt-16 grid gap-x-10 gap-y-16 md:grid-cols-2 md:gap-y-20">
+              {kelompok.map((bagian, index) => (
+                <motion.section key={bagian.judul} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-70px" }} transition={{ delay: (index % 2) * 0.08 }} className="content-start border-t border-foreground pt-5">
+                  <h3 className="font-serif text-2xl md:text-3xl">{bagian.judul}</h3>
+                  <ol className="mt-8 grid gap-7 sm:grid-cols-2">
                     {bagian.baris.map((baris) => (
                       <li key={`${baris.periode}-${baris.lembaga}`}>
                         <span className="eyebrow block text-primary">{baris.periode}</span>
@@ -69,7 +69,7 @@ export default function TentangPage() {
                       </li>
                     ))}
                   </ol>
-                </section>
+                </motion.section>
               ))}
             </div>
           </div>
