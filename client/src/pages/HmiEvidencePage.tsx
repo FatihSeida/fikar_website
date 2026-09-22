@@ -18,6 +18,126 @@ function StoryText({ children }: { children: string }) {
 
 const organizationLevels = ["Komisariat", "Cabang", "Badko", "Pengurus Besar"];
 
+const mobileDiagramCopy = [
+  {
+    title: "Struktur bergerak dari forum ke forum",
+    body: "Roda organisasi dapat terus berjalan, sementara pengalaman kader belum menjadi pengetahuan yang ikut berpindah dari satu forum ke forum berikutnya.",
+  },
+  {
+    title: "Satu nama, perjalanan yang panjang",
+    body: "Latihan Kader hanya menandai satu titik. Organisasi perlu membaca kelanjutan aktivitas, perkembangan kompetensi, dan dukungan yang dibutuhkan kader.",
+  },
+  {
+    title: "Data tersebar belum menjadi pengetahuan",
+    body: "Sentuh setiap sumber data. Ketika definisi dan alurnya terhubung, notulensi, dokumentasi, data kader, dan evaluasi dapat membentuk insight organisasi.",
+  },
+  {
+    title: "Dua dasar pengambilan keputusan",
+    body: "Bandingkan program yang mengikuti kebiasaan dengan keputusan yang membaca Student Needs, Student Interest, dan hasil evaluasi.",
+  },
+  {
+    title: "Energi organisasi menentukan arah gerakan",
+    body: "Ketika perhatian lebih banyak berputar pada dinamika internal, persoalan kader, mahasiswa, dan masyarakat semakin jauh dari ruang keputusan.",
+  },
+  {
+    title: "Bukti menghubungkan ekosistem perkaderan",
+    body: "Setiap jenjang memiliki peran berbeda, tetapi pengetahuannya perlu mengalir sebagai satu ekosistem pembinaan yang terus belajar.",
+  },
+] as const;
+
+const fragmentDetails = [
+  { label: "Notulensi", detail: "Keputusan forum, argumentasi, dan tindak lanjut dapat dibaca kembali." },
+  { label: "Dokumentasi", detail: "Aktivitas tidak berhenti sebagai arsip, tetapi memberi konteks atas proses kader." },
+  { label: "Data kader", detail: "Perjalanan, kompetensi, dan kebutuhan dukungan dapat dikenali lintas periode." },
+  { label: "Evaluasi", detail: "Hasil program diperiksa untuk mengetahui apa yang bekerja dan perlu diperbaiki." },
+] as const;
+
+function MobileStoryDiagram({ index }: { index: number }) {
+  const [fragment, setFragment] = useState(0);
+  const [decision, setDecision] = useState<"asumsi" | "bukti">("bukti");
+
+  if (index === 0) {
+    return (
+      <div className="mobile-diagram mobile-forum-diagram">
+        <div className="mobile-forum-ring">
+          <span>RAK</span><span>Konfercab</span><span>Musda</span><span>Kongres</span>
+          <strong>Kader</strong>
+        </div>
+        <p>Forum berganti, tetapi pengetahuan tentang perjalanan kader belum selalu ikut berpindah.</p>
+      </div>
+    );
+  }
+
+  if (index === 1) {
+    return (
+      <div className="mobile-diagram mobile-journey-diagram">
+        {["Latihan Kader", "Tetap aktif?", "Kompetensi berkembang?", "Dukungan berikutnya?"].map((label, itemIndex) => (
+          <div className="mobile-journey-point" key={label}>
+            <i className={itemIndex === 0 ? "is-known" : ""} />
+            <span>0{itemIndex + 1}</span><strong>{label}</strong>
+          </div>
+        ))}
+        <p>Yang tercatat sering kali titik awalnya, bukan keseluruhan perjalanannya.</p>
+      </div>
+    );
+  }
+
+  if (index === 2) {
+    return (
+      <div className="mobile-diagram mobile-data-diagram">
+        <div className="mobile-fragment-grid">
+          {fragmentDetails.map((item, itemIndex) => (
+            <button key={item.label} type="button" onClick={() => setFragment(itemIndex)} aria-pressed={fragment === itemIndex}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className="mobile-insight-core"><em>Insight</em><span>Memori organisasi</span></div>
+        <p aria-live="polite"><strong>{fragmentDetails[fragment].label}:</strong> {fragmentDetails[fragment].detail}</p>
+      </div>
+    );
+  }
+
+  if (index === 3) {
+    const evidence = decision === "bukti";
+    return (
+      <div className="mobile-diagram mobile-decision-diagram">
+        <div className="mobile-decision-tabs" role="group" aria-label="Bandingkan dasar keputusan">
+          <button type="button" aria-pressed={!evidence} onClick={() => setDecision("asumsi")}>Asumsi</button>
+          <button type="button" aria-pressed={evidence} onClick={() => setDecision("bukti")}>Bukti</button>
+        </div>
+        <div className={`mobile-decision-card ${evidence ? "is-evidence" : "is-assumption"}`} aria-live="polite">
+          <span>{evidence ? "Keputusan belajar" : "Program berulang"}</span>
+          <strong>{evidence ? "Membaca sebelum memutuskan" : "Mengulang sebelum membaca"}</strong>
+          <ul>{(evidence ? ["Student Needs", "Student Interest", "Dampak diperiksa"] : ["Kebiasaan periode lalu", "Kegiatan diselesaikan", "Laporan disimpan"]).map(item => <li key={item}><StoryText>{item}</StoryText></li>)}</ul>
+        </div>
+      </div>
+    );
+  }
+
+  if (index === 4) {
+    return (
+      <div className="mobile-diagram mobile-energy-diagram">
+        <div className="mobile-energy-row is-dominant"><span>Dinamika internal</span><i><b /></i><strong>Lebih terbaca</strong></div>
+        <div className="mobile-energy-row"><span>Perjalanan kader</span><i><b /></i><strong>Belum utuh</strong></div>
+        <div className="mobile-energy-row"><span>Persoalan mahasiswa</span><i><b /></i><strong>Menjauh</strong></div>
+        <div className="mobile-energy-row"><span>Pengabdian masyarakat</span><i><b /></i><strong>Menjauh</strong></div>
+        <p>Apa yang paling sering dibicarakan akan menjadi hal yang paling mudah dipetakan.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mobile-diagram mobile-ecosystem-diagram">
+      <div className="mobile-ecosystem-levels">
+        {organizationLevels.map((level, levelIndex) => <div key={level}><span>0{levelIndex + 1}</span><strong>{level}</strong><i /></div>)}
+      </div>
+      <div className="mobile-evidence-core"><span>HMI</span><strong>Evidence</strong></div>
+      <p>Data mengalir menjadi pengetahuan, lalu kembali sebagai dukungan bagi perkaderan.</p>
+    </div>
+  );
+}
+
 function OrganizationFlow({ active, connected }: { active: boolean; connected?: boolean }) {
   return (
     <div className={`story-hierarchy ${connected ? "is-connected" : "is-fragmented"} ${active ? "is-active" : ""}`} aria-hidden="true">
@@ -116,9 +236,109 @@ function ReadingView() {
         <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2><p className="story-body"><StoryText>{scene.body}</StoryText></p>
         <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
+        <div className="story-reading-diagram">
+          <h3>{mobileDiagramCopy[index].title}</h3>
+          <MobileStoryDiagram index={index} />
+        </div>
       </div>
     </section>
   ))}</div>;
+}
+
+function MobileCinematicStory() {
+  const storyRef = useRef<HTMLDivElement>(null);
+  const [activeScene, setActiveScene] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const totalSteps = evidenceStory.length * 3;
+  const currentStep = activeScene * 3 + activeStep;
+  const progress = totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 100;
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const root = storyRef.current;
+      if (!root) return;
+      const storyBounds = root.getBoundingClientRect();
+      setVisible(storyBounds.top < window.innerHeight * 0.84 && storyBounds.bottom > window.innerHeight * 0.16);
+      const screenTarget = window.innerHeight * 0.5;
+      let bestDistance = Number.POSITIVE_INFINITY;
+      let nextScene = 0;
+      let nextStep = 0;
+      root.querySelectorAll<HTMLElement>("[data-mobile-step]").forEach(element => {
+        const bounds = element.getBoundingClientRect();
+        const distance = Math.abs(bounds.top + bounds.height * 0.5 - screenTarget);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          nextScene = Number(element.dataset.scene ?? 0);
+          nextStep = Number(element.dataset.step ?? 0);
+        }
+      });
+      setActiveScene(nextScene);
+      setActiveStep(nextStep);
+    };
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return (
+    <div ref={storyRef} className="mobile-story" id="cerita">
+      <div
+        className={`mobile-story-progress ${visible ? "is-visible" : ""}`}
+        style={{ "--mobile-story-progress": `${progress}%` } as CSSProperties}
+        aria-label={`Bab ${activeScene + 1} dari ${evidenceStory.length}`}
+      >
+        <span>0{activeScene + 1} / 0{evidenceStory.length}</span>
+        <i><b /></i>
+      </div>
+
+      {evidenceStory.map((scene, index) => (
+        <section className={`mobile-story-chapter ${activeScene === index ? "is-active" : ""}`} key={scene.label} id={`mobile-chapter-${index + 1}`} aria-label={`Bab ${index + 1}: ${scene.label}`}>
+          <div className="mobile-scene-background" aria-hidden="true">
+            <img src={storyImage(scene.image)} alt="" loading={index === 0 ? "eager" : "lazy"} decoding="async" style={{ objectPosition: scene.position }} />
+            <div className="mobile-scene-shade" />
+            <div className="mobile-scene-depth"><i /><i /><i /></div>
+          </div>
+
+          <div className="mobile-scene-sequence">
+            <article className="mobile-story-step mobile-narrative-step" data-mobile-step data-scene={index} data-step="0">
+              <div className="mobile-story-card">
+                <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
+                <h2 className={`mobile-story-title ${scene.title.length > 85 ? "is-long" : ""}`}><StoryText>{scene.title}</StoryText></h2>
+                <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+              </div>
+            </article>
+
+            <article className="mobile-story-step mobile-visual-step" data-mobile-step data-scene={index} data-step="1">
+              <div className="mobile-visual-card">
+                <span className="mobile-step-label">Baca visual</span>
+                <h3>{mobileDiagramCopy[index].title}</h3>
+                <MobileStoryDiagram index={index} />
+                <p className="mobile-diagram-caption"><StoryText>{mobileDiagramCopy[index].body}</StoryText></p>
+              </div>
+            </article>
+
+            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2">
+              <div className="mobile-bridge-card">
+                <span className="mobile-step-label">Yang perlu dibawa</span>
+                <p><StoryText>{scene.bridge}</StoryText></p>
+                <span className="mobile-next-chapter">{index < evidenceStory.length - 1 ? `Selanjutnya, ${evidenceStory[index + 1].label}` : "Selanjutnya, komitmen HMI Evidence"}</span>
+                <ArrowDown size={18} aria-hidden="true" />
+              </div>
+            </article>
+          </div>
+        </section>
+      ))}
+    </div>
+  );
 }
 
 function CinematicStory() {
@@ -195,6 +415,8 @@ export default function HmiEvidencePage() {
   const reducedMotion = useReducedMotion();
   const [reading, setReading] = useState(false);
   const [shortScreen, setShortScreen] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  const [limitedDevice, setLimitedDevice] = useState(false);
   useEffect(() => {
     const query = window.matchMedia("(max-height: 520px), (max-width: 767px) and (max-height: 650px)");
     const update = () => setShortScreen(query.matches);
@@ -202,7 +424,22 @@ export default function HmiEvidencePage() {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  const readMode = reducedMotion || shortScreen || reading;
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      const isMobile = query.matches;
+      const device = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+      const lowMemory = typeof device.deviceMemory === "number" && device.deviceMemory <= 4;
+      const lowConcurrency = typeof device.hardwareConcurrency === "number" && device.hardwareConcurrency <= 4;
+      setMobile(isMobile);
+      setLimitedDevice(isMobile && (lowMemory || lowConcurrency || device.connection?.saveData === true));
+    };
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const forcedReadMode = reducedMotion || shortScreen || limitedDevice;
+  const readMode = forcedReadMode || reading;
   return (
     <div className="evidence-page">
       <Navbar dark />
@@ -217,10 +454,10 @@ export default function HmiEvidencePage() {
             <p className="prologue-intro">Sebuah perjalanan untuk mengenali kader, membaca pengalamannya, dan menghadirkan pengetahuan itu ke dalam keputusan organisasi.</p>
             <a href={readMode ? "#chapter-1" : "#cerita"} className="story-begin">Mulai membaca <ArrowDown size={18} /></a>
           </div>
-          <div className="prologue-bottom"><span>{evidenceStory.length} bagian / Satu rangkaian cerita</span><button onClick={() => setReading(!reading)} aria-pressed={!!readMode} disabled={!!reducedMotion || shortScreen}>{readMode ? "Mode baca" : "Baca tanpa animasi"}</button></div>
+          <div className="prologue-bottom"><span>{evidenceStory.length} bagian / Satu rangkaian cerita</span><button onClick={() => setReading(!reading)} aria-pressed={!!readMode} disabled={!!forcedReadMode}>{limitedDevice ? "Mode ringan aktif" : readMode ? "Mode baca" : "Baca tanpa animasi"}</button></div>
         </header>
 
-        {readMode ? <ReadingView /> : <CinematicStory />}
+        {readMode ? <ReadingView /> : mobile ? <MobileCinematicStory /> : <CinematicStory />}
 
         <section className="evidence-commitment" id="komitmen">
           <p className="story-eyebrow">Pedoman Perkaderan / Tafsir Tujuan / 5KIC</p>
@@ -228,7 +465,11 @@ export default function HmiEvidencePage() {
           <p>Pengalaman perkaderan berbasis bukti bukan tujuan baru yang menggantikan Pedoman Perkaderan. Ia merupakan ikhtiar untuk memastikan proses pembinaan berjalan sejalan dengan Pedoman Perkaderan dan Tafsir Tujuan HMI.</p>
           <p>Setiap data, evaluasi, keputusan, dan pembaruan program diarahkan untuk membina insan akademis, pencipta, pengabdi, bernafaskan Islam, dan bertanggung jawab bagi terwujudnya masyarakat adil makmur yang diridai Allah SWT.</p>
           <p className="commitment-statement">Dari pengalaman menjadi pengetahuan. Dari pengetahuan menjadi keputusan. Dari keputusan menuju terbinanya lima kualitas Insan Cita.</p>
-          <a href="/tentang" className="commitment-link">Kenali visi dan misi Ahmad Zulfikar <ArrowRight size={18} /></a>
+          <nav className="commitment-choices" aria-label="Lanjutkan perjalanan website">
+            <a href="/tentang"><span>01</span><strong>Mengenal Ahmad Zulfikar</strong><ArrowRight size={18} /></a>
+            <a href="/catatan"><span>02</span><strong>Membaca Catatan</strong><ArrowRight size={18} /></a>
+            <a href="/galeri"><span>03</span><strong>Melihat Aktivitas</strong><ArrowRight size={18} /></a>
+          </nav>
           <a href="#" className="story-restart"><RotateCcw size={14} /> Kembali ke awal</a>
           <p className="story-manifesto">Jangan bicara HMI tanpa bukti</p>
         </section>

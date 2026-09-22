@@ -1,15 +1,15 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { FileText, Home as HomeIcon, Images, Menu, Sparkles, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
 
 const navLinks = [
-  { name: "Beranda", href: "/" },
-  { name: "HMI Evidence", href: "/hmi-evidence" },
-  { name: "Tentang", href: "/tentang" },
-  { name: "Galeri", href: "/galeri" },
-  { name: "Catatan", href: "/catatan" },
+  { name: "Beranda", href: "/", icon: HomeIcon },
+  { name: "HMI Evidence", shortName: "Evidence", href: "/hmi-evidence", icon: Sparkles },
+  { name: "Tentang", href: "/tentang", icon: UserRound },
+  { name: "Galeri", href: "/galeri", icon: Images },
+  { name: "Catatan", href: "/catatan", icon: FileText },
 ];
 
 export default function Navbar({ dark = false }: { dark?: boolean }) {
@@ -52,10 +52,24 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
               </Link>
             ))}
           </div>
-          <button type="button" className={`p-2 lg:hidden ${ink}`} onClick={() => setMobileMenuOpen(true)} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-label="Buka menu navigasi">
+          <button type="button" className={`hidden p-2 md:block lg:hidden ${ink}`} onClick={() => setMobileMenuOpen(true)} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-label="Buka menu navigasi">
             <Menu className="h-6 w-6" />
           </button>
         </div>
+      </nav>
+
+      <nav className="mobile-bottom-nav" aria-label="Navigasi utama mobile">
+        {navLinks.map(link => {
+          const Icon = link.icon;
+          const active = location === link.href || (link.href !== "/" && location.startsWith(`${link.href}/`));
+          const evidence = link.href === "/hmi-evidence";
+          return (
+            <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`${active ? "is-active" : ""} ${evidence ? "is-evidence" : ""}`}>
+              <span><Icon aria-hidden="true" /></span>
+              <small>{link.shortName ?? link.name}</small>
+            </Link>
+          );
+        })}
       </nav>
 
       <AnimatePresence>
