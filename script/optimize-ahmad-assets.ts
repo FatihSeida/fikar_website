@@ -55,6 +55,17 @@ async function main() {
     .autoOrient().extract({ left: 40, top: 340, width: 720, height: 900 })
     .webp({ quality: 88 }).toFile(path.join(portraitDir, "standing-centered.webp"));
 
+  // Gambar pratinjau tautan (WhatsApp, Facebook, X, LinkedIn).
+  // JPEG, bukan WebP: WhatsApp kerap gagal merender WebP di kartu pratinjau.
+  // 1200x630 adalah rasio yang membuat platform memilih kartu besar, dan
+  // "north" menahan potongan di bagian bawah supaya kepala tidak terpangkas.
+  const og = await sharp(path.join(SOURCE, "ChatGPT Image 20 Sep 2026, 13.19.50 (8).png"))
+    .autoOrient()
+    .resize({ width: 1200, height: 630, fit: "cover", position: "north" })
+    .jpeg({ quality: 82, progressive: true, mozjpeg: true })
+    .toFile(path.join(PUBLIC, "og-image.jpg"));
+  console.log(`og-image.jpg ${og.width}x${og.height} ${(og.size / 1024).toFixed(0)}KB`);
+
   for (const file of stories) {
     await convert(
       path.join(SOURCE, "scrollytelling", file),
