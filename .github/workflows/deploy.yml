@@ -1,0 +1,99 @@
+name: Deploy to VPS
+
+# Situs dibangun di runner GitHub, bukan di VPS. VPS hanya punya 2 GB RAM
+# dan sudah menjalankan tiga aplikasi lain, jadi menjalankan `vite build`
+# di sana berisiko kehabisan memori dan mengganggu situs yang sudah live.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Satu deploy pada satu waktu, dan jangan batalkan deploy yang sedang jalan
+# di tengah rsync.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload build artefacts
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes"
+          # --delete hanya pada dist/ supaya berkas build lama tidak menumpuk.
+          # uploads/ dan .env ada di root aplikasi, tidak tersentuh.
+          rsync -az --delete -e "$SSH" dist/ "$VPS_USER@$VPS_HOST:fikar_website/dist/"
+          rsync -az -e "$SSH" package.json package-lock.json "$VPS_USER@$VPS_HOST:fikar_website/"
+
+      - name: Install runtime deps and reload
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -se <<'REMOTE'
+          set -euo pipefail
+          cd ~/fikar_website
+
+          # npm ci menghapus node_modules setiap kali dijalankan, dan itu mahal
+          # di VPS kecil. Jalankan hanya bila lockfile benar-benar berubah.
+          HASH=$(sha256sum package-lock.json | cut -d' ' -f1)
+          if [ ! -d node_modules ] || [ "$(cat .lockhash 2>/dev/null)" != "$HASH" ]; then
+            echo "Lockfile berubah — memasang ulang dependency runtime"
+            npm ci --omit=dev --no-audit --no-fund
+            echo "$HASH" > .lockhash
+          else
+            echo "Lockfile tidak berubah — melewati npm ci"
+          fi
+
+          pm2 reload fikar-website --update-env \
+            || pm2 start dist/index.cjs --name fikar-website --time
+          pm2 save
+          REMOTE
+
+      - name: Verify site responds
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes "$VPS_USER@$VPS_HOST" \
+            'for i in $(seq 1 10); do
+               code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5003/ || true)
+               [ "$code" = "200" ] && echo "OK: aplikasi menjawab 200" && exit 0
+               sleep 3
+             done
+             echo "GAGAL: aplikasi tidak menjawab 200 di port 5003"
+             pm2 logs fikar-website --lines 40 --nostream || true
+             exit 1'
