@@ -67,33 +67,64 @@ Jalankan `npm audit` pada proses rilis untuk memastikan dependensi tetap bebas d
 | `npm run db:push` | Terapkan skema ke database |
 | `npm run optimize-ahmad-assets` | Optimalkan foto Ahmad dan visual scrollytelling menjadi WebP siap web |
 
-## Deploy ke VPS
+## Deploy
 
-1. Pasang Node.js 20+ dan PostgreSQL di server.
-2. Buat database, lalu salin repositori ke server.
-3. Atur environment variable di panel hosting — bukan lewat berkas `.env` yang di-commit:
+Setiap push ke `main` otomatis ter-deploy lewat `.github/workflows/deploy.yml`.
+Tidak ada langkah manual.
 
-   ```
-   NODE_ENV=production
-   DATABASE_URL=postgresql://pengguna:sandi@host:5432/nama_basis_data
-   SESSION_SECRET=<hasil node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
-   ADMIN_PASSWORD=<password kuat>
-   ```
+Build dijalankan di runner GitHub, bukan di VPS. VPS hanya punya 2 GB RAM dan
+sudah melayani tiga situs lain, jadi menjalankan `vite build` di sana berisiko
+kehabisan memori dan menjatuhkan situs-situs itu. Yang dikirim ke server hanya
+`dist/` beserta `package.json` dan `package-lock.json`.
 
-   Jangan memakai nilai contoh. Server akan menolak menyala bila salah satunya kosong.
-4. Bangun dan jalankan:
+### Tempatnya di server
+
+| | |
+|---|---|
+| Host | `103.179.57.165` (VPS IDCloudHost, Ubuntu 22.04) |
+| Direktori | `~/fikar_website` |
+| Port aplikasi | `5003` — hanya diakses nginx dari localhost |
+| Proses | pm2, dengan nama `fikar-website` |
+| Database | PostgreSQL `fikardb`, pengguna `fikaruser` |
+| nginx | `/etc/nginx/sites-available/ahmadzulfikar.com` |
+
+Port 5000–5002 sudah dipakai situs lain di VPS yang sama. Jangan pakai ulang.
+
+### Secret yang dibutuhkan repositori
+
+`VPS_HOST`, `VPS_USER`, dan `VPS_SSH_KEY` — kunci SSH khusus deploy, terpisah
+dari kunci pribadi, dan bisa dicabut sendiri tanpa mengganggu akses lain.
+
+### Mengganti password admin
+
+Rahasia produksi ada di `~/fikar_website/.env` di server, tidak pernah masuk
+repositori:
 
 ```bash
-npm ci
-npm run db:push
-npm run build
-npm start
+ssh <pengguna>@103.179.57.165
+nano ~/fikar_website/.env    # ubah ADMIN_PASSWORD
+pm2 restart fikar-website --update-env
 ```
 
-5. Jalankan sebagai layanan yang otomatis restart, misalnya lewat systemd atau pm2.
-6. Letakkan di belakang reverse proxy (nginx/Caddy) yang menangani HTTPS.
+### Mengubah skema database
 
-Berkas yang diunggah lewat panel admin disimpan di `uploads/` pada akar proyek. Direktori ini tidak masuk repositori dan tidak terhapus saat build, jadi sertakan dalam cadangan.
+`npm run db:push` butuh drizzle-kit yang tidak terpasang di server. Hasilkan SQL
+di lokal lalu terapkan:
+
+```bash
+npx drizzle-kit generate                       # tulis SQL ke migrations/
+cat migrations/<berkas>.sql | ssh <pengguna>@103.179.57.165 \
+  'cd ~/fikar_website && psql "$(grep ^DATABASE_URL= .env | cut -d= -f2-)" -v ON_ERROR_STOP=1 -f -'
+```
+
+Periksa dulu isi SQL-nya sebelum dijalankan — `generate` bisa menghasilkan
+perintah yang menghapus kolom.
+
+### Cadangan
+
+Berkas yang diunggah lewat panel admin disimpan di `~/fikar_website/uploads/` di
+server. Direktori ini tidak masuk repositori dan tidak tersentuh saat deploy,
+jadi sertakan dalam cadangan bersama isi database.
 
 ## Struktur
 
