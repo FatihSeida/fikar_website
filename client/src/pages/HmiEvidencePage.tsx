@@ -3,10 +3,11 @@ import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useMotionVa
 import { ArrowDown, ArrowRight, RotateCcw } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/sections/SiteFooter";
-import { evidenceStory, storyImage } from "@/lib/evidence-story";
+import { evidenceStory, historyImage, historyMoments, storyImage } from "@/lib/evidence-story";
 import "@/styles/evidence.css";
 
 type Scene = (typeof evidenceStory)[number];
+type HistoryMoment = (typeof historyMoments)[number];
 
 const italicTerms = new Set(["Student Needs", "Student Interest", "evidence-based", "insight"]);
 
@@ -20,8 +21,8 @@ const organizationLevels = ["Komisariat", "Cabang", "Badko", "Pengurus Besar"];
 
 const mobileDiagramCopy = [
   {
-    title: "Struktur bergerak dari forum ke forum",
-    body: "Roda organisasi dapat terus berjalan, sementara pengalaman kader belum menjadi pengetahuan yang ikut berpindah dari satu forum ke forum berikutnya.",
+    title: "Enam pergulatan, satu tradisi kader",
+    body: "Setiap masa mengubah bentuk tantangan HMI. Yang perlu diwariskan bukan hanya struktur, tetapi juga pengetahuan tentang cara kader membaca dan menjawab zamannya.",
   },
   {
     title: "Satu nama, perjalanan yang panjang",
@@ -33,7 +34,7 @@ const mobileDiagramCopy = [
   },
   {
     title: "Dua dasar pengambilan keputusan",
-    body: "Bandingkan program yang mengikuti kebiasaan dengan keputusan yang membaca Student Needs, Student Interest, dan hasil evaluasi.",
+    body: "Bandingkan keputusan yang berangkat dari rasionalisasi berbeda dengan keputusan yang membangun tata kelola data, membaca Student Needs dan Student Interest, serta memeriksa hasil evaluasi.",
   },
   {
     title: "Energi organisasi menentukan arah gerakan",
@@ -58,12 +59,11 @@ function MobileStoryDiagram({ index }: { index: number }) {
 
   if (index === 0) {
     return (
-      <div className="mobile-diagram mobile-forum-diagram">
-        <div className="mobile-forum-ring">
-          <span>RAK</span><span>Konfercab</span><span>Musda</span><span>Kongres</span>
-          <strong>Kader</strong>
+      <div className="mobile-diagram mobile-history-mini">
+        <div className="mobile-history-mini-track">
+          {historyMoments.map(moment => <span key={moment.years}>{moment.years}</span>)}
         </div>
-        <p>Forum berganti, tetapi pengetahuan tentang perjalanan kader belum selalu ikut berpindah.</p>
+        <p>Pergulatan berubah bentuk. Ikhtiar untuk membaca zaman dan membina kader tetap berlanjut.</p>
       </div>
     );
   }
@@ -100,6 +100,8 @@ function MobileStoryDiagram({ index }: { index: number }) {
 
   if (index === 3) {
     const evidence = decision === "bukti";
+    const assumptionItems = ["Setiap orang membawa rasionalisasinya", "Rasionalisasi saling dicocokkan", "Dasarnya berbeda dan belum terverifikasi", "Perbedaan dasar melahirkan benturan"];
+    const evidenceItems = ["Membentuk tata kelola data", "Data diolah menjadi informasi dan bukti", "Pengambilan keputusan menjadi lebih jernih", "Keputusan atas perkara lebih mudah ditentukan"];
     return (
       <div className="mobile-diagram mobile-decision-diagram">
         <div className="mobile-decision-tabs" role="group" aria-label="Bandingkan dasar keputusan">
@@ -107,9 +109,9 @@ function MobileStoryDiagram({ index }: { index: number }) {
           <button type="button" aria-pressed={evidence} onClick={() => setDecision("bukti")}>Bukti</button>
         </div>
         <div className={`mobile-decision-card ${evidence ? "is-evidence" : "is-assumption"}`} aria-live="polite">
-          <span>{evidence ? "Keputusan belajar" : "Program berulang"}</span>
-          <strong>{evidence ? "Membaca sebelum memutuskan" : "Mengulang sebelum membaca"}</strong>
-          <ul>{(evidence ? ["Student Needs", "Student Interest", "Dampak diperiksa"] : ["Kebiasaan periode lalu", "Kegiatan diselesaikan", "Laporan disimpan"]).map(item => <li key={item}><StoryText>{item}</StoryText></li>)}</ul>
+          <span>{evidence ? "Bukti" : "Asumsi"}</span>
+          <strong>{evidence ? "Keputusan memiliki dasar yang dapat diperiksa" : "Rasionalisasi bertemu tanpa dasar bersama"}</strong>
+          <ul>{(evidence ? evidenceItems : assumptionItems).map(item => <li key={item}><StoryText>{item}</StoryText></li>)}</ul>
         </div>
       </div>
     );
@@ -174,25 +176,101 @@ function DecisionComparison({ active }: { active: boolean }) {
     <div className={`decision-comparison ${active ? "is-active" : ""}`} aria-hidden="true">
       <div className="decision-side decision-assumption">
         <span>Asumsi</span>
-        <strong>Program berulang</strong>
-        <p>Kebiasaan periode sebelumnya</p>
-        <p>Kegiatan selesai</p>
-        <p>Laporan tersimpan</p>
+        <strong>Dasar berbeda</strong>
+        <p>Rasionalisasi dibawa masing-masing</p>
+        <p>Belum terverifikasi</p>
+        <p>Perbedaan melahirkan benturan</p>
       </div>
       <div className="decision-side decision-evidence">
         <span>Bukti</span>
-        <strong>Keputusan belajar</strong>
-        <p><em>Student Needs</em></p>
-        <p><em>Student Interest</em></p>
-        <p>Dampak diperiksa</p>
+        <strong>Tata kelola data</strong>
+        <p>Data menjadi informasi dan bukti</p>
+        <p>Keputusan lebih jernih</p>
+        <p>Dasarnya dapat diperiksa</p>
       </div>
       <i className="decision-divider" />
     </div>
   );
 }
 
-function StoryLayer({ scene, index, phase, active }: { scene: Scene; index: number; phase: MotionValue<number>; active: number }) {
-  const lastScene = evidenceStory.length - 1;
+function DesktopHistoryLayer({
+  beatIndex,
+  kind,
+  moment,
+  phase,
+  activeBeat,
+}: {
+  beatIndex: number;
+  kind: "intro" | "moment" | "reflection";
+  moment: HistoryMoment;
+  phase: MotionValue<number>;
+  activeBeat: number;
+}) {
+  const scene = evidenceStory[0];
+  const opacity = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.1, beatIndex + 0.86, beatIndex + 1.12], [beatIndex === 0 ? 1 : 0, 1, 1, 0]);
+  const scale = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [1.025, 1.16]);
+  const x = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [`${moment.panX * -0.45}%`, `${moment.panX * 0.45}%`]);
+  const cameraY = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [`${moment.panY * -0.22}%`, `${moment.panY * 0.22}%`]);
+  const filter = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.09, beatIndex + 0.9, beatIndex + 1.1], ["blur(7px)", "blur(0px)", "blur(0px)", "blur(7px)"]);
+  const copyY = useTransform(phase, [beatIndex, beatIndex + 0.22, beatIndex + 1], [24, 0, -18]);
+  const active = activeBeat === beatIndex;
+
+  return (
+    <motion.section
+      className={`story-layer desktop-history-layer desktop-history-${kind}`}
+      style={{ opacity, visibility: Math.abs(activeBeat - beatIndex) <= 1 ? "visible" : "hidden" }}
+      aria-hidden={!active}
+      aria-label={kind === "moment" ? `${moment.years}: ${moment.title}` : scene.label}
+    >
+      <motion.img
+        className="story-landscape"
+        src={historyImage(moment.image)}
+        alt=""
+        style={{ scale, x, y: cameraY, filter }}
+        decoding="async"
+      />
+      <div className="story-shade" />
+      <motion.div className="story-copy desktop-history-copy" style={{ opacity: active ? 1 : 0, y: copyY }}>
+        {kind === "intro" && <>
+          <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
+          <h2><StoryText>{scene.title}</StoryText></h2>
+          <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+          <span className="desktop-history-cue">Gulir untuk memasuki enam peristiwa <ArrowDown size={14} /></span>
+        </>}
+
+        {kind === "moment" && <>
+          <p className="desktop-history-index"><span>Peristiwa</span><strong>{moment.years}</strong></p>
+          <h2>{moment.title}</h2>
+          <p className="story-body">{moment.body}</p>
+        </>}
+
+        {kind === "reflection" && <>
+          <p className="story-eyebrow"><span>01</span>Dari sejarah menuju hari ini</p>
+          <h2>Pergulatan berubah bentuk. Kerja organisasi terus berulang.</h2>
+          <p className="story-body">Setiap periode menghadirkan kepengurusan, Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, Kongres, dan Rapat Kerja. Rapat Bidang, Rapat Presidium, Rapat Harian, serta Pleno memastikan roda organisasi tetap berjalan.</p>
+          <p className="story-body story-body-secondary">Di tengah perubahan karakteristik zaman, kader HMI perlu tetap mewarisi semangat para pendahulunya. Karena itu, peninjauan aktivitas kader menjadi penting.</p>
+          <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
+        </>}
+      </motion.div>
+    </motion.section>
+  );
+}
+
+function StoryLayer({
+  scene,
+  sceneIndex,
+  beatIndex,
+  phase,
+  activeBeat,
+  isLast,
+}: {
+  scene: Scene;
+  sceneIndex: number;
+  beatIndex: number;
+  phase: MotionValue<number>;
+  activeBeat: number;
+  isLast: boolean;
+}) {
   const camera = [
     { scale: [1.03, 1.18], x: ["0%", "-2%"], y: ["0%", "1.5%"] },
     { scale: [1.24, 1.08], x: ["3%", "0%"], y: ["1%", "0%"] },
@@ -200,30 +278,49 @@ function StoryLayer({ scene, index, phase, active }: { scene: Scene; index: numb
     { scale: [1.2, 1.06], x: ["4%", "0%"], y: ["1%", "0%"] },
     { scale: [1.06, 1.14], x: ["0%", "-2%"], y: ["0%", "1%"] },
     { scale: [1.18, 1.005], x: ["2%", "0%"], y: ["1%", "0%"] },
-  ][index];
-  const opacity = useTransform(phase, [index - 0.16, index + 0.12, index + 0.84, index + 1.12], [index === 0 ? 1 : 0, 1, 1, index === lastScene ? 1 : 0]);
-  const scale = useTransform(phase, [index - 0.15, index + 1.15], camera.scale);
-  const x = useTransform(phase, [index - 0.15, index + 1.15], camera.x);
-  const cameraY = useTransform(phase, [index - 0.15, index + 1.15], camera.y);
-  const filter = useTransform(phase, [index - 0.14, index + 0.1, index + 0.9, index + 1.1], ["blur(8px)", "blur(0px)", "blur(0px)", "blur(8px)"]);
-  const y = useTransform(phase, [index, index + 0.2, index + 1], [22, 0, -18]);
-  const symbolY = useTransform(phase, [index, index + 1], [35, -35]);
-  const orbitRotation = useTransform(phase, [3, 4], [-25, 60]);
+  ][sceneIndex];
+  const opacity = useTransform(phase, [beatIndex - 0.16, beatIndex + 0.12, beatIndex + 0.84, beatIndex + 1.12], [0, 1, 1, isLast ? 1 : 0]);
+  const scale = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.scale);
+  const x = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.x);
+  const cameraY = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.y);
+  const filter = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.1, beatIndex + 0.9, beatIndex + 1.1], ["blur(8px)", "blur(0px)", "blur(0px)", "blur(8px)"]);
+  const y = useTransform(phase, [beatIndex, beatIndex + 0.2, beatIndex + 1], [22, 0, -18]);
+  const symbolY = useTransform(phase, [beatIndex, beatIndex + 1], [35, -35]);
+  const orbitRotation = useTransform(phase, [beatIndex, beatIndex + 1], [-25, 60]);
+  const active = activeBeat === beatIndex;
   return (
-    <motion.section className={`story-layer story-layer-${index}`} style={{ opacity, visibility: Math.abs(active - index) <= 1 ? "visible" : "hidden" }} aria-hidden={active !== index} aria-label={scene.label}>
+    <motion.section className={`story-layer story-layer-${sceneIndex}`} style={{ opacity, visibility: Math.abs(activeBeat - beatIndex) <= 1 ? "visible" : "hidden" }} aria-hidden={!active} aria-label={scene.label}>
       <motion.img className="story-landscape" src={storyImage(scene.image)} alt="" style={{ scale, x, y: cameraY, filter, objectPosition: scene.position }} decoding="async" />
       <div className="story-shade" />
       <motion.div className="story-symbol" style={{ y: symbolY }} aria-hidden="true">{scene.symbol}</motion.div>
-      {index === 2 && <><KnowledgeFragments active={active === index} /><OrganizationFlow active={active === index} /></>}
-      {index === 3 && <><DecisionComparison active={active === index} /><motion.div className="story-orbit" aria-hidden="true" style={{ rotate: orbitRotation }}><span /><span /><span /></motion.div></>}
-      {index === 5 && <OrganizationFlow active={active === index} connected />}
-      <motion.div className="story-copy" style={{ opacity: active === index ? 1 : 0, y }}>
-        <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
+      {sceneIndex === 2 && <><KnowledgeFragments active={active} /><OrganizationFlow active={active} /></>}
+      {sceneIndex === 3 && <><DecisionComparison active={active} /><motion.div className="story-orbit" aria-hidden="true" style={{ rotate: orbitRotation }}><span /><span /><span /></motion.div></>}
+      {sceneIndex === 5 && <OrganizationFlow active={active} connected />}
+      <motion.div className="story-copy" style={{ opacity: active ? 1 : 0, y }}>
+        <p className="story-eyebrow"><span>0{sceneIndex + 1}</span>{scene.chapter}</p>
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2>
         <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+        {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
         <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
       </motion.div>
     </motion.section>
+  );
+}
+
+function HistoryReadingTimeline() {
+  return (
+    <div className="history-reading-timeline">
+      {historyMoments.map(moment => (
+        <article key={moment.years}>
+          <img src={historyImage(moment.image)} alt={moment.focus} loading="lazy" />
+          <div>
+            <span>{moment.years}</span>
+            <h3>{moment.title}</h3>
+            <p>{moment.body}</p>
+          </div>
+        </article>
+      ))}
+    </div>
   );
 }
 
@@ -235,6 +332,8 @@ function ReadingView() {
       <div className="story-copy">
         <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2><p className="story-body"><StoryText>{scene.body}</StoryText></p>
+        {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
+        {index === 0 && <HistoryReadingTimeline />}
         <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
         <div className="story-reading-diagram">
           <h3>{mobileDiagramCopy[index].title}</h3>
@@ -245,13 +344,100 @@ function ReadingView() {
   ))}</div>;
 }
 
+const mobileChapterStepCounts = evidenceStory.map((_, index) => index === 0 ? historyMoments.length + 3 : 3);
+const mobileScenePans = [
+  { x: -4, y: -6 },
+  { x: 4, y: -5 },
+  { x: -5, y: -4 },
+  { x: 5, y: -6 },
+  { x: -4, y: -5 },
+  { x: 4, y: -7 },
+] as const;
+
+function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number; activeStep: number }) {
+  const scene = evidenceStory[0];
+  const activeHistory = Math.min(historyMoments.length - 1, Math.max(0, activeStep - 1));
+  const routineStep = historyMoments.length + 1;
+  const bridgeStep = historyMoments.length + 2;
+
+  return (
+    <section className={`mobile-story-chapter mobile-history-chapter ${activeScene === 0 ? "is-active" : ""}`} id="mobile-chapter-1" aria-label="Bab 1: HMI dari masa ke masa">
+      <div className="mobile-scene-background mobile-history-background" aria-hidden="true">
+        {historyMoments.map((moment, index) => (
+          <img
+            className={activeHistory === index ? "is-active" : ""}
+            key={moment.image}
+            src={historyImage(moment.image)}
+            alt=""
+            loading={index === 0 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        ))}
+        <div className="mobile-scene-shade" />
+        <div className="mobile-scene-depth"><i /><i /><i /></div>
+        <div className="mobile-history-period"><span>{historyMoments[activeHistory].years}</span><i /></div>
+      </div>
+
+      <div className="mobile-scene-sequence">
+        <article className="mobile-story-step mobile-narrative-step mobile-history-intro" data-mobile-step data-scene="0" data-step="0" data-pan-x={historyMoments[0].panX} data-pan-y={historyMoments[0].panY}>
+          <div className="mobile-story-card">
+            <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
+            <h2 className="mobile-story-title is-long"><StoryText>{scene.title}</StoryText></h2>
+            <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+            {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
+            <span className="mobile-history-cue">Gulir untuk memasuki setiap masa <ArrowDown size={14} /></span>
+          </div>
+        </article>
+
+        {historyMoments.map((moment, index) => (
+          <article
+            className="mobile-story-step mobile-history-step"
+            data-mobile-step
+            data-scene="0"
+            data-step={index + 1}
+            data-pan-x={moment.panX}
+            data-pan-y={moment.panY}
+            key={moment.years}
+          >
+            <div className="mobile-history-card">
+              <div className="mobile-history-heading"><span>Peristiwa 0{index + 1}</span><strong>{moment.years}</strong></div>
+              <h3>{moment.title}</h3>
+              <p>{moment.body}</p>
+            </div>
+          </article>
+        ))}
+
+        <article className="mobile-story-step mobile-history-step mobile-history-reflection" data-mobile-step data-scene="0" data-step={routineStep} data-pan-x="3" data-pan-y="-9">
+          <div className="mobile-history-card">
+            <span className="mobile-step-label">Dari sejarah menuju hari ini</span>
+            <h3>Pergulatan berubah bentuk. Kerja organisasi terus berulang.</h3>
+            <p>Setiap periode menghadirkan kepengurusan, Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, Kongres, dan Rapat Kerja. Rapat Bidang, Rapat Presidium, Rapat Harian, serta Pleno memastikan roda organisasi tetap berjalan.</p>
+            <p>Di tengah perubahan karakteristik zaman, kader HMI perlu tetap mewarisi semangat para pendahulunya. Karena itu, peninjauan aktivitas kader menjadi penting.</p>
+            <p>Roda organisasi dan estafeta kepemimpinan dapat terus berjalan, sementara pengalaman serta aktivitas kader belum menjadi informasi yang ikut berpindah dari satu periode ke periode berikutnya.</p>
+          </div>
+        </article>
+
+        <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene="0" data-step={bridgeStep} data-pan-x="-2" data-pan-y="-10">
+          <div className="mobile-bridge-card">
+            <span className="mobile-step-label">Yang perlu dibawa</span>
+            <p><StoryText>{scene.bridge}</StoryText></p>
+            <span className="mobile-next-chapter">Selanjutnya, {evidenceStory[1].label}</span>
+            <ArrowDown size={18} aria-hidden="true" />
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function MobileCinematicStory() {
   const storyRef = useRef<HTMLDivElement>(null);
   const [activeScene, setActiveScene] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [visible, setVisible] = useState(false);
-  const totalSteps = evidenceStory.length * 3;
-  const currentStep = activeScene * 3 + activeStep;
+  const totalSteps = mobileChapterStepCounts.reduce((sum, count) => sum + count, 0);
+  const completedSteps = mobileChapterStepCounts.slice(0, activeScene).reduce((sum, count) => sum + count, 0);
+  const currentStep = completedSteps + activeStep;
   const progress = totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 100;
 
   useEffect(() => {
@@ -266,6 +452,7 @@ function MobileCinematicStory() {
       let bestDistance = Number.POSITIVE_INFINITY;
       let nextScene = 0;
       let nextStep = 0;
+      let bestElement: HTMLElement | null = null;
       root.querySelectorAll<HTMLElement>("[data-mobile-step]").forEach(element => {
         const bounds = element.getBoundingClientRect();
         const distance = Math.abs(bounds.top + bounds.height * 0.5 - screenTarget);
@@ -273,8 +460,20 @@ function MobileCinematicStory() {
           bestDistance = distance;
           nextScene = Number(element.dataset.scene ?? 0);
           nextStep = Number(element.dataset.step ?? 0);
+          bestElement = element;
         }
       });
+      if (bestElement) {
+        const element = bestElement as HTMLElement;
+        const bounds = element.getBoundingClientRect();
+        const stepProgress = Math.min(1, Math.max(0, (window.innerHeight - bounds.top) / (window.innerHeight + bounds.height)));
+        const travel = (stepProgress - 0.5) * 2;
+        const panX = Number(element.dataset.panX ?? mobileScenePans[nextScene]?.x ?? 0);
+        const panY = Number(element.dataset.panY ?? mobileScenePans[nextScene]?.y ?? -5);
+        root.style.setProperty("--mobile-camera-x", `${travel * panX}%`);
+        root.style.setProperty("--mobile-camera-y", `${travel * panY}%`);
+        root.style.setProperty("--mobile-camera-scale", `${1.04 + stepProgress * 0.15}`);
+      }
       setActiveScene(nextScene);
       setActiveStep(nextStep);
     };
@@ -300,7 +499,12 @@ function MobileCinematicStory() {
         <i><b /></i>
       </div>
 
-      {evidenceStory.map((scene, index) => (
+      <MobileHistoryChapter activeScene={activeScene} activeStep={activeScene === 0 ? activeStep : 0} />
+
+      {evidenceStory.slice(1).map((scene, storyIndex) => {
+        const index = storyIndex + 1;
+        const pan = mobileScenePans[index];
+        return (
         <section className={`mobile-story-chapter ${activeScene === index ? "is-active" : ""}`} key={scene.label} id={`mobile-chapter-${index + 1}`} aria-label={`Bab ${index + 1}: ${scene.label}`}>
           <div className="mobile-scene-background" aria-hidden="true">
             <img src={storyImage(scene.image)} alt="" loading={index === 0 ? "eager" : "lazy"} decoding="async" style={{ objectPosition: scene.position }} />
@@ -309,15 +513,16 @@ function MobileCinematicStory() {
           </div>
 
           <div className="mobile-scene-sequence">
-            <article className="mobile-story-step mobile-narrative-step" data-mobile-step data-scene={index} data-step="0">
+            <article className="mobile-story-step mobile-narrative-step" data-mobile-step data-scene={index} data-step="0" data-pan-x={pan.x} data-pan-y={pan.y}>
               <div className="mobile-story-card">
                 <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
                 <h2 className={`mobile-story-title ${scene.title.length > 85 ? "is-long" : ""}`}><StoryText>{scene.title}</StoryText></h2>
                 <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+                {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
               </div>
             </article>
 
-            <article className="mobile-story-step mobile-visual-step" data-mobile-step data-scene={index} data-step="1">
+            <article className="mobile-story-step mobile-visual-step" data-mobile-step data-scene={index} data-step="1" data-pan-x={-pan.x} data-pan-y={pan.y - 2}>
               <div className="mobile-visual-card">
                 <span className="mobile-step-label">Baca visual</span>
                 <h3>{mobileDiagramCopy[index].title}</h3>
@@ -326,7 +531,7 @@ function MobileCinematicStory() {
               </div>
             </article>
 
-            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2">
+            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2" data-pan-x={pan.x / 2} data-pan-y={pan.y - 4}>
               <div className="mobile-bridge-card">
                 <span className="mobile-step-label">Yang perlu dibawa</span>
                 <p><StoryText>{scene.bridge}</StoryText></p>
@@ -336,7 +541,8 @@ function MobileCinematicStory() {
             </article>
           </div>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -344,10 +550,12 @@ function MobileCinematicStory() {
 function CinematicStory() {
   const track = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const [activeBeat, setActiveBeat] = useState(0);
+  const historyBeatCount = historyMoments.length + 2;
+  const totalBeats = historyBeatCount + evidenceStory.length - 1;
   const { scrollYProgress } = useScroll({ target: track, offset: ["start start", "end end"] });
-  const storyDuration = evidenceStory.length - 0.01;
-  const lastScene = evidenceStory.length - 1;
+  const storyDuration = totalBeats - 0.01;
+  const lastBeat = totalBeats - 1;
   const phase = useTransform(scrollYProgress, [0, 1], [0, storyDuration]);
   const lineProgress = useTransform(scrollYProgress, [0, 1], [0.03, 1]);
   const pointerX = useMotionValue(72);
@@ -355,13 +563,24 @@ function CinematicStory() {
   const glowX = useSpring(pointerX, { stiffness: 90, damping: 24, mass: 0.7 });
   const glowY = useSpring(pointerY, { stiffness: 90, damping: 24, mass: 0.7 });
   const spotlight = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, rgba(231, 207, 146, .15), transparent 27%)`;
-  useMotionValueEvent(phase, "change", value => setActive(Math.min(lastScene, Math.max(0, Math.floor(value)))));
+  useMotionValueEvent(phase, "change", value => setActiveBeat(Math.min(lastBeat, Math.max(0, Math.floor(value)))));
 
-  const goToChapter = (index: number) => {
+  const activeChapter = activeBeat < historyBeatCount ? 0 : activeBeat - historyBeatCount + 1;
+  const activeEra = activeBeat === 0
+    ? "1947 sampai Reformasi"
+    : activeBeat <= historyMoments.length
+      ? historyMoments[activeBeat - 1].years
+      : activeBeat === historyBeatCount - 1
+        ? "Dari sejarah menuju hari ini"
+        : evidenceStory[activeChapter].era;
+
+  const chapterBeat = (chapterIndex: number) => chapterIndex === 0 ? 0 : historyBeatCount + chapterIndex - 1;
+
+  const goToChapter = (chapterIndex: number) => {
     if (!track.current || !stage.current) return;
     const start = track.current.getBoundingClientRect().top + window.scrollY;
     const distance = track.current.offsetHeight - stage.current.offsetHeight;
-    window.scrollTo({ top: start + distance * ((index + 0.25) / storyDuration), behavior: "smooth" });
+    window.scrollTo({ top: start + distance * ((chapterBeat(chapterIndex) + 0.18) / storyDuration), behavior: "smooth" });
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -371,23 +590,40 @@ function CinematicStory() {
   };
 
   const goForward = () => {
-    if (active < lastScene) {
-      goToChapter(active + 1);
+    if (activeChapter < evidenceStory.length - 1) {
+      goToChapter(activeChapter + 1);
       return;
     }
     document.getElementById("komitmen")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div ref={track} className="story-track" id="cerita">
+    <div ref={track} className="story-track" id="cerita" style={{ "--story-height": `${totalBeats * 200}svh` } as CSSProperties}>
       <div ref={stage} className="story-stage" onPointerMove={handlePointerMove} onPointerLeave={() => { pointerX.set(72); pointerY.set(42); }}>
-        {evidenceStory.map((scene, index) => <StoryLayer key={scene.label} scene={scene} index={index} phase={phase} active={active} />)}
+        <DesktopHistoryLayer beatIndex={0} kind="intro" moment={historyMoments[0]} phase={phase} activeBeat={activeBeat} />
+        {historyMoments.map((moment, index) => (
+          <DesktopHistoryLayer key={moment.years} beatIndex={index + 1} kind="moment" moment={moment} phase={phase} activeBeat={activeBeat} />
+        ))}
+        <DesktopHistoryLayer beatIndex={historyBeatCount - 1} kind="reflection" moment={historyMoments[historyMoments.length - 1]} phase={phase} activeBeat={activeBeat} />
+        {evidenceStory.slice(1).map((scene, storyIndex) => {
+          const sceneIndex = storyIndex + 1;
+          const beatIndex = historyBeatCount + storyIndex;
+          return <StoryLayer
+            key={scene.label}
+            scene={scene}
+            sceneIndex={sceneIndex}
+            beatIndex={beatIndex}
+            phase={phase}
+            activeBeat={activeBeat}
+            isLast={beatIndex === lastBeat}
+          />;
+        })}
         <motion.div className="story-spotlight" style={{ background: spotlight }} aria-hidden="true" />
         <div className="story-vignette" aria-hidden="true" />
         <div className="story-topline" aria-hidden="true">
-          <span>{active === 2 ? "" : "HMI Evidence / Perjalanan kader"}</span>
-          <AnimatePresence mode="wait"><motion.span key={active} className="story-count" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>0{active + 1} / 0{evidenceStory.length}</motion.span></AnimatePresence>
-          <span>{evidenceStory[active].era}</span>
+          <span>HMI Evidence / {evidenceStory[activeChapter].label}</span>
+          <AnimatePresence mode="wait"><motion.span key={activeChapter} className="story-count" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>0{activeChapter + 1} / 0{evidenceStory.length}</motion.span></AnimatePresence>
+          <AnimatePresence mode="wait"><motion.span key={activeEra} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>{activeEra}</motion.span></AnimatePresence>
         </div>
         <div className="story-progress-rail" aria-hidden="true"><motion.span style={{ scaleY: scrollYProgress }} /></div>
         <svg className="story-thread" viewBox="0 0 1000 460" fill="none" aria-hidden="true">
@@ -395,16 +631,16 @@ function CinematicStory() {
           <motion.path d="M25 400 C160 400 120 70 290 100 S360 420 530 330 S620 90 730 165 S890 350 970 40" stroke="currentColor" strokeWidth="1.6" style={{ pathLength: lineProgress }} />
         </svg>
         <nav className="story-chapters" aria-label="Bab HMI Evidence">
-          {evidenceStory.map((scene, index) => <button key={scene.label} onClick={() => goToChapter(index)} aria-label={`Bab ${index + 1}: ${scene.label}`} aria-current={active === index ? "step" : undefined}>
+          {evidenceStory.map((scene, index) => <button key={scene.label} onClick={() => goToChapter(index)} aria-label={`Bab ${index + 1}: ${scene.label}`} aria-current={activeChapter === index ? "step" : undefined}>
             <span className="chapter-number">0{index + 1}</span><span className="chapter-label">{scene.label}</span><span className="chapter-bar" />
           </button>)}
         </nav>
-        <button type="button" className="story-next" onClick={goForward} aria-label={active < lastScene ? `Lanjut ke ${evidenceStory[active + 1].label}` : "Lanjut ke komitmen"}>
-          <span>{active < lastScene ? "Bab selanjutnya" : "Penutup"}</span>
-          <strong>{active < lastScene ? evidenceStory[active + 1].label : "Komitmen"}</strong>
+        <button type="button" className="story-next" onClick={goForward} aria-label={activeChapter < evidenceStory.length - 1 ? `Lanjut ke ${evidenceStory[activeChapter + 1].label}` : "Lanjut ke komitmen"}>
+          <span>{activeChapter < evidenceStory.length - 1 ? "Bab selanjutnya" : "Penutup"}</span>
+          <strong>{activeChapter < evidenceStory.length - 1 ? evidenceStory[activeChapter + 1].label : "Komitmen"}</strong>
           <ArrowDown size={14} />
         </button>
-        <AnimatePresence>{active === 0 && <motion.div className="story-scroll-cue" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} aria-hidden="true"><i /><span>Gulir untuk menelusuri</span></motion.div>}</AnimatePresence>
+        <AnimatePresence>{activeBeat === 0 && <motion.div className="story-scroll-cue" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} aria-hidden="true"><i /><span>Gulir untuk menelusuri</span></motion.div>}</AnimatePresence>
         <a className="story-skip" href="#komitmen">Ke komitmen <ArrowDown size={12} /></a>
       </div>
     </div>
@@ -429,10 +665,8 @@ export default function HmiEvidencePage() {
     const update = () => {
       const isMobile = query.matches;
       const device = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-      const lowMemory = typeof device.deviceMemory === "number" && device.deviceMemory <= 4;
-      const lowConcurrency = typeof device.hardwareConcurrency === "number" && device.hardwareConcurrency <= 4;
       setMobile(isMobile);
-      setLimitedDevice(isMobile && (lowMemory || lowConcurrency || device.connection?.saveData === true));
+      setLimitedDevice(isMobile && device.connection?.saveData === true);
     };
     update();
     query.addEventListener("change", update);
