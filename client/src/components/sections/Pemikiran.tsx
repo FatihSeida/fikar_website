@@ -4,9 +4,9 @@ import SectionHeader from "@/components/SectionHeader";
 import { usePage } from "@/hooks/use-content";
 
 /**
- * Ringkasan Pemikiran & Ide. Konten berasal dari editor TipTap dan sudah
+ * Ringkasan halaman Pemikiran. Konten berasal dari editor TipTap dan sudah
  * disanitasi di server (server/routes.ts sanitizeHtml), jadi dirender
- * sebagai HTML — bukan dipecah per baris seperti versi sebelumnya.
+ * sebagai HTML.
  */
 export default function Pemikiran() {
   const { data: page, isLoading } = usePage("pemikiran-ide");
@@ -17,7 +17,7 @@ export default function Pemikiran() {
   return (
     <section id="pemikiran" className="border-t border-border py-24 md:py-36">
       <div className="container mx-auto px-6">
-        <SectionHeader title={page?.title ?? "Pemikiran & Ide"} subtitle="Pemikiran" />
+        <SectionHeader title={page?.title ?? "Pemikiran"} subtitle="Esai & gagasan" />
 
         {isLoading && <p className="text-muted-foreground">Memuat halaman…</p>}
 
@@ -40,7 +40,7 @@ export default function Pemikiran() {
 
           <div className="mt-10 md:mt-0">
             <a
-              href="/pemikiran-ide"
+              href="/pemikiran"
               className="group inline-flex items-center gap-3 text-sm text-primary transition-colors hover:text-foreground"
               data-testid="link-pemikiran-selengkapnya"
             >

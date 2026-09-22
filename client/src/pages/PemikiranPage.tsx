@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { usePage } from "@/hooks/use-content";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
+import SiteFooter from "@/components/sections/SiteFooter";
 import { proseKelas } from "@/pages/NoteDetail";
 
 export default function PemikiranPage() {
@@ -32,11 +33,11 @@ export default function PemikiranPage() {
       <PaperGrain />
       <Navbar />
 
-      <motion.div
+      <motion.main
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, ease: "easeOut" }}
-        className="px-6 pb-28 pt-36"
+        className="px-6 pb-28 pt-40"
       >
         <div className="container mx-auto max-w-2xl">
           <a
@@ -48,7 +49,7 @@ export default function PemikiranPage() {
           </a>
 
           <header className="mb-14">
-            <span className="eyebrow mb-6 block">Pemikiran</span>
+            <span className="eyebrow mb-6 block">Gagasan &amp; Arah</span>
             <h1 className="font-serif text-4xl leading-[1.15] md:text-5xl">
               {page.title}
             </h1>
@@ -57,7 +58,8 @@ export default function PemikiranPage() {
 
           <div className={proseKelas} dangerouslySetInnerHTML={{ __html: page.content }} />
         </div>
-      </motion.div>
+      </motion.main>
+      <SiteFooter />
     </div>
   );
 }

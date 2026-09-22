@@ -24,6 +24,14 @@ if (isProduction) {
       );
     }
   }
+
+  if ((process.env.SESSION_SECRET?.length ?? 0) < 32) {
+    throw new Error("SESSION_SECRET di produksi harus memiliki sedikitnya 32 karakter acak.");
+  }
+
+  if ((process.env.ADMIN_PASSWORD?.length ?? 0) < 12) {
+    throw new Error("ADMIN_PASSWORD di produksi harus memiliki sedikitnya 12 karakter.");
+  }
 }
 
 /**

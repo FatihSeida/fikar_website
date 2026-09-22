@@ -3,9 +3,9 @@ import type { Note } from "@shared/schema";
 /**
  * Menentukan ke mana sebuah entri mengarah.
  *
- * Liputan dan publikasi hidup di situs lain — situs ini hanya menunjuk ke
+ * Liputan dan publikasi hidup di situs lain. Situs ini hanya menunjuk ke
  * sumbernya, jadi tautannya keluar. Sebaliknya opini dan pemikiran adalah
- * tulisan Nur Ghina sendiri yang naskahnya dimuat di sini, jadi tautannya
+ * tulisan Ahmad Zulfikar sendiri yang naskahnya dimuat di sini, jadi tautannya
  * masuk ke halaman catatan meskipun entrinya juga punya tautan sumber.
  */
 const TAG_TULISAN_SENDIRI = ["opini", "pemikiran", "catatan"];

@@ -1,25 +1,23 @@
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import Hero from "@/components/sections/Hero";
+import EvidenceTeaser from "@/components/sections/EvidenceTeaser";
 import About from "@/components/sections/About";
-import Perjalanan from "@/components/sections/Perjalanan";
-import Pemikiran from "@/components/sections/Pemikiran";
+import GalleryPreview from "@/components/sections/GalleryPreview";
 import Notes from "@/components/sections/Notes";
-import Contact from "@/components/sections/Contact";
 import SiteFooter from "@/components/sections/SiteFooter";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PaperGrain />
-      <Navbar />
+      <Navbar dark />
       <main>
         <Hero />
+        <EvidenceTeaser />
         <About />
-        <Perjalanan />
-        <Pemikiran />
+        <GalleryPreview />
         <Notes />
-        <Contact />
       </main>
       <SiteFooter />
     </div>

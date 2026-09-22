@@ -10,7 +10,7 @@ export default function Notes() {
   return (
     <section id="catatan" className="border-t border-border py-24 md:py-36">
       <div className="container mx-auto px-6">
-        <SectionHeader title="Catatan & Aktivitas" subtitle="Catatan" />
+        <SectionHeader title="Catatan" subtitle="Tulisan, gagasan, dan aktivitas Ahmad Zulfikar" />
 
         {isLoading && <p className="text-muted-foreground">Memuat catatan…</p>}
 
@@ -31,10 +31,10 @@ export default function Notes() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.9, ease: "easeOut" }}
-                className="group flex flex-col gap-4 border-b border-border py-9 md:flex-row md:items-baseline md:gap-12"
+                className="group flex flex-col gap-5 border-b border-border py-10 md:flex-row md:items-start md:gap-12"
                 data-testid={`note-item-${item.id}`}
               >
-                <span className="font-serif text-sm text-primary md:w-10 md:shrink-0">
+                <span className="pt-1 font-serif text-sm text-primary md:w-10 md:shrink-0">
                   {String(index + 1).padStart(2, "0")}
                 </span>
 
@@ -55,11 +55,11 @@ export default function Notes() {
                     )}
                   </div>
 
-                  <h3 className="mb-2 font-serif text-2xl text-foreground transition-colors duration-500 group-hover:text-primary md:text-3xl">
+                  <h3 className="mb-3 max-w-3xl font-serif text-2xl leading-tight text-foreground transition-colors duration-500 group-hover:text-primary md:text-3xl">
                     {item.title}
                   </h3>
 
-                  <p className="measure text-base text-muted-foreground">
+                  <p className="max-w-3xl text-base leading-relaxed text-muted-foreground">
                     {item.excerpt}
                   </p>
 

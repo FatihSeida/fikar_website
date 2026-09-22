@@ -299,7 +299,7 @@ function NotesManager() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-serif font-bold">Kelola Catatan & Aktivitas</h2>
+        <h2 className="text-2xl font-serif font-bold">Kelola Pemikiran & Catatan</h2>
         <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-note"><Plus className="w-4 h-4 mr-2" /> Tambah Catatan</Button>
@@ -484,7 +484,7 @@ function PageEditor() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-serif font-bold">Halaman Pemikiran & Ide</h2>
+        <h2 className="text-2xl font-serif font-bold">Halaman Pemikiran</h2>
         <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} data-testid="button-save-page">
           {saveMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
@@ -561,10 +561,7 @@ export default function Admin() {
               <Image className="w-4 h-4" /> Galeri
             </TabsTrigger>
             <TabsTrigger value="notes" className="gap-2" data-testid="tab-notes">
-              <FileText className="w-4 h-4" /> Catatan & Aktivitas
-            </TabsTrigger>
-            <TabsTrigger value="pages" className="gap-2" data-testid="tab-pages">
-              <BookOpen className="w-4 h-4" /> Pemikiran & Ide
+              <FileText className="w-4 h-4" /> Pemikiran & Catatan
             </TabsTrigger>
           </TabsList>
 
@@ -573,9 +570,6 @@ export default function Admin() {
           </TabsContent>
           <TabsContent value="notes">
             <NotesManager />
-          </TabsContent>
-          <TabsContent value="pages">
-            <PageEditor />
           </TabsContent>
         </Tabs>
       </main>

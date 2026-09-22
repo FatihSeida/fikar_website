@@ -8,3 +8,15 @@ vite.config.ts.*
 .local/
 .env
 uploads/
+
+# Sumber foto mentah (input untuk script/optimize-*.ts).
+# Hasil optimasinya di client/public dan client/src/assets tetap dilacak.
+/assets/
+/photo/
+
+# Materi kerja yang tidak dibutuhkan build
+/HMI Evidence*.pdf
+/Proposal_Kandidat_HMI_Evidence_*.html
+
+# Pengaturan lokal editor/agen
+.claude/settings.local.json

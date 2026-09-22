@@ -5,7 +5,7 @@ interface SectionHeaderProps {
 
 /**
  * Judul section. Garis tipis clay menggantikan balok tebal merah pada
- * versi lama — aksen, bukan penekanan.
+ * versi lama, sebagai aksen.
  */
 export default function SectionHeader({ title, subtitle }: SectionHeaderProps) {
   return (

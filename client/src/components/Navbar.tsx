@@ -1,82 +1,58 @@
 import { Link, useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
 
 const navLinks = [
-  { name: "Beranda", href: "#hero" },
-  { name: "Tentang", href: "#tentang" },
-  { name: "Perjalanan", href: "#perjalanan" },
-  { name: "Pemikiran", href: "#pemikiran" },
-  { name: "Catatan", href: "#catatan" },
+  { name: "Beranda", href: "/" },
+  { name: "HMI Evidence", href: "/hmi-evidence" },
+  { name: "Tentang", href: "/tentang" },
+  { name: "Galeri", href: "/galeri" },
+  { name: "Catatan", href: "/catatan" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ dark = false }: { dark?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 32);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setMobileMenuOpen(false);
+  const cinematic = location === "/hmi-evidence";
+  const lightInk = cinematic || (dark && !isScrolled);
+  const ink = lightInk ? "text-white" : "text-foreground";
+  const muted = lightInk ? "text-white/70" : "text-muted-foreground";
 
-    if (window.location.pathname !== "/") {
-      setLocation("/");
-      setTimeout(() => {
-        document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-      return;
-    }
-
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
-  };
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setMobileMenuOpen(false); };
+    window.addEventListener("keydown", close);
+    return () => { document.body.style.overflow = previous; window.removeEventListener("keydown", close); };
+  }, [mobileMenuOpen]);
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-500 ${
-          isScrolled
-            ? "border-border/70 bg-background/90 py-4 backdrop-blur-md"
-            : "border-transparent bg-transparent py-6"
-        }`}
-      >
-        <div className="container mx-auto flex items-center justify-between px-6">
-          <Link
-            href="/"
-            className="font-serif text-lg tracking-tight text-foreground"
-            data-testid="link-logo"
-          >
-            {site.namaDepan}{" "}
-            <span className="text-muted-foreground">{site.namaBelakang}</span>
+      <nav aria-label="Navigasi utama" className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-500 ${cinematic ? "border-white/10 bg-[#071610]/85 py-3 backdrop-blur-xl" : isScrolled ? "border-border/70 bg-background/95 py-3 backdrop-blur-xl" : "border-transparent bg-transparent py-5"}`}>
+        <div className="container mx-auto flex items-center justify-between px-5 md:px-8">
+          <Link href="/" className={`font-serif text-lg tracking-tight ${ink}`}>
+            {site.namaDepan} <span className={muted}>{site.namaBelakang}</span>
           </Link>
-
-          <div className="hidden items-center gap-9 md:flex">
+          <div className="hidden items-center gap-6 lg:flex">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="text-sm text-muted-foreground transition-colors duration-300 hover:text-primary"
-                data-testid={`link-nav-${link.name.toLowerCase()}`}
-              >
+              <Link key={link.href} href={link.href} aria-current={location === link.href ? "page" : undefined} className={`text-xs uppercase tracking-[0.14em] transition-colors ${link.href === "/hmi-evidence" ? `evidence-shimmer ${lightInk ? "" : "evidence-shimmer-light"}` : `hover:opacity-70 ${location === link.href ? ink : muted}`}`}>
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
-
-          <button
-            className="text-foreground md:hidden"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Buka menu navigasi"
-            data-testid="button-mobile-menu"
-          >
+          <button type="button" className={`p-2 lg:hidden ${ink}`} onClick={() => setMobileMenuOpen(true)} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-label="Buka menu navigasi">
             <Menu className="h-6 w-6" />
           </button>
         </div>
@@ -84,32 +60,17 @@ export default function Navbar() {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-background"
-          >
-            <button
-              className="absolute right-6 top-6 p-2"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label="Tutup menu navigasi"
-              data-testid="button-close-menu"
-            >
+          <motion.div id="mobile-navigation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center bg-[hsl(var(--evidence))] text-white">
+            <button type="button" className="absolute right-5 top-5 p-2" onClick={() => setMobileMenuOpen(false)} aria-label="Tutup menu navigasi">
               <X className="h-7 w-7" />
             </button>
-
-            <div className="flex flex-col gap-8 text-center">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className="font-serif text-2xl text-foreground transition-colors hover:text-primary"
-                >
-                  {link.name}
-                </a>
+            <div className="flex flex-col gap-6 text-center">
+              {navLinks.map((link, index) => (
+                <motion.div key={link.href} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}>
+                  <Link href={link.href} onClick={() => setMobileMenuOpen(false)} className={`font-serif text-3xl ${link.href === "/hmi-evidence" ? "evidence-shimmer" : "text-white/90 hover:text-[hsl(var(--gold))]"}`}>
+                    {link.name}
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </motion.div>

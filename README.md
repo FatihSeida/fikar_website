@@ -1,6 +1,6 @@
-# Situs Nur Ghina Muslimah
+# Situs Ahmad Zulfikar
 
-Situs personal untuk membaca dan menulis catatan, pemikiran, dan aktivitas.
+Situs kandidat Ketua Umum PB HMI Ahmad Zulfikar, dengan pengalaman scrollytelling HMI Evidence, profil, pemikiran, catatan, dan galeri.
 
 ## Teknologi
 
@@ -31,8 +31,8 @@ lalu jalankan `npm run db:push` sekali untuk membuat tabelnya.
 | Nama | Pengembangan | Produksi |
 |---|---|---|
 | `DATABASE_URL` | Opsional — kosong berarti penyimpanan dalam memori | **Wajib** |
-| `SESSION_SECRET` | Opsional | **Wajib**, nilai acak panjang |
-| `ADMIN_PASSWORD` | Opsional | **Wajib**, password kuat |
+| `SESSION_SECRET` | Opsional | **Wajib**, minimal 32 karakter acak |
+| `ADMIN_PASSWORD` | Opsional | **Wajib**, minimal 12 karakter |
 | `PORT` | Opsional, default 5000 | Opsional, default 5000 |
 
 Di produksi server sengaja menolak menyala bila salah satu dari ketiga
@@ -45,6 +45,17 @@ menandai cookie session sebagai `secure`, dan menyimpan session di
 PostgreSQL. Di pengembangan server mengikat `127.0.0.1` dan menyimpan
 session di memori.
 
+## Pengamanan bawaan
+
+- Percobaan login admin dibatasi dan sesi diperbarui setelah autentikasi berhasil.
+- Permintaan mutasi lintas situs ditolak melalui pemeriksaan `Origin` dan `Sec-Fetch-Site`.
+- Unggahan dibatasi 5 MB, hanya menerima JPEG, PNG, atau WebP, dan tanda tangan berkas diperiksa.
+- Konten editor disanitasi dan seluruh masukan memiliki batas panjang serta format yang jelas.
+- Header CSP, HSTS, anti-framing, MIME sniffing, referrer, dan permissions diterapkan di produksi.
+- Server tidak mencatat isi respons API atau kredensial ke log.
+
+Jalankan `npm audit` pada proses rilis untuk memastikan dependensi tetap bebas dari temuan yang telah diketahui.
+
 ## Perintah
 
 | Perintah | Fungsi |
@@ -54,7 +65,7 @@ session di memori.
 | `npm start` | Jalankan hasil build |
 | `npm run check` | Pemeriksaan tipe TypeScript |
 | `npm run db:push` | Terapkan skema ke database |
-| `npm run optimize-photos` | Ubah foto di `photo/` menjadi WebP siap web |
+| `npm run optimize-ahmad-assets` | Optimalkan foto Ahmad dan visual scrollytelling menjadi WebP siap web |
 
 ## Deploy ke VPS
 
@@ -90,7 +101,7 @@ Berkas yang diunggah lewat panel admin disimpan di `uploads/` pada akar proyek. 
 client/src/
   components/sections/   Section halaman beranda
   components/ui/         Komponen shadcn/ui
-  pages/                 Rute: Home, NoteDetail, PemikiranPage, Admin
+  pages/                 Rute: Beranda, HMI Evidence, Tentang, Galeri, Catatan, Admin
   lib/site.ts            Identitas situs
 server/                  Express, rute API, Drizzle
 shared/schema.ts         Skema database

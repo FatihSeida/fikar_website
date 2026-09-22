@@ -1,6 +1,6 @@
 import { db, type Db } from "./db";
 import { gallery, notes, pages, type GalleryItem, type InsertGalleryItem, type Note, type InsertNote, type Page, type InsertPage } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 export interface IStorage {
   getGalleryItems(): Promise<GalleryItem[]>;
@@ -34,7 +34,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotes(): Promise<Note[]> {
-    return await this.db.select().from(notes);
+    return await this.db.select().from(notes).orderBy(asc(notes.id));
   }
 
   async getNote(slug: string): Promise<Note | undefined> {

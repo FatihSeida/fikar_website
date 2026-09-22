@@ -1,11 +1,12 @@
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertGallerySchema, insertNoteSchema, insertPageSchema } from "@shared/schema";
-import { z } from "zod";
+import { createHash, randomBytes, timingSafeEqual } from "crypto";
+import { insertGallerySchema, insertNoteSchema } from "@shared/schema";
+import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 
@@ -18,7 +19,9 @@ function sanitizeHtml(html: string): string {
       "p", "br", "strong", "em", "u", "s", "h1", "h2", "h3",
       "ul", "ol", "li", "blockquote", "img", "hr", "span", "div",
     ],
-    ALLOWED_ATTR: ["src", "alt", "class", "style", "width", "height"],
+    ALLOWED_ATTR: ["src", "alt", "class", "width", "height"],
+    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form"],
+    FORBID_ATTR: ["style"],
   });
 }
 
@@ -30,19 +33,72 @@ if (!fs.existsSync(uploadDir)) {
 const multerStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const extensions: Record<string, string> = {
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "image/webp": ".webp",
+    };
+    cb(null, `${randomBytes(24).toString("hex")}${extensions[file.mimetype] ?? ""}`);
   },
 });
-const upload = multer({ storage: multerStorage, limits: { fileSize: 10 * 1024 * 1024 } });
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const upload = multer({
+  storage: multerStorage,
+  limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 4, fieldNameSize: 100 },
+  fileFilter: (_req, file, cb) => {
+    if (!allowedImageTypes.has(file.mimetype)) {
+      return cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
+    }
+    cb(null, true);
+  },
+});
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const MAX_LOGIN_ATTEMPTS = 5;
+const loginAttempts = new Map<string, { count: number; startedAt: number; blockedUntil?: number }>();
 
-function requireAdmin(req: any, res: any, next: any) {
+function passwordMatches(candidate: string): boolean {
+  const expected = createHash("sha256").update(ADMIN_PASSWORD).digest();
+  const received = createHash("sha256").update(candidate).digest();
+  return timingSafeEqual(expected, received);
+}
+
+function parsePositiveId(raw: string | string[]): number | null {
+  if (Array.isArray(raw)) return null;
+  if (!/^\d+$/.test(raw)) return null;
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+function parseSlug(raw: string | string[]): string | null {
+  if (Array.isArray(raw) || raw.length > 120) return null;
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(raw) ? raw : null;
+}
+
+function validationMessage(error: z.ZodError): string {
+  return error.issues[0]?.message || "Data yang dikirim tidak valid";
+}
+
+async function hasValidImageSignature(filePath: string, mimetype: string): Promise<boolean> {
+  const handle = await fs.promises.open(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(12);
+    await handle.read(buffer, 0, buffer.length, 0);
+    if (mimetype === "image/jpeg") return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    if (mimetype === "image/png") return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    if (mimetype === "image/webp") return buffer.subarray(0, 4).toString() === "RIFF" && buffer.subarray(8, 12).toString() === "WEBP";
+    return false;
+  } finally {
+    await handle.close();
+  }
+}
+
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (req.session?.isAdmin) {
     return next();
   }
-  res.status(401).json({ message: "Unauthorized" });
+  return res.status(401).json({ message: "Autentikasi diperlukan" });
 }
 
 export async function registerRoutes(
@@ -50,19 +106,66 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
+  app.use("/api", (req, res, next) => {
+    res.setHeader("Cache-Control", "no-store");
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+
+    const fetchSite = req.get("sec-fetch-site");
+    if (fetchSite === "cross-site") {
+      return res.status(403).json({ message: "Permintaan lintas situs ditolak" });
+    }
+
+    const origin = req.get("origin");
+    if (origin) {
+      try {
+        if (new URL(origin).host !== req.get("host")) {
+          return res.status(403).json({ message: "Asal permintaan tidak diizinkan" });
+        }
+      } catch {
+        return res.status(403).json({ message: "Asal permintaan tidak valid" });
+      }
+    }
+    return next();
+  });
+
   // --- Admin Auth ---
   app.post("/api/admin/login", (req, res) => {
-    const { password } = req.body;
-    if (password === ADMIN_PASSWORD) {
-      req.session.isAdmin = true;
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ message: "Password salah" });
+    const input = z.object({ password: z.string().min(1).max(256) }).safeParse(req.body);
+    if (!input.success) return res.status(400).json({ message: "Kredensial tidak valid" });
+
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const existing = loginAttempts.get(key);
+    if (existing?.blockedUntil && existing.blockedUntil > now) {
+      const retryAfter = Math.ceil((existing.blockedUntil - now) / 1000);
+      res.setHeader("Retry-After", String(retryAfter));
+      return res.status(429).json({ message: "Terlalu banyak percobaan. Silakan coba kembali beberapa saat lagi" });
     }
+
+    if (!passwordMatches(input.data.password)) {
+      const current = !existing || now - existing.startedAt > LOGIN_WINDOW_MS
+        ? { count: 0, startedAt: now }
+        : existing;
+      current.count += 1;
+      if (current.count >= MAX_LOGIN_ATTEMPTS) current.blockedUntil = now + LOGIN_WINDOW_MS;
+      loginAttempts.set(key, current);
+      return res.status(401).json({ message: "Kredensial tidak valid" });
+    }
+
+    loginAttempts.delete(key);
+    return req.session.regenerate((error) => {
+      if (error) return res.status(500).json({ message: "Sesi tidak dapat dibuat" });
+      req.session.isAdmin = true;
+      return req.session.save((saveError) => {
+        if (saveError) return res.status(500).json({ message: "Sesi tidak dapat disimpan" });
+        return res.json({ success: true });
+      });
+    });
   });
 
   app.post("/api/admin/logout", (req, res) => {
     req.session.destroy(() => {
+      res.clearCookie("ahmad.sid", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
       res.json({ success: true });
     });
   });
@@ -79,73 +182,104 @@ export async function registerRoutes(
 
   app.post("/api/gallery", requireAdmin, async (req, res) => {
     const parsed = insertGallerySchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
     const item = await storage.createGalleryItem(parsed.data);
-    res.json(item);
+    res.status(201).json(item);
   });
 
   app.delete("/api/gallery/:id", requireAdmin, async (req, res) => {
-    await storage.deleteGalleryItem(Number(req.params.id));
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID galeri tidak valid" });
+    await storage.deleteGalleryItem(id);
     res.json({ success: true });
   });
 
-  // --- Notes (Catatan & Aktivitas) ---
+  // --- Catatan ---
   app.get("/api/notes", async (_req, res) => {
     const items = await storage.getNotes();
     res.json(items);
   });
 
   app.get("/api/notes/:slug", async (req, res) => {
-    const note = await storage.getNote(req.params.slug);
+    const slug = parseSlug(req.params.slug);
+    if (!slug) {
+      return res.status(400).json({ message: "Slug catatan tidak valid" });
+    }
+    const note = await storage.getNote(slug);
     if (!note) return res.status(404).json({ message: "Catatan tidak ditemukan" });
     res.json(note);
   });
 
   app.post("/api/notes", requireAdmin, async (req, res) => {
     const parsed = insertNoteSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
     const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
     const note = await storage.createNote(data);
-    res.json(note);
+    res.status(201).json(note);
   });
 
   app.put("/api/notes/:id", requireAdmin, async (req, res) => {
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID catatan tidak valid" });
     const parsed = insertNoteSchema.partial().safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
     const data = parsed.data.content ? { ...parsed.data, content: sanitizeHtml(parsed.data.content) } : parsed.data;
-    const note = await storage.updateNote(Number(req.params.id), data);
+    const note = await storage.updateNote(id, data);
     res.json(note);
   });
 
   app.delete("/api/notes/:id", requireAdmin, async (req, res) => {
-    await storage.deleteNote(Number(req.params.id));
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID catatan tidak valid" });
+    await storage.deleteNote(id);
     res.json({ success: true });
   });
 
-  // --- Pages (static pages like Pemikiran & Ide) ---
+  // --- Pages (halaman statis seperti Pemikiran) ---
   app.get("/api/pages/:slug", async (req, res) => {
-    const page = await storage.getPage(req.params.slug);
+    const slug = parseSlug(req.params.slug);
+    if (!slug) {
+      return res.status(400).json({ message: "Slug halaman tidak valid" });
+    }
+    const page = await storage.getPage(slug);
     if (!page) return res.status(404).json({ message: "Halaman tidak ditemukan" });
     res.json(page);
   });
 
   app.put("/api/pages/:slug", requireAdmin, async (req, res) => {
-    const pageSchema = z.object({ title: z.string().min(1), content: z.string().min(1) });
+    const slug = parseSlug(req.params.slug);
+    if (!slug) {
+      return res.status(400).json({ message: "Slug halaman tidak valid" });
+    }
+    const pageSchema = z.object({ title: z.string().trim().min(3).max(180), content: z.string().min(20).max(200_000) });
     const parsed = pageSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
     const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
-    const page = await storage.upsertPage(req.params.slug, data);
+    const page = await storage.upsertPage(slug, data);
     res.json(page);
   });
 
   // --- File Upload ---
-  app.post("/api/upload", requireAdmin, upload.single("file"), (req, res) => {
+  app.post("/api/upload", requireAdmin, upload.single("file"), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "File tidak ditemukan" });
+    if (!(await hasValidImageSignature(req.file.path, req.file.mimetype))) {
+      await fs.promises.unlink(req.file.path).catch(() => undefined);
+      return res.status(400).json({ message: "Isi file tidak cocok dengan format gambar" });
+    }
     const url = `/uploads/${req.file.filename}`;
-    res.json({ url });
+    res.status(201).json({ url });
   });
 
-  app.use("/uploads", express.static(uploadDir));
+  app.use("/uploads", express.static(uploadDir, {
+    dotfiles: "deny",
+    index: false,
+    maxAge: "30d",
+    immutable: true,
+    setHeaders: (res) => {
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
+    },
+  }));
 
   await seedDatabase();
 
@@ -153,136 +287,74 @@ export async function registerRoutes(
 }
 
 async function seedDatabase() {
-  const existingNotes = await storage.getNotes();
-  if (existingNotes.length === 0) {
-    await storage.createNote({
-      title: "Dari Kalteng ke Panggung Dunia: Wakili Indonesia di OIC Youth Capital 2026",
-      slug: "oic-youth-capital-2026-konya",
-      excerpt: "Hadir di pembukaan resmi Konya OIC Youth Capital 2026, Turki, mewakili Indonesia dan Kalimantan Tengah.",
-      content:
-        "<p>Indonesia turut hadir dalam pembukaan resmi Konya OIC Youth Capital 2026 di Turki, 9–12 Mei 2026. Forum ini mempertemukan perwakilan pemuda dari negara-negara anggota Organisasi Kerja Sama Islam.</p><p>Dalam kegiatan tersebut saya mewakili Kementerian Pemuda dan Olahraga sekaligus membawa nama Kalimantan Tengah, memperkenalkan identitas budaya Indonesia kepada delegasi negara lain.</p>",
-      tag: "Aktivitas",
-      date: "Mei 2026",
-      coverImage: "/liputan/oic-youth-capital.webp",
-      sourceUrl: "https://intimnews.com/dari-kalteng-ke-panggung-dunia-ghina-muslimah-wakili-indonesia-di-oic-youth-capital-2026-turki/",
-      sourceName: "Intim News",
-    });
-
-    await storage.createNote({
-      title: "UMKM sebagai Fondasi Masa Depan",
-      slug: "umkm-sebagai-fondasi-masa-depan",
-      excerpt: "Catatan tentang pandangan Teguh Anantawikrama yang menempatkan UMKM sebagai fondasi ekonomi Indonesia.",
-      content:
-        "<p>Catatan tentang pandangan Teguh Anantawikrama yang menempatkan UMKM sebagai fondasi ekonomi Indonesia ke depan.</p><p>Yang menarik dari pendekatannya adalah upaya menyeimbangkan kepentingan bisnis dengan pemerataan sosial, serta kesediaannya melibatkan generasi muda dalam prosesnya.</p>",
-      tag: "Liputan",
-      date: "Desember 2025",
-      coverImage: "/liputan/umkm-fondasi.webp",
-      sourceUrl: "https://www.amaspersadanews.com/2025/12/ketua-bidang-di-pb-hmi-nur-ghina.html",
-      sourceName: "Amas Persada News",
-    });
-
-    await storage.createNote({
-      title: "Evaluasi Pelayanan Kepemudaan di Kemenpora",
-      slug: "evaluasi-pelayanan-kepemudaan",
-      excerpt: "PB HMI menilai pelayanan kepemudaan berjalan lambat dan menuntut evaluasi terhadap Deputi I.",
-      content:
-        "<p>PB HMI menilai pelayanan kepemudaan di Kementerian Pemuda dan Olahraga berjalan lambat dan menuntut evaluasi terhadap Deputi I.</p><p>Persoalannya bukan sekadar satu program yang tersendat, melainkan kelemahan pelayanan yang sudah berlangsung terlalu lama.</p>",
-      tag: "Liputan",
-      date: "Desember 2025",
-      coverImage: "/liputan/potret-03.webp",
-      sourceUrl: "https://kumparan.com/berita-sampit/kinerja-dinilai-buruk-pb-hmi-tuntut-deputi-i-kemenpora-dicopot-26NijjExF32",
-      sourceName: "Kumparan",
-    });
-
-    await storage.createNote({
-      title: "Apresiasi Kepemimpinan Menteri Pariwisata",
-      slug: "apresiasi-kepemimpinan-menteri-pariwisata",
-      excerpt: "Catatan atas arah kepemimpinan Menteri Widiyanti Putri Wardhana, khususnya pada pemberdayaan pemuda.",
-      content:
-        "<p>Bidang Pariwisata dan Ekonomi Kreatif PB HMI menyampaikan apresiasi atas arah kepemimpinan Menteri Pariwisata Widiyanti Putri Wardhana, khususnya pada perhatian terhadap pemberdayaan pemuda di sektor pariwisata.</p>",
-      tag: "Liputan",
-      date: "Oktober 2025",
-      coverImage: "/liputan/potret-01.webp",
-      sourceUrl: "https://mediumnews.id/bidang-pariwisata-pb-hmi-apresiasi-kepemimpinan-menteri-widiyanti-dorong-kemajuan-pariwisata-dan-pemberdayaan-pemuda/",
-      sourceName: "Mediumnews.id",
-    });
-
-    await storage.createNote({
-      title: "Delapan Dekade Indonesia: Pariwisata sebagai Pilar Kesejahteraan",
-      slug: "pariwisata-pilar-kesejahteraan",
-      excerpt: "Sektor pariwisata dan ekonomi kreatif layak diperlakukan sebagai pilar kesejahteraan, bukan pelengkap.",
-      content:
-        "<p>Memasuki delapan dekade kemerdekaan, sektor pariwisata dan ekonomi kreatif layak diperlakukan sebagai pilar kesejahteraan rakyat — bukan pelengkap.</p><p>Bidang Pariwisata dan Ekonomi Kreatif PB HMI mendorong inovasi anak muda dan penguatan potensi lokal sebagai jalan menuju daya saing yang lebih baik.</p>",
-      tag: "Liputan",
-      date: "Agustus 2025",
-      coverImage: "/liputan/dirgahayu-80.webp",
-      sourceUrl: "https://www.indonesiafolks.com/kabar-indonesia/86915744818/berusia-delapan-dekade-indonesia-pb-hmi-menjadikan-sektor-pariwisata-dan-ekonomi-kreatif-sebagai-pilar-penting-dalam-mewujudkan-kesejahteraan-rakyat",
-      sourceName: "Indonesia Folks",
-    });
-
-    await storage.createNote({
-      title: "Mitigasi Bencana di Destinasi Wisata Alam",
-      slug: "mitigasi-destinasi-wisata-alam",
-      excerpt: "Letusan Gunung Lewotobi sebagai momentum evaluasi keselamatan destinasi wisata alam.",
-      content:
-        "<p>Letusan Gunung Lewotobi di Flores Timur menjadi pengingat bahwa banyak destinasi wisata alam Indonesia berdiri di kawasan rawan bencana.</p><p>Sistem tanggap bencana perlu benar-benar terintegrasi di destinasi-destinasi itu. Mahasiswa dan komunitas pemuda punya ruang untuk terlibat dalam advokasi keselamatan wisata dan mendorong gerakan wisata tangguh bencana.</p>",
-      tag: "Liputan",
-      date: "Juni 2025",
-      coverImage: "/liputan/mitigasi-wisata.webp",
-      sourceUrl: "https://www.indonesiafolks.com/kabar-indonesia/86915374502/ketua-bidang-pariwisata-pb-hmi-letusan-gunung-lewotobi-momentum-evaluasi-dan-penguatan-mitigasi-di-destinasi-wisata-alam",
-      sourceName: "Indonesia Folks",
-    });
-
-    await storage.createNote({
-      title: "Pengaruh Tarif Pajak Efektif dan Profitabilitas terhadap Manajemen Perpajakan",
-      slug: "tarif-pajak-efektif-manajemen-perpajakan",
-      excerpt: "Kajian pustaka yang dimuat di Jurnal Manajemen, Akuntansi dan Logistik (JUMATI).",
-      content:
-        "<p>Kajian pustaka mengenai pengaruh tarif pajak efektif dan profitabilitas terhadap manajemen perpajakan.</p><p>Tulisan ini merangkum temuan penelitian terdahulu untuk menyusun hipotesis yang dapat diuji secara empiris, dan menyimpulkan bahwa keduanya berpengaruh terhadap strategi manajemen perpajakan perusahaan.</p><p>Dimuat di Jurnal Manajemen, Akuntansi dan Logistik (JUMATI) Vol. 1 No. 4.</p>",
-      tag: "Publikasi",
-      date: "2023",
-      coverImage: "/liputan/potret-04.webp",
-      sourceUrl: "https://ciptakind-publisher.com/jumati/index.php/ojs/article/view/97",
-      sourceName: "JUMATI",
-    });
-
-    await storage.createNote({
-      title: "Peranan Perempuan terhadap Penerapan Civil Society menurut Perspektif Islam",
-      slug: "peranan-perempuan-civil-society",
-      excerpt: "Tulisan tentang hak dan tanggung jawab sosial perempuan dalam membangun masyarakat madani.",
-      content:
-        "<p>Tulisan tentang peranan perempuan dalam penerapan civil society menurut perspektif Islam.</p><p>Perempuan memiliki hak sekaligus tanggung jawab sosial sebagai anggota masyarakat, dan terbuka ruang untuk berperan di ranah publik sepanjang memiliki kompetensi yang relevan.</p>",
-      tag: "Publikasi",
-      date: "HMI Cabang Palangka Raya",
-      coverImage: "/liputan/potret-02.webp",
-      sourceUrl: "https://www.scribd.com/document/618359209/ARTIKEL-PERANAN-PEREMPUAN-TERHADAP-PENERAPAN-CIVIL-SOCIETY-MENURUT-PRESFEKTIF-ISLAM-NUR-GHINA-MUSLIMAH-CABANG-PALANGKA-RAYA",
-      sourceName: "Scribd",
-    });
-  }
-
-  const existingGallery = await storage.getGalleryItems();
-  if (existingGallery.length === 0) {
-    const gallerySeeds = [
-      { image: "/galeri/galeri-01.webp", caption: "Hormat" },
-      { image: "/galeri/galeri-02.webp", caption: "Sejenak menoleh" },
-      { image: "/galeri/galeri-03.webp", caption: "Berdiri tenang" },
-      { image: "/galeri/galeri-04.webp", caption: "Jeda" },
-    ];
-    for (const seed of gallerySeeds) {
-      await storage.createGalleryItem({
-        image: seed.image,
-        caption: seed.caption,
-        colSpan: "col-span-1",
-      });
+  const legacySlugs = new Set([
+    "oic-youth-capital-2026-konya", "umkm-sebagai-fondasi-masa-depan",
+    "evaluasi-pelayanan-kepemudaan", "apresiasi-kepemimpinan-menteri-pariwisata",
+    "pariwisata-pilar-kesejahteraan", "mitigasi-destinasi-wisata-alam",
+    "tarif-pajak-efektif-manajemen-perpajakan", "peranan-perempuan-civil-society",
+    "hmi-evidence-gerakan-berbasis-bukti", "kaderisasi-yang-berkelanjutan",
+    "membaca-perubahan-lebih-awal", "dari-pergantian-menuju-pembelajaran",
+  ]);
+  for (const note of await storage.getNotes()) {
+    if (legacySlugs.has(note.slug)) await storage.deleteNote(note.id);
+    else if ([note.content, note.title, note.excerpt].some(value => value.includes("\u2014"))) {
+      const normalize = (value: string) => value.replace(/\s*\u2014\s*/g, ", ");
+      await storage.updateNote(note.id, { content: normalize(note.content), title: normalize(note.title), excerpt: normalize(note.excerpt) });
     }
   }
 
+  const noteSeeds = [
+    {
+      title: "Ketika Data Kader Belum Menjadi Pengetahuan Organisasi", slug: "data-kader-belum-menjadi-pengetahuan-organisasi",
+      excerpt: "Komisariat, Cabang, Badko, dan Pengurus Besar dapat memiliki banyak catatan, tetapi belum tentu berbagi satu gambaran yang dapat dipercaya.",
+      content: `<p>Setiap jenjang HMI menghasilkan data. Nama peserta Latihan Kader dicatat, susunan kepengurusan disimpan, kegiatan dilaporkan, dan keputusan forum dituangkan ke dalam dokumen. Dari Komisariat sampai Pengurus Besar, jejak organisasi sebenarnya terus bertambah.</p><p>Persoalannya muncul ketika catatan tersebut hidup sendiri-sendiri. Komisariat memiliki daftar kadernya, Cabang menyusun rekapitulasi, Badko menerima laporan dari sejumlah wilayah, sedangkan Pengurus Besar melihat angka dalam skala nasional. Semuanya berbicara tentang kader, tetapi belum tentu menggunakan pengertian yang sama.</p><h2>Banyak catatan, belum satu pengetahuan</h2><p>Siapa yang disebut kader aktif? Apakah kehadiran dalam satu kegiatan cukup menjadi ukuran? Bagaimana kompetensi, minat, proses pendampingan, dan ruang pengabdian dicatat? Ketika definisinya berbeda, angka yang sama dapat membawa kesimpulan yang berbeda.</p><p>Akibatnya terasa ketika Rapat Bidang menyusun program, Rapat Presidium menentukan prioritas, Rapat Harian memeriksa pelaksanaan, atau Pleno mengevaluasi satu periode. Forum dapat dipenuhi laporan, tetapi keputusan tetap bertumpu pada gambaran yang tidak utuh.</p><blockquote>Organisasi dapat memiliki banyak data dan tetap tidak mempunyai pengetahuan yang dapat dipercaya.</blockquote><h2>Data sebagai bahasa bersama</h2><p>HMI Evidence tidak berangkat dari keinginan mengumpulkan data sebanyak-banyaknya. Ikhtiarnya adalah membangun bahasa bersama agar pengalaman kader dapat dibaca secara berkelanjutan. Data harus memiliki definisi, konteks, penanggung jawab, serta hubungan yang jelas dengan keputusan organisasi.</p><p>Komisariat memberi makna pada catatan karena berada paling dekat dengan keseharian kader. Cabang membaca pola antarkomisariat dan melihat kebutuhan penguatan. Badko menghubungkan pengalaman antarcabang. Pengurus Besar mengolah pola nasional menjadi arah kebijakan, pedoman, dan dukungan perkaderan.</p><p>Data baru menjadi pengetahuan ketika organisasi dapat menjelaskan apa yang terjadi, mengapa hal itu terjadi, dan keputusan apa yang perlu diambil. Pada titik itulah catatan tidak lagi berhenti sebagai kelengkapan administrasi. Ia menjadi ingatan bersama yang membantu HMI belajar dari dirinya sendiri.</p>`,
+      tag: "HMI Evidence", date: "2026", coverImage: "/scrollytelling/hmi-evidence-01-indonesia-v1.webp", sourceUrl: null, sourceName: null,
+    },
+    {
+      title: "Sesudah Latihan Kader, Ke Mana Perjalanan Mereka Berlanjut?", slug: "sesudah-latihan-kader-ke-mana-perjalanan-berlanjut",
+      excerpt: "Organisasi mengetahui siapa yang mengikuti latihan, tetapi belum selalu mengetahui siapa yang bertumbuh, berhenti, atau membutuhkan pendampingan.",
+      content: `<p>Latihan Kader sering menjadi salah satu peristiwa yang paling diingat dalam perjalanan seorang anggota HMI. Di dalamnya, kader berjumpa dengan nilai, gagasan, sejarah, dan tanggung jawab organisasi. Namun, perkaderan tidak selesai ketika forum ditutup dan peserta kembali ke kampusnya.</p><p>Justru setelah latihan, pertanyaan yang lebih penting dimulai. Apakah kader memperoleh ruang untuk menguji gagasannya? Siapa yang mendampinginya ketika menghadapi persoalan akademik, ekonomi, organisasi, atau kehidupan kampus? Kompetensi apa yang berkembang, dan di bagian mana prosesnya terhenti?</p><h2>Dari daftar alumni menuju perjalanan kader</h2><p>Organisasi umumnya dapat mengetahui jumlah peserta dan alumni latihan. Akan tetapi, jumlah tersebut belum menjelaskan siapa yang tetap aktif, siapa yang menjauh, mengapa mereka berhenti, dan dukungan apa yang sebenarnya mereka perlukan.</p><p>Ketika perjalanan itu tidak terbaca, kader mudah dipandang hanya pada dua keadaan: hadir atau tidak hadir, aktif atau tidak aktif. Padahal, pertumbuhan manusia tidak berlangsung sesederhana itu. Ada kader yang membutuhkan ruang intelektual, ada yang memerlukan pendampingan profesi, ada yang sedang mencari ruang pengabdian, dan ada pula yang belum menemukan hubungan antara HMI dengan kenyataan hidupnya.</p><blockquote>Latihan Kader adalah pintu masuk. Perkaderan adalah perjalanan panjang untuk membina manusia.</blockquote><h2>Organisasi yang hadir setelah forum selesai</h2><p>Komisariat memiliki posisi terdekat untuk mengenali perjalanan tersebut. Percakapan informal, forum kajian, penugasan, ruang karya, dan pendampingan dapat menjadi sumber pengetahuan tentang perkembangan kader. Cabang kemudian membaca pola lintas Komisariat agar dukungan tidak bergantung pada kebetulan atau kedekatan personal.</p><p>Membaca perjalanan kader bukan ikhtiar untuk mengawasi atau membuat peringkat. Bukti digunakan agar organisasi mengetahui kapan harus hadir, bentuk dukungan apa yang dibutuhkan, dan pengalaman mana yang layak diperbaiki atau diteruskan.</p><p>Dengan cara itu, perkaderan bergerak dari kegiatan yang selesai pada jadwal menuju ekosistem yang menjaga pertumbuhan. Lima kualitas Insan Cita tidak hanya disebut sebagai tujuan, tetapi dibina melalui pengalaman yang dapat dirasakan, dibaca, dan dipelajari bersama.</p>`,
+      tag: "HMI Evidence", date: "2026", coverImage: "/scrollytelling/hmi-evidence-02-kelahiran-hmi-v1.webp", sourceUrl: null, sourceName: null,
+    },
+    {
+      title: "Ketika Perkaderan Tidak Lagi Membaca Student Needs dan Student Interest", slug: "perkaderan-student-needs-dan-student-interest",
+      excerpt: "Perkaderan kehilangan relevansi ketika pengalaman yang ditawarkan tidak lagi berhubungan dengan kebutuhan dan ketertarikan mahasiswa hari ini.",
+      content: `<p>Mahasiswa yang datang ke HMI hari ini hidup dalam kenyataan yang berbeda dari generasi sebelumnya. Teknologi mengubah cara belajar dan berkomunikasi. Tekanan akademik, ketidakpastian dunia kerja, persoalan ekonomi, kesehatan mental, serta kebutuhan mengembangkan kompetensi hadir bersamaan dalam kehidupan mereka.</p><p>Di tengah perubahan itu, organisasi tidak cukup hanya mengulang bentuk kegiatan yang pernah dianggap berhasil. Pedoman dapat tetap sama, tetapi pengalaman perkaderan harus terus diperiksa. Tanpa pembacaan yang jernih, HMI berisiko menawarkan jawaban lama kepada mahasiswa yang sedang menghadapi persoalan baru.</p><h2>Mengenali Student Needs dan Student Interest</h2><p>Student Needs membantu organisasi memahami dukungan yang dibutuhkan mahasiswa untuk bertumbuh. Student Interest membantu membaca isu, medium, pengetahuan, dan ruang pengembangan yang membuat mereka bersedia terlibat. Keduanya bukan alasan untuk mengikuti setiap tren, melainkan pintu untuk menghubungkan nilai HMI dengan kenyataan kader.</p><p>Jika Student Needs dan Student Interest tidak hadir dalam Rapat Bidang dan Rapat Kerja, program mudah disusun dari kebiasaan. Jika tidak dibawa ke Rapat Presidium dan Rapat Harian, keputusan mudah bertumpu pada asumsi. Jika tidak dibaca dalam Pleno, evaluasi hanya mengukur apakah kegiatan terlaksana, bukan apakah kader mengalami pertumbuhan.</p><blockquote>Relevansi bukan mengubah tujuan perkaderan. Relevansi memastikan tujuan itu benar-benar bekerja dalam kehidupan mahasiswa.</blockquote><h2>Nilai yang tetap, pengalaman yang terus diperbarui</h2><p>HMI Evidence menempatkan Pedoman Perkaderan dan Tafsir Tujuan sebagai arah. Bukti membantu organisasi memahami jalan yang ditempuh untuk sampai ke arah tersebut. Pengalaman kader didengarkan, perkembangan dibaca, dan hasil program diperiksa agar pembinaan tidak berhenti sebagai niat baik.</p><p>Lima kualitas Insan Cita memerlukan lebih dari penyampaian materi. Kualitas akademis tumbuh melalui tradisi intelektual. Kualitas pencipta berkembang melalui ruang untuk menguji gagasan. Kualitas pengabdi dibina melalui perjumpaan dengan persoalan masyarakat. Nafas Islam dan tanggung jawab sosial hidup ketika nilai hadir dalam pilihan nyata.</p><p>Perkaderan yang relevan bukan perkaderan yang kehilangan identitas. Ia justru menjaga tujuan HMI dengan menghadirkan pengalaman yang mampu menjawab Student Needs dan Student Interest, tanpa melepaskan tanggung jawab kepada umat dan bangsa.</p>`,
+      tag: "HMI Evidence", date: "2026", coverImage: "/scrollytelling/hmi-evidence-03-perubahan-zaman-v1.webp", sourceUrl: null, sourceName: null,
+    },
+    {
+      title: "Ketika Energi Organisasi Lebih Banyak Terserap ke Dalam", slug: "energi-organisasi-terserap-ke-dalam",
+      excerpt: "Dinamika internal adalah bagian dari organisasi, tetapi ia menjadi persoalan ketika lebih dikenal daripada masalah mahasiswa dan masyarakat.",
+      content: `<p>Setiap organisasi memiliki dinamika internal. Perbedaan pandangan, pergantian kepemimpinan, dan kontestasi gagasan merupakan bagian dari proses demokrasi. Persoalan muncul ketika hampir seluruh perhatian, waktu, dan sumber daya organisasi habis untuk mengelola dirinya sendiri.</p><p>Menjelang Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, atau Kongres, peta dukungan dapat dibaca dengan sangat teliti. Nama, delegasi, kekuatan cabang, dan arah konsolidasi diperbarui dari waktu ke waktu. Ketelitian serupa belum selalu digunakan untuk membaca perjalanan kader serta persoalan mahasiswa di sekitar organisasi.</p><blockquote>Kita dapat mengetahui cabang mana mendukung siapa, tetapi belum tentu mengetahui Komisariat mana yang kehilangan kader setelah latihan.</blockquote><h2>Ketika kesibukan tidak lagi sama dengan gerakan</h2><p>Rapat dapat berlangsung berkali-kali, agenda dapat memenuhi kalender, dan struktur dapat terus bergerak. Namun, kesibukan internal tidak dengan sendirinya menghadirkan dampak. Organisasi perlu bertanya apakah energi yang dikeluarkan menghasilkan pertumbuhan kader, pengetahuan baru, dan perubahan yang dirasakan masyarakat.</p><p>Ketika pertanyaan itu tidak hadir, kader menjadi lebih akrab dengan konflik kepengurusan daripada persoalan kampus. Peta dukungan lebih dikenal daripada Student Needs dan Student Interest. Ruang pengabdian menyempit karena organisasi terus-menerus memusatkan pandangan kepada dirinya sendiri.</p><h2>Mengembalikan energi kepada tujuan</h2><p>HMI Evidence tidak meniadakan dinamika politik organisasi. Ikhtiarnya adalah menghadirkan ukuran tanggung jawab yang lebih substantif. Laporan pertanggungjawaban tidak hanya memuat berapa kegiatan yang dilaksanakan, tetapi juga perubahan apa yang terjadi, siapa yang memperoleh manfaat, apa yang tidak bekerja, dan pengetahuan apa yang diwariskan.</p><p>Rapat Bidang perlu memulai program dari masalah yang jelas. Rapat Presidium menimbang pilihan dan akibatnya. Rapat Harian memeriksa kemajuan serta hambatan. Pleno membandingkan tujuan dengan hasil. Rapat Kerja mengarahkan program dan anggaran kepada kebutuhan kader, bukan sekadar mengulang susunan kegiatan.</p><p>Dengan begitu, Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, dan Kongres tidak hanya menjadi ruang pergantian kepemimpinan. Forum tersebut juga menjadi saat bagi organisasi untuk menilai seberapa jauh ia membina kader, menjawab persoalan mahasiswa, dan menghadirkan pengabdian bagi masyarakat.</p><p>Transformasi dimulai ketika energi organisasi kembali diarahkan keluar: dari kontestasi menuju kontribusi, dari kesibukan menuju dampak, dan dari mempertahankan struktur menuju membina manusia.</p>`,
+      tag: "HMI Evidence", date: "2026", coverImage: "/scrollytelling/hmi-evidence-04-lingkaran-organisasi-v1.webp", sourceUrl: null, sourceName: null,
+    },
+  ];
+  for (const seed of noteSeeds) {
+    if (!(await storage.getNote(seed.slug))) await storage.createNote(seed);
+  }
+
+  const legacyCaptions = new Set(["Hormat", "Sejenak menoleh", "Berdiri tenang", "Jeda"]);
+  for (const item of await storage.getGalleryItems()) {
+    if (legacyCaptions.has(item.caption)) await storage.deleteGalleryItem(item.id);
+  }
+  const gallerySeeds = [
+    { image: "/ahmad/portrait-standing.webp", caption: "Ruang pengabdian" },
+    { image: "/ahmad/gallery-01.webp", caption: "Menyampaikan gagasan" },
+    { image: "/ahmad/gallery-02.webp", caption: "Jejak perjalanan" },
+    { image: "/ahmad/portrait-hmi.webp", caption: "Bersama HMI" },
+    { image: "/ahmad/gallery-03.webp", caption: "Percakapan tentang arah" },
+    { image: "/ahmad/gallery-04.webp", caption: "Dokumentasi kegiatan" },
+  ];
+  const existingImages = new Set((await storage.getGalleryItems()).map((item) => item.image));
+  for (const seed of gallerySeeds) {
+    if (!existingImages.has(seed.image)) await storage.createGalleryItem({ ...seed, colSpan: "col-span-1" });
+  }
+
   const pemikiranPage = await storage.getPage("pemikiran-ide");
-  if (!pemikiranPage) {
+  if (!pemikiranPage || pemikiranPage.content.includes("hal-hal yang sedang saya pikirkan")) {
     await storage.upsertPage("pemikiran-ide", {
-      title: "Pemikiran & Ide",
-      content:
-        "<p>Halaman ini berisi hal-hal yang sedang saya pikirkan — sebagian sudah matang, sebagian besar belum.</p><p>Saya percaya bahwa gagasan yang baik tidak perlu diucapkan dengan keras. Ia cukup diletakkan dengan jelas, lalu dibiarkan bekerja pada orang yang membacanya.</p><p>Isi halaman ini akan berubah dari waktu ke waktu.</p>",
+      title: "Gagasan untuk Organisasi yang Terus Belajar",
+      content: "<p>HMI lahir untuk menjawab kebutuhan umat dan bangsa. Tugas itu tidak berubah, tetapi medan pengabdiannya terus bergerak.</p><h2>Menjaga nilai, memperbarui cara</h2><p>Nilai memberi arah. Data membantu kita memahami kenyataan. Keduanya perlu dipertemukan agar setiap keputusan organisasi tidak berhenti sebagai asumsi, melainkan menjadi ikhtiar yang dapat diperiksa dan diperbaiki.</p><blockquote>Transformasi bukan mengganti identitas organisasi. Transformasi adalah memastikan nilai yang sama tetap mampu bekerja dalam zaman yang berubah.</blockquote><h2>Perkaderan sebagai ekosistem</h2><p>Latihan formal harus terhubung dengan pendampingan, ruang karya, pengalaman profesi, dan jalur pengabdian. Dengan ekosistem itu, lima kualitas Insan Cita tidak hanya menjadi rumusan, tetapi tumbuh dalam perjalanan nyata setiap kader.</p><h2>Dari Indonesia untuk dunia</h2><p>Kader HMI harus berakar pada kebutuhan masyarakat Indonesia sekaligus siap memasuki percakapan global. Tujuannya bukan sekadar hadir, melainkan membawa pengetahuan, solusi, dan kepentingan bangsa ke panggung dunia.</p>",
     });
   }
 }

@@ -1,91 +1,51 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { site } from "@/lib/site";
+import { Link } from "wouter";
 
-/**
- * Tentang / Filosofi. Naskah berbasis profil publik dan dapat disunting
- * pemilik situs. Kolom kiri menahan kutipan, kolom kanan menahan narasi —
- * lebar tidak sama, mengikuti komposisi cetak.
- */
-
-const keterangan = [
-  { label: "Lahir", nilai: "Palangka Raya, 14 Agustus 1999" },
-  { label: "Domisili", nilai: "Jakarta Selatan" },
-  { label: "Pendidikan", nilai: "S-2 Magister Akuntansi, PERBANAS Institute" },
-  // Keduanya sama-sama amanah organisasi, jadi didaftar berdampingan di
-  // bawah satu label alih-alih dipisah "Amanah" dan "Organisasi".
-  { label: "Organisasi", nilai: "Ketua Bidang Parekraf PB HMI" },
-  { label: "Organisasi", nilai: "Ketua Bidang Parekraf OIC Youth Indonesia" },
-  { label: "Beasiswa", nilai: "Awardee Beasiswa Unggulan" },
+const facts = [
+  ["Lahir", site.lahir],
+  ["Pendidikan", "Sarjana Ilmu Hukum UIN Alauddin Makassar · Magister Ilmu Hukum Universitas Trisakti"],
+  ["Profesi", site.profesi],
+  ["Amanah", "Wakil Sekretaris Bidang Pariwisata dan Ekonomi Kreatif PB HMI"],
 ];
 
 export default function About() {
   return (
     <section id="tentang" className="border-t border-border py-24 md:py-36">
-      <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="grid gap-14 md:grid-cols-[0.85fr_1.15fr] md:gap-20"
-        >
-          <div>
-            <span className="eyebrow mb-6 block">Tentang</span>
-            {/* Kutipan ini sekaligus judul section — dijadikan h2 agar
-                pembaca layar yang menelusuri per-heading tidak melewati
-                seluruh bagian Tentang. */}
-            <h2 className="font-serif text-2xl leading-snug text-foreground md:text-3xl">
-              fatum brutum,{" "}
-              <br />
-              amor fati
+      <div className="container mx-auto px-6 md:px-10">
+        <div className="grid items-start gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
+          <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="lg:sticky lg:top-32">
+            <span className="eyebrow mb-6 block">Tentang Ahmad</span>
+            <h2 className="font-serif text-4xl leading-tight md:text-5xl">
+              Ditempa dalam kaderisasi. Bertumbuh melalui pengabdian.
             </h2>
-            <div className="mt-7 h-px w-16 bg-accent" />
-          </div>
+            <div className="mt-8 h-px w-20 bg-accent" />
+          </motion.div>
 
-          <div>
-            <p className="measure mb-6 text-lg text-muted-foreground">
-              Takdir berjalan tanpa diminta, dan tugas kita adalah mencintainya.
-              Kalimat itu yang saya bawa ke mana-mana.
+          <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
+            <p className="measure text-xl leading-relaxed text-foreground md:text-2xl">
+              Bagi Ahmad Zulfikar, organisasi bukan hanya ruang mengambil peran, tetapi tempat membina diri, merawat gagasan, dan menghadirkan manfaat bagi sesama.
             </p>
-            <p className="measure mb-6 text-lg text-muted-foreground">
-              Saya Ghina, lahir dan tumbuh di Palangka Raya, Kalimantan Tengah,
-              dan kini berdomisili di Jakarta Selatan. Lulusan Sarjana Ekonomi
-              dari IAIN Palangka Raya, sedang menempuh Magister Akuntansi di
-              PERBANAS Institute.
-            </p>
-            <p className="measure mb-6 text-lg text-muted-foreground">
-              Sejak 2017 saya bergerak bersama HMI dan KOHATI, dari komisariat
-              sampai pengurus besar. Sekarang memegang Bidang Pariwisata dan
-              Ekonomi Kreatif di PB HMI.
-            </p>
-            <p className="measure mb-12 text-lg text-muted-foreground">
-              Sebagian besar yang saya kerjakan berpusat pada satu hal:
-              mendengarkan, lalu menuliskannya kembali dengan lebih jernih.
-              Situs ini tempat tulisan-tulisan itu disimpan.
+            <p className="measure mt-7 text-base text-muted-foreground">
+              Perjalanannya dari Komisariat, Cabang, Badko, hingga Pengurus Besar mempertemukan kaderisasi dengan pendidikan hukum, advokasi pekerja, kebijakan strategis, dan tanggung jawab publik.
             </p>
 
-            <dl className="border-t border-border">
-              {keterangan.map((item, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col gap-1 border-b border-border py-4 sm:flex-row sm:items-baseline sm:gap-8"
-                >
-                  <dt className="eyebrow sm:w-32 sm:shrink-0">{item.label}</dt>
-                  <dd className="text-base text-foreground">{item.nilai}</dd>
+            <dl className="mt-12 border-t border-border">
+              {facts.map(([label, value]) => (
+                <div key={label} className="grid gap-2 border-b border-border py-5 sm:grid-cols-[8rem_1fr]">
+                  <dt className="eyebrow pt-1">{label}</dt>
+                  <dd className="text-sm leading-relaxed text-foreground md:text-base">{value}</dd>
                 </div>
               ))}
             </dl>
 
-            <a
-              href="/tentang"
-              className="group mt-10 inline-flex items-center gap-3 text-sm text-primary transition-colors hover:text-foreground"
-              data-testid="link-riwayat-lengkap"
-            >
-              Riwayat lengkap
-              <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
-            </a>
-          </div>
-        </motion.div>
+            <Link href="/tentang" className="group mt-10 inline-flex items-center gap-3 text-sm font-medium text-primary">
+              Profil, visi, dan rekam jejak
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,69 +1,51 @@
-import { motion } from "framer-motion";
-import potretUtama from "@/assets/potret-utama.webp";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { useRef } from "react";
+import { Link } from "wouter";
 import { site } from "@/lib/site";
 
-/**
- * Pembuka: satu pernyataan singkat, satu foto, satu ajakan.
- * Kolom sengaja tidak sama lebar (1.05fr / 0.95fr) mengikuti komposisi
- * cetak asimetris.
- */
 export default function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+  const fade = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+
   return (
-    <section
-      id="hero"
-      className="flex min-h-screen flex-col pt-24 md:grid md:grid-cols-[1.05fr_0.95fr] md:pt-0"
-    >
-      <div className="order-2 flex flex-col justify-center px-6 py-16 md:order-1 md:px-16 lg:px-24">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: "easeOut" }}
-        >
-          <span className="eyebrow mb-6 block">
-            Catatan &middot; Pemikiran &middot; Aktivitas
-          </span>
+    <section ref={ref} id="hero" className="relative min-h-[108vh] overflow-hidden bg-[hsl(var(--evidence))] text-white">
+      <motion.img src="/ahmad/hero.webp" alt={`Potret ${site.nama}`} style={{ y: imageY }} className="hero-portrait absolute inset-0 h-[66%] w-full object-cover object-[46%_center] md:h-[108%] md:object-center" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/35 to-black/10 md:from-black/90 md:via-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--evidence))] via-transparent to-black/30" />
 
-          <h1 className="mb-8 font-serif text-4xl leading-[1.15] text-foreground md:text-5xl lg:text-6xl">
-            {/* Spasi eksplisit: JSX membuang whitespace di sekitar <br/>,
-                sehingga nama terbaca menyatu oleh pembaca layar. */}
-            {site.namaDepan}{" "}
-            <br />
-            {site.namaBelakang}
-          </h1>
+      <motion.div style={{ y: copyY, opacity: fade }} className="container relative z-10 mx-auto flex min-h-screen items-end px-6 pb-20 pt-32 md:items-center md:px-10 md:pb-0">
+        <div className="max-w-3xl">
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="evidence-kicker mb-6">
+            {site.kandidat}
+          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.08 }} className="text-shadow-cinematic font-serif text-5xl leading-[0.95] md:text-7xl lg:text-[6.5rem]">
+            Ahmad<br />Zulfikar
+          </motion.h1>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 1 }} className="mt-8 max-w-xl border-l border-[hsl(var(--gold))] pl-6">
+            <p className="text-xl leading-relaxed text-white/88 md:text-2xl">
+              Transformasi gerakan organisasi berbasis bukti.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-white/60">
+              Untuk HMI yang mampu belajar dari kenyataan, menjaga pengetahuan, dan menciptakan masa depan.
+            </p>
+          </motion.div>
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link href="/hmi-evidence" className="inline-flex items-center gap-2 bg-[hsl(var(--gold))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--evidence))] transition-transform hover:-translate-y-0.5">
+              Jelajahi HMI Evidence <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link href="/tentang" className="inline-flex items-center border border-white/40 px-6 py-3 text-xs uppercase tracking-[0.16em] text-white hover:border-white">
+              Tentang Ahmad
+            </Link>
+          </div>
+        </div>
+      </motion.div>
 
-          <p className="measure mb-10 text-lg text-muted-foreground">
-            Ruang tenang untuk menulis dan membaca — tempat pemikiran, catatan,
-            dan perjalanan disimpan dengan sederhana.
-          </p>
-
-          <a
-            href="#pemikiran"
-            className="inline-flex w-fit items-center border border-foreground px-8 py-4 text-xs uppercase tracking-[0.18em] text-foreground transition-colors duration-500 hover:bg-foreground hover:text-background"
-            data-testid="link-cta-hero"
-          >
-            Baca Tulisan
-          </a>
-
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: 64 }}
-            transition={{ duration: 1.4, delay: 0.5, ease: "easeOut" }}
-            className="mt-16 h-px bg-accent"
-          />
-        </motion.div>
-      </div>
-
-      <div className="order-1 h-[58vh] overflow-hidden bg-muted md:order-2 md:h-screen">
-        <motion.img
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.6, ease: "easeOut" }}
-          src={potretUtama}
-          alt={`Potret ${site.nama}`}
-          width={1600}
-          height={2400}
-          className="h-full w-full object-cover object-top"
-        />
+      <div className="absolute bottom-7 right-7 z-10 hidden items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/55 md:flex">
+        Gulir untuk mulai <ArrowDown className="h-4 w-4 animate-bounce" />
       </div>
     </section>
   );
