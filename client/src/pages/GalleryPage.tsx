@@ -7,6 +7,7 @@ import SiteFooter from "@/components/sections/SiteFooter";
 
 type GalleryPhoto = {
   src: string;
+  fullSrc?: string;
   alt: string;
   className: string;
   position?: string;
@@ -14,7 +15,7 @@ type GalleryPhoto = {
 
 const photos: GalleryPhoto[] = [
   { src: "/ahmad/standing-centered.webp", alt: "Ahmad Zulfikar berdiri mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
-  { src: "/ahmad/gallery-02.webp?v=oriented", alt: "Potret Ahmad Zulfikar mengenakan batik", className: "md:col-span-4 md:aspect-[4/5]" },
+  { src: "/ahmad/gallery-02.webp?v=oriented", fullSrc: "/ahmad/gallery-02-cropped.webp", alt: "Potret Ahmad Zulfikar mengenakan batik", className: "md:col-span-4 md:aspect-[4/5]" },
   { src: "/ahmad/profile-centered.webp", alt: "Ahmad Zulfikar duduk mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
   { src: "/ahmad/gallery-01.webp", alt: "Ahmad Zulfikar berbicara dalam sesi dokumentasi", className: "md:col-span-6 md:aspect-video" },
   { src: "/ahmad/gallery-03.webp", alt: "Ahmad Zulfikar dalam sesi wawancara", className: "md:col-span-6 md:aspect-video" },
@@ -88,7 +89,7 @@ export default function GalleryPage() {
         {selected !== null && (
           <motion.div className="fixed inset-0 z-[220] grid place-items-center bg-[#03100c] p-4 pb-[calc(80px+env(safe-area-inset-bottom))] pt-16 text-white md:p-10" initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label={`Foto ${selected + 1} dari ${photos.length}`}>
             <button type="button" className="absolute right-4 top-4 grid h-11 w-11 place-items-center border border-white/20 bg-white/5" onClick={() => setSelected(null)} aria-label="Tutup foto"><X className="h-5 w-5" /></button>
-            <motion.img key={photos[selected].src} src={photos[selected].src} alt={photos[selected].alt} className="max-h-full max-w-full object-contain" initial={reducedMotion ? false : { opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0.01 : .35 }} />
+            <motion.img key={photos[selected].fullSrc ?? photos[selected].src} src={photos[selected].fullSrc ?? photos[selected].src} alt={photos[selected].alt} className="max-h-full max-w-full object-contain" initial={reducedMotion ? false : { opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0.01 : .35 }} />
             <button type="button" className="absolute bottom-[calc(18px+env(safe-area-inset-bottom))] left-4 grid h-11 w-11 place-items-center border border-white/20 bg-white/5 md:bottom-auto md:top-1/2" onClick={() => move(-1)} aria-label="Foto sebelumnya"><ChevronLeft className="h-5 w-5" /></button>
             <span className="absolute bottom-[calc(31px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 font-serif text-sm text-[#e2cb8e]">{String(selected + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
             <button type="button" className="absolute bottom-[calc(18px+env(safe-area-inset-bottom))] right-4 grid h-11 w-11 place-items-center border border-white/20 bg-white/5 md:bottom-auto md:top-1/2" onClick={() => move(1)} aria-label="Foto berikutnya"><ChevronRight className="h-5 w-5" /></button>
