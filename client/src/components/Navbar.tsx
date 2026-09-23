@@ -1,12 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { FileText, Home as HomeIcon, Images, Menu, Sparkles, UserRound, X } from "lucide-react";
+import { FileText, Home as HomeIcon, Images, Menu, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
 
 const navLinks = [
   { name: "Beranda", href: "/", icon: HomeIcon },
-  { name: "HMI Evidence", shortName: "Evidence", href: "/hmi-evidence", icon: Sparkles },
+  { name: "HMI Evidence", shortName: "Evidence", href: "/hmi-evidence", icon: null },
   { name: "Tentang", href: "/tentang", icon: UserRound },
   { name: "Galeri", href: "/galeri", icon: Images },
   { name: "Catatan", href: "/catatan", icon: FileText },
@@ -65,7 +65,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
           const evidence = link.href === "/hmi-evidence";
           return (
             <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`${active ? "is-active" : ""} ${evidence ? "is-evidence" : ""}`}>
-              <span><Icon aria-hidden="true" /></span>
+              <span>{Icon ? <Icon aria-hidden="true" /> : <img className="mobile-hmi-logo" src="/favicon.svg?v=2" alt="" aria-hidden="true" />}</span>
               <small>{link.shortName ?? link.name}</small>
             </Link>
           );

@@ -602,6 +602,13 @@ html {
     border-radius: 50%;
   }
   .mobile-bottom-nav svg { width: 17px; height: 17px; }
+  .mobile-bottom-nav .mobile-hmi-logo {
+    display: block;
+    width: 21px;
+    height: 21px;
+    border-radius: 5px;
+    filter: drop-shadow(0 0 7px rgb(231 199 116 / .2));
+  }
   .mobile-bottom-nav small {
     max-width: 100%;
     overflow: hidden;
@@ -622,6 +629,7 @@ html {
     box-shadow: 0 0 9px #e4ca87;
   }
   .mobile-bottom-nav a.is-evidence { color: #e4ca87; }
+  .mobile-bottom-nav a.is-evidence > span { border-radius: 7px; }
   .mobile-bottom-nav a.is-evidence > span::before {
     content: "";
     position: absolute;
