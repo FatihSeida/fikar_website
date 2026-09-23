@@ -5,7 +5,14 @@ import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
 
-const photos = [
+type GalleryPhoto = {
+  src: string;
+  alt: string;
+  className: string;
+  position?: string;
+};
+
+const photos: GalleryPhoto[] = [
   { src: "/ahmad/standing-centered.webp", alt: "Ahmad Zulfikar berdiri mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
   { src: "/ahmad/gallery-02.webp?v=oriented", alt: "Potret Ahmad Zulfikar mengenakan batik", className: "md:col-span-4 md:aspect-[4/5]" },
   { src: "/ahmad/profile-centered.webp", alt: "Ahmad Zulfikar duduk mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
@@ -18,6 +25,17 @@ const photos = [
   { src: "/ahmad/journey-hmi-tv.webp", alt: "Ahmad Zulfikar menyampaikan laporan dalam forum nasional HMI", className: "md:col-span-6 md:aspect-video" },
   { src: "/ahmad/journey-court-wide.webp", alt: "Ahmad Zulfikar bersama tim dalam kegiatan advokasi", className: "md:col-span-6 md:aspect-video" },
   { src: "/ahmad/journey-court-detail.webp", alt: "Ahmad Zulfikar dalam kegiatan profesi hukum", className: "md:col-span-12 md:aspect-[21/9]" },
+  { src: "/ahmad/gallery-forum-integritas.webp", alt: "Ahmad Zulfikar berbicara dalam forum integritas organisasi", className: "md:col-span-4 md:aspect-square", position: "70% center" },
+  { src: "/ahmad/gallery-diskusi-komunitas.webp", alt: "Ahmad Zulfikar berdiskusi bersama komunitas", className: "md:col-span-4 md:aspect-square", position: "center center" },
+  { src: "/ahmad/gallery-forum-profesi.webp", alt: "Ahmad Zulfikar menyampaikan pandangan dalam forum profesi", className: "md:col-span-4 md:aspect-square", position: "60% center" },
+  { src: "/ahmad/gallery-aksi-mahasiswa.webp", alt: "Ahmad Zulfikar dalam aksi mahasiswa", className: "md:col-span-4 md:aspect-[4/5]", position: "42% center" },
+  { src: "/ahmad/gallery-aksi-advokasi.webp", alt: "Ahmad Zulfikar dalam aksi advokasi", className: "md:col-span-4 md:aspect-[4/5]", position: "36% center" },
+  { src: "/ahmad/gallery-intermediate-training.webp", alt: "Ahmad Zulfikar dalam kegiatan Intermediate Training HMI", className: "md:col-span-4 md:aspect-[4/5]", position: "center 34%" },
+  { src: "/ahmad/gallery-kebersamaan-komunitas.webp", alt: "Ahmad Zulfikar bersama peserta pertemuan komunitas", className: "md:col-span-6 md:aspect-video", position: "center 48%" },
+  { src: "/ahmad/gallery-diskusi-terbuka.webp", alt: "Ahmad Zulfikar memandu diskusi terbuka", className: "md:col-span-6 md:aspect-video", position: "center 54%" },
+  { src: "/ahmad/gallery-forum-warga.webp", alt: "Suasana forum dialog bersama warga", className: "md:col-span-6 md:aspect-video", position: "center center" },
+  { src: "/ahmad/gallery-forum-organisasi.webp", alt: "Ahmad Zulfikar bersama peserta forum organisasi", className: "md:col-span-6 md:aspect-video", position: "center center" },
+  { src: "/ahmad/gallery-rapat-dengar-pendapat.webp", alt: "Ahmad Zulfikar menyampaikan pandangan dalam rapat dengar pendapat", className: "md:col-span-12 md:aspect-[21/9]", position: "center 42%" },
 ];
 
 export default function GalleryPage() {
@@ -56,7 +74,7 @@ export default function GalleryPage() {
           {photos.map((photo, index) => (
             <motion.figure key={photo.src} initial={reducedMotion ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ delay: (index % 3) * 0.06, duration: reducedMotion ? 0.01 : 0.8 }} className={`group aspect-[4/5] min-w-[82vw] snap-center overflow-hidden bg-[hsl(var(--evidence))] md:min-w-0 ${photo.className}`}>
               <button type="button" className="relative h-full w-full" onClick={() => setSelected(index)} aria-label={`Buka foto ${index + 1}: ${photo.alt}`}>
-                <img src={photo.src} alt={photo.alt} loading={index > 1 ? "lazy" : "eager"} className="h-full w-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.025]" />
+                <img src={photo.src} alt={photo.alt} loading={index > 1 ? "lazy" : "eager"} className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.025]" style={{ objectPosition: photo.position ?? "center" }} />
                 <span className="absolute bottom-3 right-3 border border-white/25 bg-black/35 px-3 py-2 text-[9px] uppercase tracking-[0.12em] text-white backdrop-blur md:hidden">Lihat penuh</span>
               </button>
             </motion.figure>
