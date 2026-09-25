@@ -9,6 +9,25 @@ import "@/styles/evidence.css";
 type Scene = (typeof evidenceStory)[number];
 type HistoryMoment = (typeof historyMoments)[number];
 
+type CameraProfile = {
+  focusX: number;
+  focusY: number;
+  zoom: number;
+  panX: number;
+  panY: number;
+};
+
+const historyIntroCamera: CameraProfile = { focusX: 62, focusY: 49, zoom: 1.62, panX: -1, panY: -2 };
+const historyReflectionCamera: CameraProfile = { focusX: 55, focusY: 66, zoom: 1.66, panX: 1, panY: -2 };
+const sceneCameraProfiles: readonly CameraProfile[] = [
+  historyIntroCamera,
+  { focusX: 68, focusY: 53, zoom: 1.58, panX: -2, panY: -2 },
+  { focusX: 57, focusY: 51, zoom: 1.62, panX: 1, panY: -2 },
+  { focusX: 76, focusY: 49, zoom: 1.66, panX: -2, panY: -2 },
+  { focusX: 50, focusY: 55, zoom: 1.58, panX: 1, panY: -2 },
+  { focusX: 72, focusY: 55, zoom: 1.68, panX: -2, panY: -2 },
+];
+
 const italicTerms = new Set(["Student Needs", "Student Interest", "evidence-based", "insight"]);
 
 function StoryText({ children }: { children: string }) {
@@ -207,10 +226,15 @@ function DesktopHistoryLayer({
   activeBeat: number;
 }) {
   const scene = evidenceStory[0];
+  const visual = kind === "intro"
+    ? { ...historyIntroCamera, src: storyImage(scene.image) }
+    : kind === "reflection"
+      ? { ...historyReflectionCamera, src: storyImage("06-masa-depan") }
+      : { ...moment, src: historyImage(moment.image) };
   const opacity = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.1, beatIndex + 0.86, beatIndex + 1.12], [beatIndex === 0 ? 1 : 0, 1, 1, 0]);
-  const scale = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [1.025, 1.16]);
-  const x = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [`${moment.panX * -0.45}%`, `${moment.panX * 0.45}%`]);
-  const cameraY = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], [`${moment.panY * -0.22}%`, `${moment.panY * 0.22}%`]);
+  const scale = useTransform(phase, [beatIndex - 0.12, beatIndex + 0.08, beatIndex + 0.78, beatIndex + 1.12], [1.025, 1.08, visual.zoom, visual.zoom * 1.04]);
+  const x = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], ["0%", `${visual.panX}%`]);
+  const cameraY = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], ["0%", `${visual.panY}%`]);
   const filter = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.09, beatIndex + 0.9, beatIndex + 1.1], ["blur(7px)", "blur(0px)", "blur(0px)", "blur(7px)"]);
   const copyY = useTransform(phase, [beatIndex, beatIndex + 0.22, beatIndex + 1], [24, 0, -18]);
   const active = activeBeat === beatIndex;
@@ -224,9 +248,9 @@ function DesktopHistoryLayer({
     >
       <motion.img
         className="story-landscape"
-        src={historyImage(moment.image)}
+        src={visual.src}
         alt=""
-        style={{ scale, x, y: cameraY, filter }}
+        style={{ scale, x, y: cameraY, filter, transformOrigin: `${visual.focusX}% ${visual.focusY}%` }}
         decoding="async"
       />
       <div className="story-shade" />
@@ -271,18 +295,11 @@ function StoryLayer({
   activeBeat: number;
   isLast: boolean;
 }) {
-  const camera = [
-    { scale: [1.03, 1.18], x: ["0%", "-2%"], y: ["0%", "1.5%"] },
-    { scale: [1.24, 1.08], x: ["3%", "0%"], y: ["1%", "0%"] },
-    { scale: [1.13, 1.035], x: ["-3%", "0%"], y: ["0%", "-1%"] },
-    { scale: [1.2, 1.06], x: ["4%", "0%"], y: ["1%", "0%"] },
-    { scale: [1.06, 1.14], x: ["0%", "-2%"], y: ["0%", "1%"] },
-    { scale: [1.18, 1.005], x: ["2%", "0%"], y: ["1%", "0%"] },
-  ][sceneIndex];
+  const camera = sceneCameraProfiles[sceneIndex];
   const opacity = useTransform(phase, [beatIndex - 0.16, beatIndex + 0.12, beatIndex + 0.84, beatIndex + 1.12], [0, 1, 1, isLast ? 1 : 0]);
-  const scale = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.scale);
-  const x = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.x);
-  const cameraY = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], camera.y);
+  const scale = useTransform(phase, [beatIndex - 0.15, beatIndex + 0.08, beatIndex + 0.78, beatIndex + 1.15], [1.025, 1.08, camera.zoom, camera.zoom * 1.04]);
+  const x = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], ["0%", `${camera.panX}%`]);
+  const cameraY = useTransform(phase, [beatIndex - 0.15, beatIndex + 1.15], ["0%", `${camera.panY}%`]);
   const filter = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.1, beatIndex + 0.9, beatIndex + 1.1], ["blur(8px)", "blur(0px)", "blur(0px)", "blur(8px)"]);
   const y = useTransform(phase, [beatIndex, beatIndex + 0.2, beatIndex + 1], [22, 0, -18]);
   const symbolY = useTransform(phase, [beatIndex, beatIndex + 1], [35, -35]);
@@ -290,7 +307,7 @@ function StoryLayer({
   const active = activeBeat === beatIndex;
   return (
     <motion.section className={`story-layer story-layer-${sceneIndex}`} style={{ opacity, visibility: Math.abs(activeBeat - beatIndex) <= 1 ? "visible" : "hidden" }} aria-hidden={!active} aria-label={scene.label}>
-      <motion.img className="story-landscape" src={storyImage(scene.image)} alt="" style={{ scale, x, y: cameraY, filter, objectPosition: scene.position }} decoding="async" />
+      <motion.img className="story-landscape" src={storyImage(scene.image)} alt="" style={{ scale, x, y: cameraY, filter, objectPosition: scene.position, transformOrigin: `${camera.focusX}% ${camera.focusY}%` }} decoding="async" />
       <div className="story-shade" />
       <motion.div className="story-symbol" style={{ y: symbolY }} aria-hidden="true">{scene.symbol}</motion.div>
       {sceneIndex === 2 && <><KnowledgeFragments active={active} /><OrganizationFlow active={active} /></>}
@@ -354,20 +371,45 @@ const mobileScenePans = [
   { x: 4, y: -7 },
 ] as const;
 
+const mobileHistoryVisuals = [
+  {
+    key: "history-intro",
+    src: storyImage(evidenceStory[0].image),
+    period: "1947 sampai Reformasi",
+    ...historyIntroCamera,
+  },
+  ...historyMoments.map(moment => ({
+    key: moment.image,
+    src: historyImage(moment.image),
+    period: moment.years,
+    focusX: moment.focusX,
+    focusY: moment.focusY,
+    zoom: moment.zoom,
+    panX: moment.panX,
+    panY: moment.panY,
+  })),
+  {
+    key: "history-reflection",
+    src: storyImage("06-masa-depan"),
+    period: "Dari sejarah menuju hari ini",
+    ...historyReflectionCamera,
+  },
+];
+
 function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number; activeStep: number }) {
   const scene = evidenceStory[0];
-  const activeHistory = Math.min(historyMoments.length - 1, Math.max(0, activeStep - 1));
+  const activeHistory = Math.min(mobileHistoryVisuals.length - 1, Math.max(0, activeStep));
   const routineStep = historyMoments.length + 1;
   const bridgeStep = historyMoments.length + 2;
 
   return (
     <section className={`mobile-story-chapter mobile-history-chapter ${activeScene === 0 ? "is-active" : ""}`} id="mobile-chapter-1" aria-label="Bab 1: HMI dari masa ke masa">
       <div className="mobile-scene-background mobile-history-background" aria-hidden="true">
-        {historyMoments.map((moment, index) => (
+        {mobileHistoryVisuals.map((visual, index) => (
           <img
             className={activeHistory === index ? "is-active" : ""}
-            key={moment.image}
-            src={historyImage(moment.image)}
+            key={visual.key}
+            src={visual.src}
             alt=""
             loading={index === 0 ? "eager" : "lazy"}
             decoding="async"
@@ -375,11 +417,11 @@ function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number
         ))}
         <div className="mobile-scene-shade" />
         <div className="mobile-scene-depth"><i /><i /><i /></div>
-        <div className="mobile-history-period"><span>{historyMoments[activeHistory].years}</span><i /></div>
+        <div className="mobile-history-period"><span>{mobileHistoryVisuals[activeHistory].period}</span><i /></div>
       </div>
 
       <div className="mobile-scene-sequence">
-        <article className="mobile-story-step mobile-narrative-step mobile-history-intro" data-mobile-step data-scene="0" data-step="0" data-pan-x={historyMoments[0].panX} data-pan-y={historyMoments[0].panY}>
+        <article className="mobile-story-step mobile-narrative-step mobile-history-intro" data-mobile-step data-scene="0" data-step="0" data-pan-x={historyIntroCamera.panX} data-pan-y={historyIntroCamera.panY} data-camera-origin-x={historyIntroCamera.focusX} data-camera-origin-y={historyIntroCamera.focusY} data-camera-start="1.025" data-camera-zoom={historyIntroCamera.zoom}>
           <div className="mobile-story-card">
             <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
             <h2 className="mobile-story-title is-long"><StoryText>{scene.title}</StoryText></h2>
@@ -397,6 +439,10 @@ function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number
             data-step={index + 1}
             data-pan-x={moment.panX}
             data-pan-y={moment.panY}
+            data-camera-origin-x={moment.focusX}
+            data-camera-origin-y={moment.focusY}
+            data-camera-start="1.025"
+            data-camera-zoom={moment.zoom}
             key={moment.years}
           >
             <div className="mobile-history-card">
@@ -407,7 +453,7 @@ function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number
           </article>
         ))}
 
-        <article className="mobile-story-step mobile-history-step mobile-history-reflection" data-mobile-step data-scene="0" data-step={routineStep} data-pan-x="3" data-pan-y="-9">
+        <article className="mobile-story-step mobile-history-step mobile-history-reflection" data-mobile-step data-scene="0" data-step={routineStep} data-pan-x={historyReflectionCamera.panX} data-pan-y={historyReflectionCamera.panY} data-camera-origin-x={historyReflectionCamera.focusX} data-camera-origin-y={historyReflectionCamera.focusY} data-camera-start="1.025" data-camera-zoom={historyReflectionCamera.zoom}>
           <div className="mobile-history-card">
             <span className="mobile-step-label">Dari sejarah menuju hari ini</span>
             <h3>Pergulatan berubah bentuk. Kerja organisasi terus berulang.</h3>
@@ -417,7 +463,7 @@ function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number
           </div>
         </article>
 
-        <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene="0" data-step={bridgeStep} data-pan-x="-2" data-pan-y="-10">
+        <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene="0" data-step={bridgeStep} data-pan-x={historyReflectionCamera.panX} data-pan-y={historyReflectionCamera.panY - 1} data-camera-origin-x={historyReflectionCamera.focusX} data-camera-origin-y={historyReflectionCamera.focusY} data-camera-start="1.42" data-camera-zoom="1.8">
           <div className="mobile-bridge-card">
             <span className="mobile-step-label">Yang perlu dibawa</span>
             <p><StoryText>{scene.bridge}</StoryText></p>
@@ -470,9 +516,17 @@ function MobileCinematicStory() {
         const travel = (stepProgress - 0.5) * 2;
         const panX = Number(element.dataset.panX ?? mobileScenePans[nextScene]?.x ?? 0);
         const panY = Number(element.dataset.panY ?? mobileScenePans[nextScene]?.y ?? -5);
+        const originX = Number(element.dataset.cameraOriginX ?? 50);
+        const originY = Number(element.dataset.cameraOriginY ?? 50);
+        const startScale = Number(element.dataset.cameraStart ?? 1.025);
+        const endScale = Number(element.dataset.cameraZoom ?? 1.62);
+        const zoomProgress = Math.min(1, Math.max(0, (stepProgress - 0.18) / 0.58));
+        const easedZoom = 1 - Math.pow(1 - zoomProgress, 3);
         root.style.setProperty("--mobile-camera-x", `${travel * panX}%`);
         root.style.setProperty("--mobile-camera-y", `${travel * panY}%`);
-        root.style.setProperty("--mobile-camera-scale", `${1.04 + stepProgress * 0.15}`);
+        root.style.setProperty("--mobile-camera-origin-x", `${originX}%`);
+        root.style.setProperty("--mobile-camera-origin-y", `${originY}%`);
+        root.style.setProperty("--mobile-camera-scale", `${startScale + (endScale - startScale) * easedZoom}`);
       }
       setActiveScene(nextScene);
       setActiveStep(nextStep);
@@ -504,6 +558,7 @@ function MobileCinematicStory() {
       {evidenceStory.slice(1).map((scene, storyIndex) => {
         const index = storyIndex + 1;
         const pan = mobileScenePans[index];
+        const camera = sceneCameraProfiles[index];
         return (
         <section className={`mobile-story-chapter ${activeScene === index ? "is-active" : ""}`} key={scene.label} id={`mobile-chapter-${index + 1}`} aria-label={`Bab ${index + 1}: ${scene.label}`}>
           <div className="mobile-scene-background" aria-hidden="true">
@@ -513,7 +568,7 @@ function MobileCinematicStory() {
           </div>
 
           <div className="mobile-scene-sequence">
-            <article className="mobile-story-step mobile-narrative-step" data-mobile-step data-scene={index} data-step="0" data-pan-x={pan.x} data-pan-y={pan.y}>
+            <article className="mobile-story-step mobile-narrative-step" data-mobile-step data-scene={index} data-step="0" data-pan-x={pan.x / 2} data-pan-y={pan.y / 2} data-camera-origin-x={camera.focusX} data-camera-origin-y={camera.focusY} data-camera-start="1.025" data-camera-zoom={camera.zoom - 0.28}>
               <div className="mobile-story-card">
                 <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
                 <h2 className={`mobile-story-title ${scene.title.length > 85 ? "is-long" : ""}`}><StoryText>{scene.title}</StoryText></h2>
@@ -522,7 +577,7 @@ function MobileCinematicStory() {
               </div>
             </article>
 
-            <article className="mobile-story-step mobile-visual-step" data-mobile-step data-scene={index} data-step="1" data-pan-x={-pan.x} data-pan-y={pan.y - 2}>
+            <article className="mobile-story-step mobile-visual-step" data-mobile-step data-scene={index} data-step="1" data-pan-x={-pan.x / 2} data-pan-y={pan.y / 2 - 1} data-camera-origin-x={camera.focusX} data-camera-origin-y={camera.focusY} data-camera-start={camera.zoom - 0.4} data-camera-zoom={camera.zoom}>
               <div className="mobile-visual-card">
                 <span className="mobile-step-label">Baca visual</span>
                 <h3>{mobileDiagramCopy[index].title}</h3>
@@ -531,7 +586,7 @@ function MobileCinematicStory() {
               </div>
             </article>
 
-            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2" data-pan-x={pan.x / 2} data-pan-y={pan.y - 4}>
+            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2" data-pan-x={pan.x / 3} data-pan-y={pan.y / 2 - 1.5} data-camera-origin-x={camera.focusX} data-camera-origin-y={camera.focusY} data-camera-start={camera.zoom - 0.2} data-camera-zoom={camera.zoom + 0.14}>
               <div className="mobile-bridge-card">
                 <span className="mobile-step-label">Yang perlu dibawa</span>
                 <p><StoryText>{scene.bridge}</StoryText></p>

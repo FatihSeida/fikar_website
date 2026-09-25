@@ -17,6 +17,9 @@ export type HistoryMoment = {
   body: string;
   image: string;
   focus: string;
+  focusX: number;
+  focusY: number;
+  zoom: number;
   panX: number;
   panY: number;
 };
@@ -29,8 +32,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Pada tahun-tahun awalnya, HMI tumbuh di tengah Revolusi Kemerdekaan. Kader dan mahasiswa membantu perjuangan sebagai penghubung, tenaga penerangan, relawan, serta anggota Corps Mahasiswa ketika Agresi Militer Belanda dan Peristiwa Madiun menguji Republik.",
     image: "hmi-1947-1949",
     focus: "Relawan mahasiswa meninggalkan ruang belajar untuk membantu perjuangan Republik",
-    panX: -5,
-    panY: -7,
+    focusX: 70,
+    focusY: 43,
+    zoom: 1.75,
+    panX: -2,
+    panY: -3,
   },
   {
     years: "1950–1963",
@@ -38,8 +44,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Sesudah pengakuan kedaulatan, HMI memperluas cabang, menyusun metode training, menerbitkan media, dan menegaskan independensinya. Proses itu berlangsung ketika arus Islam, nasionalisme, dan komunisme berkompetisi menentukan arah kehidupan nasional.",
     image: "hmi-1950-1963",
     focus: "Kader berdiskusi, mencetak media, dan menghubungkan cabang-cabang HMI",
-    panX: 5,
-    panY: -6,
+    focusX: 58,
+    focusY: 54,
+    zoom: 1.68,
+    panX: 2,
+    panY: -2,
   },
   {
     years: "1964–1965",
@@ -47,8 +56,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Kampanye pembubaran HMI bergerak terbuka melalui PKI, CGMI, dan kelompok-kelompok sekutunya. Di tengah tekanan itu, HMI bertahan bersama solidaritas pemuda dan mahasiswa Islam yang berhimpun dalam pembelaan terhadap keberadaan organisasi.",
     image: "hmi-1964-1965",
     focus: "Kader HMI bertahan di tengah arus kampanye pembubaran organisasi",
-    panX: -6,
-    panY: -8,
+    focusX: 46,
+    focusY: 46,
+    zoom: 1.66,
+    panX: -2,
+    panY: -3,
   },
   {
     years: "1965–1968",
@@ -56,8 +68,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Sesudah G30S 1965, kader HMI ikut membentuk Kesatuan Aksi Mahasiswa Indonesia. Gelombang Angkatan '66 dan Tritura membawa mahasiswa ke jalan, sekaligus menempatkan mereka di tengah peralihan kekuasaan dari Orde Lama menuju Orde Baru.",
     image: "hmi-1965-1968",
     focus: "Mahasiswa menyuarakan Tritura melalui mimbar jalanan dan gerak massa",
-    panX: 7,
-    panY: -9,
+    focusX: 24,
+    focusY: 48,
+    zoom: 1.72,
+    panX: 3,
+    panY: -3,
   },
   {
     years: "1970–1986",
@@ -65,8 +80,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Pembaruan pemikiran Islam memperoleh ruang di lingkungan HMI, sementara kekuasaan Orde Baru semakin terkonsolidasi. Undang-Undang Nomor 8 Tahun 1985 dan Kongres HMI ke-16 di Padang pada 1986 membawa perdebatan asas organisasi ke titik penentuan.",
     image: "hmi-1970-1986",
     focus: "Delegasi HMI berdebat di bawah tekanan kebijakan Asas Tunggal Pancasila",
-    panX: -5,
-    panY: -7,
+    focusX: 60,
+    focusY: 48,
+    zoom: 1.68,
+    panX: -2,
+    panY: -2,
   },
   {
     years: "1986–1998",
@@ -74,8 +92,11 @@ export const historyMoments: readonly HistoryMoment[] = [
     body: "Keputusan Kongres Padang melahirkan HMI DIPO yang menerima penyesuaian asas dan HMI MPO yang menolaknya. Keduanya menempuh ruang gerak berbeda di bawah tekanan Orde Baru hingga gelombang Reformasi membuka babak politik yang baru.",
     image: "hmi-1986-1998",
     focus: "Jalan organisasi terbelah sebelum kembali menuju gelombang Reformasi",
-    panX: 5,
-    panY: -10,
+    focusX: 67,
+    focusY: 44,
+    zoom: 1.72,
+    panX: 2,
+    panY: -3,
   },
 ] as const;
 
@@ -89,7 +110,7 @@ export const evidenceStory: readonly EvidenceScene[] = [
     body: "Sejak kelahirannya, HMI mengalami pergulatan ideologi, organisasi, dan kaderisasi. Bentuk tantangannya berubah, tetapi setiap zaman selalu menuntut kader membaca keadaan dan menentukan sikap.",
     bodySecondary: "Pergulatan masa lalu mungkin tidak kembali dalam bentuk yang sama. Untuk menjaga eksistensinya, HMI merutinkan aktivitas dan menerjemahkan karisma pendirinya, Lafran Pane, menjadi kerja sehari-hari yang dilanjutkan oleh kader.",
     bridge: "Namun, keberlangsungan struktur belum selalu berarti organisasi memahami perjalanan kadernya.",
-    image: "history/hmi-1947-1949",
+    image: "01-indonesia",
     position: "50% 50%",
     symbol: "1947",
   },

@@ -189,10 +189,10 @@
   .mobile-story-chapter { position: relative; min-height: 276svh; isolation: isolate; }
   .mobile-history-chapter { min-height: auto; }
   .mobile-scene-background { position: sticky; z-index: -1; top: 0; height: 100svh; margin-bottom: -100svh; overflow: hidden; background: #071610; }
-  .mobile-scene-background > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: translate3d(var(--mobile-camera-x, 0), var(--mobile-camera-y, 0), 0) scale(var(--mobile-camera-scale, 1.04)); filter: saturate(.78) brightness(.82); transition: filter .7s ease; will-change: transform, opacity; }
+  .mobile-scene-background > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: translate3d(var(--mobile-camera-x, 0), var(--mobile-camera-y, 0), 0) scale(var(--mobile-camera-scale, 1.025)); transform-origin: var(--mobile-camera-origin-x, 50%) var(--mobile-camera-origin-y, 50%); filter: saturate(.78) brightness(.82); transition: filter .7s ease; will-change: transform, opacity; }
   .mobile-story-chapter:not(.mobile-history-chapter).is-active .mobile-scene-background > img { filter: saturate(.9) brightness(.9); }
   .mobile-history-background > img { opacity: 0; transform: translate3d(0, 3%, 0) scale(.96); filter: saturate(.64) brightness(.64); transition: opacity .72s ease, transform .72s cubic-bezier(.2,.7,.2,1), filter .72s ease; }
-  .mobile-history-background > img.is-active { opacity: 1; transform: translate3d(var(--mobile-camera-x, 0), var(--mobile-camera-y, 0), 0) scale(var(--mobile-camera-scale, 1.04)); filter: saturate(.88) brightness(.82); transition: opacity .72s ease, transform .12s linear, filter .72s ease; }
+  .mobile-history-background > img.is-active { opacity: 1; transform: translate3d(var(--mobile-camera-x, 0), var(--mobile-camera-y, 0), 0) scale(var(--mobile-camera-scale, 1.025)); filter: saturate(.88) brightness(.82); transition: opacity .72s ease, transform .12s linear, filter .72s ease; }
   .mobile-scene-shade { position: absolute; inset: 0; background: linear-gradient(180deg, #03100c7a 0%, #04110dbf 54%, #071610f7 100%), linear-gradient(90deg, #04110dc9, #04110d5c); }
   .mobile-scene-depth { position: absolute; inset: 0; overflow: hidden; opacity: .38; }
   .mobile-scene-depth i { position: absolute; border: 1px solid #e4ca8740; border-radius: 50%; }
