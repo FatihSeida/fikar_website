@@ -5,8 +5,8 @@ import { Link } from "wouter";
 
 const destinations = [
   { href: "/", index: "01", title: "Beranda", description: "Rangkuman perjalanan dan gagasan Ahmad Zulfikar." },
-  { href: "/hmi-evidence", index: "02", title: "HMI Evidence", description: "Scrollytelling transformasi gerakan organisasi berbasis bukti." },
-  { href: "/tentang", index: "03", title: "Tentang", description: "Visi, misi, profil, serta rekam jejak organisasi." },
+  { href: "/hmi-evidence", index: "02", title: "HMI Evidence", description: "Scrollytelling, visi, misi, dan program strategis HMI Evidence." },
+  { href: "/tentang", index: "03", title: "Tentang", description: "Profil serta rekam jejak organisasi." },
   { href: "/galeri", index: "04", title: "Galeri", description: "Dokumentasi gagasan, kaderisasi, dan pengabdian." },
   { href: "/catatan", index: "05", title: "Catatan", description: "Tulisan, gagasan, dan aktivitas Ahmad Zulfikar." },
 ];

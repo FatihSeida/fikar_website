@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
 import { kelompok, pengalamanAdvokasi, ringkasanProfil, ruangPengabdian, sumberProfil } from "@/lib/riwayat";
-import { misi, site, visi } from "@/lib/site";
+import { site } from "@/lib/site";
 
 export default function TentangPage() {
   return (
@@ -16,7 +16,7 @@ export default function TentangPage() {
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }} className="md:col-span-6">
             <span className="eyebrow mb-7 block">Tentang</span>
             <h1 className="font-serif text-5xl leading-[0.98] md:text-7xl">{site.nama}</h1>
-            <p className="mt-5 text-sm uppercase tracking-[0.18em] text-primary">{site.profesi}</p>
+            <p className="mt-5 text-sm uppercase tracking-[0.18em] text-primary">{site.kandidat}</p>
             <p className="mt-9 max-w-xl text-lg leading-relaxed text-muted-foreground">
               Tumbuh melalui kaderisasi HMI, pendidikan hukum, dan ruang advokasi. Perjalanan itu menumbuhkan satu keyakinan: organisasi harus mengenali kadernya, membaca kenyataan, dan mengarahkan setiap ikhtiar pada pengabdian.
             </p>
@@ -32,27 +32,6 @@ export default function TentangPage() {
           </motion.figure>
         </section>
 
-        <section className="bg-[hsl(var(--evidence))] px-6 py-24 text-white md:px-10 md:py-32">
-          <div className="container mx-auto grid gap-12 md:grid-cols-12">
-            <div className="md:col-span-3"><span className="evidence-kicker text-white/60">Visi</span></div>
-            <motion.blockquote initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} className="font-serif text-3xl leading-snug md:col-span-9 md:text-5xl">“{visi}”</motion.blockquote>
-          </div>
-        </section>
-
-        <section className="container mx-auto px-6 py-24 md:px-10 md:py-32">
-          <div className="grid gap-12 md:grid-cols-12">
-            <div className="md:col-span-3"><span className="eyebrow">Enam Misi</span></div>
-            <ol className="grid gap-x-10 gap-y-12 md:col-span-9 md:grid-cols-2">
-              {misi.map((item, index) => (
-                <motion.li key={item} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: (index % 2) * 0.08 }} className="border-t border-border pt-6">
-                  <span className="font-serif text-3xl text-primary">0{index + 1}</span>
-                  <p className="mt-4 leading-relaxed text-muted-foreground">{item}</p>
-                </motion.li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
         <section className="border-t border-border px-6 py-24 md:px-10 md:py-32">
           <div className="container mx-auto">
             <span className="eyebrow mb-6 block">Jejak Perjalanan</span>
@@ -61,7 +40,7 @@ export default function TentangPage() {
             <div className="mt-16 grid gap-10 border-y border-border py-10 md:grid-cols-12 md:py-14">
               <div className="md:col-span-4">
                 <span className="eyebrow text-primary">Tiga Ruang Pengabdian</span>
-                <h3 className="mt-5 max-w-sm font-serif text-3xl leading-tight md:text-4xl">Hukum, kaderisasi, dan perjuangan pekerja bertemu dalam satu perjalanan.</h3>
+                <h3 className="mt-5 max-w-sm font-serif text-3xl leading-tight md:text-4xl">Kaderisasi, perjuangan pekerja, dan advokasi publik bertemu dalam satu perjalanan.</h3>
               </div>
               <div className="grid content-start gap-5 text-base leading-relaxed text-muted-foreground md:col-span-8 md:pl-8 md:text-lg">
                 {ringkasanProfil.map((paragraf) => <p key={paragraf}>{paragraf}</p>)}
@@ -87,7 +66,7 @@ export default function TentangPage() {
 
             <section className="mt-24 grid gap-10 md:grid-cols-12 md:gap-14">
               <div className="md:col-span-4">
-                <span className="eyebrow text-primary">Pengalaman Advokasi</span>
+                <span className="eyebrow text-primary">Pengalaman Advokasi Publik</span>
                 <h3 className="mt-5 font-serif text-3xl leading-tight md:text-5xl">Membela hak pekerja dari ruang perundingan hingga aksi lapangan.</h3>
                 <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">Sembilan pengalaman berikut merekam pendampingan buruh yang dilakukan Ahmad Zulfikar di Makassar dan sekitarnya.</p>
                 <a href={sumberProfil.url} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex items-center gap-2 border-b border-primary pb-1 text-xs uppercase tracking-[0.14em] text-primary">

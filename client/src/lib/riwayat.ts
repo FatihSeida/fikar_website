@@ -10,15 +10,11 @@ export interface PengalamanAdvokasi {
 }
 
 export const ringkasanProfil = [
-  "Ahmad Zulfikar adalah advokat dan anggota PERADI yang menempuh pendidikan Magister Ilmu Hukum di Universitas Trisakti. Akar geraknya tumbuh dari kaderisasi HMI Cabang Gowa Raya dan berlanjut hingga tanggung jawab di Pengurus Besar HMI.",
+  "Akar gerak Ahmad Zulfikar tumbuh dari kaderisasi HMI Cabang Gowa Raya dan berlanjut hingga tanggung jawab di Pengurus Besar HMI. Pendidikan hukum yang ia tempuh hingga Magister Ilmu Hukum di Universitas Trisakti menjadi bekal dalam kerja advokasi publik.",
   "Pada Musyawarah Daerah 17 Mei 2025, ia ditetapkan sebagai Ketua Pimpinan Daerah F.SPTI–KSPSI DKI Jakarta periode 2025–2030. Amanah ini melanjutkan pengalamannya mendampingi pekerja dan mengelola organisasi buruh di Makassar, dengan perhatian pada perlindungan hak pekerja serta hubungan industrial yang sehat antara pekerja, pengusaha, dan pemerintah.",
 ] as const;
 
 export const ruangPengabdian = [
-  {
-    label: "Advokat",
-    uraian: "Menjalani PKPA dan magang sejak 2021, lulus UPA pada 2022, lalu disumpah sebagai advokat pada 2023.",
-  },
   {
     label: "Kader HMI",
     uraian: "Berproses sejak Basic Training 2014 di Cabang Gowa Raya hingga mengemban tanggung jawab di PB HMI.",
@@ -26,6 +22,10 @@ export const ruangPengabdian = [
   {
     label: "Pemimpin Serikat Pekerja",
     uraian: "Ketua Pimpinan Daerah F.SPTI–KSPSI DKI Jakarta untuk masa bakti 2025–2030.",
+  },
+  {
+    label: "Advokasi Publik",
+    uraian: "Membawa bekal hukum ke pendampingan pekerja dan persoalan publik, termasuk sebagai advokat dan anggota PERADI sejak disumpah pada 2023.",
   },
 ] as const;
 
@@ -88,14 +88,14 @@ export const pendidikan: BarisRiwayat[] = [
 
 export const organisasiHmi: BarisRiwayat[] = [
   { periode: "2025–sekarang", lembaga: "PB HMI", peran: "Wakil Sekretaris Bidang Pariwisata dan Ekonomi Kreatif" },
-  { periode: "2022", lembaga: "Badko HMI", peran: "Wakil Sekretaris Bidang Transportasi Publik dan Kebijakan Strategis" },
-  { periode: "2017", lembaga: "HMI Cabang", peran: "Ketua Bidang Transportasi Publik dan Kebijakan Strategis" },
+  { periode: "2022", lembaga: "Badko HMI Sulselbar", peran: "Wakil Sekretaris Bidang Transportasi Publik dan Kebijakan Strategis" },
+  { periode: "2017", lembaga: "HMI Cabang Gowa Raya", peran: "Departemen Hukum dan HAM" },
   { periode: "2016", lembaga: "HMI Komisariat", peran: "Departemen Perguruan Tinggi, Kemahasiswaan, dan Kepemudaan" },
 ];
 
 export const organisasiLain: BarisRiwayat[] = [
   { periode: "2020–2023", lembaga: "DPP SIMPOSIUM Sulawesi Selatan", peran: "Ketua Umum" },
-  { periode: "Rekam organisasi", lembaga: "FSPTI KSPSI Kota Makassar", peran: "Ketua, advokasi dan konsolidasi pekerja sektor transportasi" },
+  { periode: "2023–2024", lembaga: "FSPTI KSPSI Kota Makassar", peran: "Ketua, advokasi dan konsolidasi pekerja sektor transportasi" },
   { periode: "2025–2030", lembaga: "PD F.SPTI–KSPSI DKI Jakarta", peran: "Ketua Pimpinan Daerah, perlindungan pekerja dan penguatan hubungan industrial" },
 ];
 

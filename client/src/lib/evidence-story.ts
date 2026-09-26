@@ -172,6 +172,80 @@ export const evidenceStory: readonly EvidenceScene[] = [
   },
 ] as const;
 
+/** 44 indikator kemunduran HMI (Agussalim Sitompul, 2006) yang dikelompokkan buku HMI Evidence, Bab 8. */
+export const persoalanHmi = [
+  {
+    judul: "Kaderisasi",
+    sorotan: "Perjalanan kader",
+    indikator: 15,
+    uraian: "Latihan formal berjalan, tetapi tindak lanjut dan pendampingan sering terputus. Perkaderan belum menjadi perjalanan yang utuh.",
+    gejala: "tindak lanjut perkaderan tidak berjalan sebagaimana mestinya; jarak HMI dengan kehidupan mahasiswa semakin lebar.",
+  },
+  {
+    judul: "Tata Kelola",
+    sorotan: "Akuntabilitas",
+    indikator: 14,
+    uraian: "Mandat, kewenangan, dan tanggung jawab belum selalu jelas, tercatat, dan dijalankan sesuai konstitusi.",
+    gejala: "sebagian aparat organisasi seperti Badko kurang berfungsi; manajemen organisasi tertinggal dari kebutuhan zaman.",
+  },
+  {
+    judul: "Pengetahuan",
+    sorotan: "Tradisi intelektual",
+    indikator: 6,
+    uraian: "Tradisi intelektual melemah. Gagasan dan karya kader belum cukup menjawab persoalan masyarakat.",
+    gejala: "tradisi intelektual HMI memudar; basis intelektual di kampus-kampus unggulan melemah.",
+  },
+  {
+    judul: "Target Program",
+    sorotan: "Keterukuran",
+    indikator: 4,
+    uraian: "Program mudah dibuat, tetapi tujuan, target, dan pelaksanaannya lemah, sehingga hasilnya sulit dinilai.",
+    gejala: "program disusun tanpa target yang jelas; retorika lebih banyak daripada tindakan.",
+  },
+  {
+    judul: "Evaluasi dan Arsip",
+    sorotan: "Pembelajaran",
+    indikator: 3,
+    uraian: "Evaluasi jarang dilakukan dan pengalaman organisasi tidak tersimpan. Pergantian pengurus hanya memindahkan jabatan.",
+    gejala: "evaluasi program jarang dilakukan secara terencana; dokumen dan sejarah organisasi belum dikelola dengan kuat.",
+  },
+  {
+    judul: "Data dan Jaringan",
+    sorotan: "Informasi",
+    indikator: 2,
+    uraian: "Data dan jaringan organisasi belum tertata, sehingga informasi belum banyak membantu keputusan.",
+    gejala: "HMI belum memiliki media representatif sebagai ruang gagasan; jaringan organisasi lemah.",
+  },
+] as const;
+
+/** Empat ranah perbaikan untuk membangun ekosistem perkaderan berbasis bukti. */
+export const ranahPerbaikan = [
+  {
+    judul: "Kaderisasi",
+    uraian: "Perkaderan dipandang sebagai perjalanan. Organisasi perlu tahu dari mana calon kader datang, siapa yang mendampingi setelah latihan, kemampuan apa yang tumbuh, dan di titik mana kader berhenti aktif. Komisariat mencatat, cabang menjaga mutu, jenjang di atasnya membaca pola.",
+  },
+  {
+    judul: "Dinamika Organisasi",
+    uraian: "Setiap keputusan penting dicatat: masalahnya, pilihan yang dipertimbangkan, alasan, penanggung jawab, dan waktu evaluasi. Serah terima memindahkan pekerjaan dan pengetahuan, bukan hanya jabatan.",
+  },
+  {
+    judul: "Tata Kelola dan Konstitusi",
+    uraian: "Konstitusi dijalankan dalam kerja sehari-hari: kewenangan, administrasi, keuangan, perlindungan data kader, dan penyelesaian pelanggaran. Pemeriksaannya sederhana, tetapi rutin.",
+  },
+  {
+    judul: "Budaya Organisasi",
+    uraian: "Kebiasaan baik dirawat: membaca sebelum berbicara, menulis setelah berdiskusi, kritik disertai alasan, mengakui kesalahan, dan karya kader dihargai.",
+  },
+] as const;
+
+export const langkahPenerapan = [
+  { judul: "Kenali", uraian: "Pilih satu masalah penting, pahami siapa yang mengalaminya dan bagaimana keadaan awalnya." },
+  { judul: "Rancang", uraian: "Bandingkan pilihan, tetapkan penanggung jawab dan ukuran perubahan." },
+  { judul: "Uji Coba", uraian: "Jalankan di beberapa komisariat atau cabang, catat manfaat dan kendalanya." },
+  { judul: "Perluas", uraian: "Perluas hanya bagian yang terbukti bermanfaat dan dapat dijalankan." },
+  { judul: "Bakukan", uraian: "Masukkan ke pedoman, anggaran, dan serah terima agar tidak bergantung pada satu periode." },
+] as const;
+
 export const storyImage = (name: string) => name.startsWith("history/")
   ? `/scrollytelling/${name}.webp`
   : `/scrollytelling/hmi-evidence-${name}-v1.webp`;

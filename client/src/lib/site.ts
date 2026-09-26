@@ -10,7 +10,7 @@ export const site = {
   pendidikan: "Magister Ilmu Hukum, Universitas Trisakti",
   fokus:
     "Hukum, konstitusi, kebijakan strategis, ketenagakerjaan, transportasi publik, pariwisata, dan ekonomi kreatif",
-  kandidat: "Kandidat Ketua Umum PB HMI 2026–2028",
+  kandidat: "Kandidat Ketua Umum PB HMI Periode 2026–2028",
 } as const;
 
 export const visi =

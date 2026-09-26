@@ -37,7 +37,7 @@ export default function EvidenceTeaser() {
 
           <motion.div style={{ opacity: third }} className="absolute inset-x-6 top-1/2 max-w-3xl -translate-y-1/2 md:inset-x-auto md:left-10">
             <p className="text-shadow-cinematic font-serif text-4xl leading-tight md:text-6xl">Transformasi Gerakan Organisasi Berbasis Bukti.</p>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/70">Komitmen HMI Evidence menghadirkan ekosistem perkaderan terbaharukan.</p>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/70">Komitmen HMI Evidence menghadirkan ekosistem perkaderan berkelanjutan.</p>
             <Link href="/hmi-evidence" className="mt-8 inline-flex items-center gap-2 bg-[hsl(var(--gold))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--evidence))]">
               Selanjutnya <ArrowUpRight className="h-4 w-4" />
             </Link>
