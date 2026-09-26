@@ -661,7 +661,6 @@ function VisiMisiProgram() {
                       <p><StoryText>{program.deskripsi}</StoryText></p>
                       <dl>
                         <div><dt>Tujuan</dt><dd>{program.tujuan}</dd></div>
-                        <div><dt>Hasil</dt><dd><ul>{program.hasil.map(hasil => <li key={hasil}><StoryText>{hasil}</StoryText></li>)}</ul></dd></div>
                       </dl>
                     </div>
                   </li>
