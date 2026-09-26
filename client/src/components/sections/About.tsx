@@ -41,7 +41,7 @@ export default function About() {
             </dl>
 
             <Link href="/tentang" className="group mt-10 inline-flex items-center gap-3 text-sm font-medium text-primary">
-              Profil, visi, dan rekam jejak
+              Profil dan rekam jejak
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </motion.div>

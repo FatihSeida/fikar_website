@@ -3,11 +3,12 @@ import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useMotionVa
 import { ArrowDown, ArrowRight, RotateCcw } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/sections/SiteFooter";
-import { evidenceStory, historyImage, historyMoments, storyImage } from "@/lib/evidence-story";
+import { evidenceStory, historyImage, historyMoments, langkahPenerapan, persoalanHmi, ranahPerbaikan, storyImage } from "@/lib/evidence-story";
+import { pilarStrategis } from "@/lib/program";
+import { misi, visi } from "@/lib/site";
 import "@/styles/evidence.css";
 
 type Scene = (typeof evidenceStory)[number];
-type HistoryMoment = (typeof historyMoments)[number];
 
 type CameraProfile = {
   focusX: number;
@@ -18,7 +19,6 @@ type CameraProfile = {
 };
 
 const historyIntroCamera: CameraProfile = { focusX: 62, focusY: 49, zoom: 1.62, panX: -1, panY: -2 };
-const historyReflectionCamera: CameraProfile = { focusX: 55, focusY: 66, zoom: 1.66, panX: 1, panY: -2 };
 const sceneCameraProfiles: readonly CameraProfile[] = [
   historyIntroCamera,
   { focusX: 68, focusY: 53, zoom: 1.58, panX: -2, panY: -2 },
@@ -76,16 +76,7 @@ function MobileStoryDiagram({ index }: { index: number }) {
   const [fragment, setFragment] = useState(0);
   const [decision, setDecision] = useState<"asumsi" | "bukti">("bukti");
 
-  if (index === 0) {
-    return (
-      <div className="mobile-diagram mobile-history-mini">
-        <div className="mobile-history-mini-track">
-          {historyMoments.map(moment => <span key={moment.years}>{moment.years}</span>)}
-        </div>
-        <p>Pergulatan berubah bentuk. Ikhtiar untuk membaca zaman dan membina kader tetap berlanjut.</p>
-      </div>
-    );
-  }
+  if (index === 0) return <div className="mobile-diagram"><HistoryCard /></div>;
 
   if (index === 1) {
     return (
@@ -212,69 +203,82 @@ function DecisionComparison({ active }: { active: boolean }) {
   );
 }
 
-function DesktopHistoryLayer({
-  beatIndex,
-  kind,
-  moment,
-  phase,
-  activeBeat,
-}: {
-  beatIndex: number;
-  kind: "intro" | "moment" | "reflection";
-  moment: HistoryMoment;
-  phase: MotionValue<number>;
-  activeBeat: number;
-}) {
+/** Garis waktu enam masa HMI. Setiap titik dapat diklik untuk membuka narasinya. */
+function HistoryExplorer({ variant, selected, onSelect }: { variant: "stage" | "card"; selected: number; onSelect: (index: number) => void }) {
+  const moment = historyMoments[selected];
+  return (
+    <div className={`history-explorer history-explorer-${variant}`}>
+      <p className="history-explorer-hint">Klik setiap masa untuk membaca narasinya</p>
+      <div className="history-line" role="group" aria-label="Enam masa perjalanan HMI">
+        <i className="history-line-track" aria-hidden="true"><b style={{ width: `${(selected / (historyMoments.length - 1)) * 100}%` }} /></i>
+        {historyMoments.map((item, index) => (
+          <button
+            key={item.years}
+            type="button"
+            className={index < selected ? "is-passed" : undefined}
+            aria-pressed={selected === index}
+            aria-label={`${item.years}: ${item.title}`}
+            onClick={() => onSelect(index)}
+          >
+            <i aria-hidden="true" /><span>{item.years.split("–")[0]}</span>
+          </button>
+        ))}
+      </div>
+      <div aria-live="polite">
+        <article key={moment.years} className="history-detail">
+          {variant === "card" && <img src={historyImage(moment.image)} alt={moment.focus} loading="lazy" decoding="async" />}
+          <p className="history-detail-index"><span>Peristiwa 0{selected + 1}</span><strong>{moment.years}</strong></p>
+          <h3>{moment.title}</h3>
+          <p>{moment.body}</p>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+function HistoryCard() {
+  const [selected, setSelected] = useState(0);
+  return <HistoryExplorer variant="card" selected={selected} onSelect={setSelected} />;
+}
+
+/** Bab pertama pada desktop: satu layar sejarah dengan garis waktu interaktif. */
+function DesktopHistoryLayer({ phase, activeBeat }: { phase: MotionValue<number>; activeBeat: number }) {
   const scene = evidenceStory[0];
-  const visual = kind === "intro"
-    ? { ...historyIntroCamera, src: storyImage(scene.image) }
-    : kind === "reflection"
-      ? { ...historyReflectionCamera, src: storyImage("06-masa-depan") }
-      : { ...moment, src: historyImage(moment.image) };
-  const opacity = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.1, beatIndex + 0.86, beatIndex + 1.12], [beatIndex === 0 ? 1 : 0, 1, 1, 0]);
-  const scale = useTransform(phase, [beatIndex - 0.12, beatIndex + 0.08, beatIndex + 0.78, beatIndex + 1.12], [1.025, 1.08, visual.zoom, visual.zoom * 1.04]);
-  const x = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], ["0%", `${visual.panX}%`]);
-  const cameraY = useTransform(phase, [beatIndex - 0.12, beatIndex + 1.12], ["0%", `${visual.panY}%`]);
-  const filter = useTransform(phase, [beatIndex - 0.14, beatIndex + 0.09, beatIndex + 0.9, beatIndex + 1.1], ["blur(7px)", "blur(0px)", "blur(0px)", "blur(7px)"]);
-  const copyY = useTransform(phase, [beatIndex, beatIndex + 0.22, beatIndex + 1], [24, 0, -18]);
-  const active = activeBeat === beatIndex;
+  const [selected, setSelected] = useState(0);
+  const opacity = useTransform(phase, [0, 0.86, 1.12], [1, 1, 0]);
+  const scale = useTransform(phase, [0, 0.86, 1.12], [1.03, 1.1, 1.14]);
+  const filter = useTransform(phase, [0, 0.9, 1.1], ["blur(0px)", "blur(0px)", "blur(7px)"]);
+  const copyY = useTransform(phase, [0, 1], [0, -18]);
+  const active = activeBeat === 0;
 
   return (
     <motion.section
-      className={`story-layer desktop-history-layer desktop-history-${kind}`}
-      style={{ opacity, visibility: Math.abs(activeBeat - beatIndex) <= 1 ? "visible" : "hidden" }}
+      className={`story-layer desktop-history-layer ${active ? "is-active" : ""}`}
+      style={{ opacity, visibility: activeBeat <= 1 ? "visible" : "hidden" }}
       aria-hidden={!active}
-      aria-label={kind === "moment" ? `${moment.years}: ${moment.title}` : scene.label}
+      aria-label={scene.label}
     >
-      <motion.img
-        className="story-landscape"
-        src={visual.src}
-        alt=""
-        style={{ scale, x, y: cameraY, filter, transformOrigin: `${visual.focusX}% ${visual.focusY}%` }}
-        decoding="async"
-      />
+      <motion.div className="history-backdrop" style={{ scale, filter }}>
+        {historyMoments.map((moment, index) => (
+          <img
+            key={moment.image}
+            className={index === selected ? "is-active" : undefined}
+            src={historyImage(moment.image)}
+            alt=""
+            style={{ objectPosition: `${moment.focusX}% ${moment.focusY}%` }}
+            decoding="async"
+          />
+        ))}
+      </motion.div>
       <div className="story-shade" />
       <motion.div className="story-copy desktop-history-copy" style={{ opacity: active ? 1 : 0, y: copyY }}>
-        {kind === "intro" && <>
-          <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
-          <h2><StoryText>{scene.title}</StoryText></h2>
-          <p className="story-body"><StoryText>{scene.body}</StoryText></p>
-          <span className="desktop-history-cue">Gulir untuk memasuki enam peristiwa <ArrowDown size={14} /></span>
-        </>}
-
-        {kind === "moment" && <>
-          <p className="desktop-history-index"><span>Peristiwa</span><strong>{moment.years}</strong></p>
-          <h2>{moment.title}</h2>
-          <p className="story-body">{moment.body}</p>
-        </>}
-
-        {kind === "reflection" && <>
-          <p className="story-eyebrow"><span>01</span>Dari sejarah menuju hari ini</p>
-          <h2>Pergulatan berubah bentuk. Kerja organisasi terus berulang.</h2>
-          <p className="story-body">Setiap periode menghadirkan kepengurusan, Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, Kongres, dan Rapat Kerja. Rapat Bidang, Rapat Presidium, Rapat Harian, serta Pleno memastikan roda organisasi tetap berjalan.</p>
-          <p className="story-body story-body-secondary">Di tengah perubahan karakteristik zaman, kader HMI perlu tetap mewarisi semangat para pendahulunya. Karena itu, peninjauan aktivitas kader menjadi penting.</p>
-          <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
-        </>}
+        <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
+        <h2><StoryText>{scene.title}</StoryText></h2>
+        <p className="story-body"><StoryText>{scene.body}</StoryText></p>
+        <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
+      </motion.div>
+      <motion.div className="desktop-history-explorer" style={{ opacity: active ? 1 : 0, y: copyY }}>
+        <HistoryExplorer variant="stage" selected={selected} onSelect={setSelected} />
       </motion.div>
     </motion.section>
   );
@@ -324,23 +328,6 @@ function StoryLayer({
   );
 }
 
-function HistoryReadingTimeline() {
-  return (
-    <div className="history-reading-timeline">
-      {historyMoments.map(moment => (
-        <article key={moment.years}>
-          <img src={historyImage(moment.image)} alt={moment.focus} loading="lazy" />
-          <div>
-            <span>{moment.years}</span>
-            <h3>{moment.title}</h3>
-            <p>{moment.body}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
 function ReadingView() {
   return <div className="story-reading">{evidenceStory.map((scene, index) => (
     <section key={scene.label} id={`chapter-${index + 1}`}>
@@ -350,18 +337,18 @@ function ReadingView() {
         <p className="story-eyebrow"><span>0{index + 1}</span>{scene.chapter}</p>
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2><p className="story-body"><StoryText>{scene.body}</StoryText></p>
         {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
-        {index === 0 && <HistoryReadingTimeline />}
+        {index === 0 && <HistoryCard />}
         <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
-        <div className="story-reading-diagram">
+        {index > 0 && <div className="story-reading-diagram">
           <h3>{mobileDiagramCopy[index].title}</h3>
           <MobileStoryDiagram index={index} />
-        </div>
+        </div>}
       </div>
     </section>
   ))}</div>;
 }
 
-const mobileChapterStepCounts = evidenceStory.map((_, index) => index === 0 ? historyMoments.length + 3 : 3);
+const mobileChapterStepCounts = evidenceStory.map(() => 3);
 const mobileScenePans = [
   { x: -4, y: -6 },
   { x: 4, y: -5 },
@@ -370,111 +357,6 @@ const mobileScenePans = [
   { x: -4, y: -5 },
   { x: 4, y: -7 },
 ] as const;
-
-const mobileHistoryVisuals = [
-  {
-    key: "history-intro",
-    src: storyImage(evidenceStory[0].image),
-    period: "1947 sampai Reformasi",
-    ...historyIntroCamera,
-  },
-  ...historyMoments.map(moment => ({
-    key: moment.image,
-    src: historyImage(moment.image),
-    period: moment.years,
-    focusX: moment.focusX,
-    focusY: moment.focusY,
-    zoom: moment.zoom,
-    panX: moment.panX,
-    panY: moment.panY,
-  })),
-  {
-    key: "history-reflection",
-    src: storyImage("06-masa-depan"),
-    period: "Dari sejarah menuju hari ini",
-    ...historyReflectionCamera,
-  },
-];
-
-function MobileHistoryChapter({ activeScene, activeStep }: { activeScene: number; activeStep: number }) {
-  const scene = evidenceStory[0];
-  const activeHistory = Math.min(mobileHistoryVisuals.length - 1, Math.max(0, activeStep));
-  const routineStep = historyMoments.length + 1;
-  const bridgeStep = historyMoments.length + 2;
-
-  return (
-    <section className={`mobile-story-chapter mobile-history-chapter ${activeScene === 0 ? "is-active" : ""}`} id="mobile-chapter-1" aria-label="Bab 1: HMI dari masa ke masa">
-      <div className="mobile-scene-background mobile-history-background" aria-hidden="true">
-        {mobileHistoryVisuals.map((visual, index) => (
-          <img
-            className={activeHistory === index ? "is-active" : ""}
-            key={visual.key}
-            src={visual.src}
-            alt=""
-            loading={index === 0 ? "eager" : "lazy"}
-            decoding="async"
-          />
-        ))}
-        <div className="mobile-scene-shade" />
-        <div className="mobile-scene-depth"><i /><i /><i /></div>
-        <div className="mobile-history-period"><span>{mobileHistoryVisuals[activeHistory].period}</span><i /></div>
-      </div>
-
-      <div className="mobile-scene-sequence">
-        <article className="mobile-story-step mobile-narrative-step mobile-history-intro" data-mobile-step data-scene="0" data-step="0" data-pan-x={historyIntroCamera.panX} data-pan-y={historyIntroCamera.panY} data-camera-origin-x={historyIntroCamera.focusX} data-camera-origin-y={historyIntroCamera.focusY} data-camera-start="1.025" data-camera-zoom={historyIntroCamera.zoom}>
-          <div className="mobile-story-card">
-            <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
-            <h2 className="mobile-story-title is-long"><StoryText>{scene.title}</StoryText></h2>
-            <p className="story-body"><StoryText>{scene.body}</StoryText></p>
-            {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
-            <span className="mobile-history-cue">Gulir untuk memasuki setiap masa <ArrowDown size={14} /></span>
-          </div>
-        </article>
-
-        {historyMoments.map((moment, index) => (
-          <article
-            className="mobile-story-step mobile-history-step"
-            data-mobile-step
-            data-scene="0"
-            data-step={index + 1}
-            data-pan-x={moment.panX}
-            data-pan-y={moment.panY}
-            data-camera-origin-x={moment.focusX}
-            data-camera-origin-y={moment.focusY}
-            data-camera-start="1.025"
-            data-camera-zoom={moment.zoom}
-            key={moment.years}
-          >
-            <div className="mobile-history-card">
-              <div className="mobile-history-heading"><span>Peristiwa 0{index + 1}</span><strong>{moment.years}</strong></div>
-              <h3>{moment.title}</h3>
-              <p>{moment.body}</p>
-            </div>
-          </article>
-        ))}
-
-        <article className="mobile-story-step mobile-history-step mobile-history-reflection" data-mobile-step data-scene="0" data-step={routineStep} data-pan-x={historyReflectionCamera.panX} data-pan-y={historyReflectionCamera.panY} data-camera-origin-x={historyReflectionCamera.focusX} data-camera-origin-y={historyReflectionCamera.focusY} data-camera-start="1.025" data-camera-zoom={historyReflectionCamera.zoom}>
-          <div className="mobile-history-card">
-            <span className="mobile-step-label">Dari sejarah menuju hari ini</span>
-            <h3>Pergulatan berubah bentuk. Kerja organisasi terus berulang.</h3>
-            <p>Setiap periode menghadirkan kepengurusan, Rapat Anggota Komisariat, Konferensi Cabang, Musyawarah Daerah, Kongres, dan Rapat Kerja. Rapat Bidang, Rapat Presidium, Rapat Harian, serta Pleno memastikan roda organisasi tetap berjalan.</p>
-            <p>Di tengah perubahan karakteristik zaman, kader HMI perlu tetap mewarisi semangat para pendahulunya. Karena itu, peninjauan aktivitas kader menjadi penting.</p>
-            <p>Roda organisasi dan estafeta kepemimpinan dapat terus berjalan, sementara pengalaman serta aktivitas kader belum menjadi informasi yang ikut berpindah dari satu periode ke periode berikutnya.</p>
-          </div>
-        </article>
-
-        <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene="0" data-step={bridgeStep} data-pan-x={historyReflectionCamera.panX} data-pan-y={historyReflectionCamera.panY - 1} data-camera-origin-x={historyReflectionCamera.focusX} data-camera-origin-y={historyReflectionCamera.focusY} data-camera-start="1.42" data-camera-zoom="1.8">
-          <div className="mobile-bridge-card">
-            <span className="mobile-step-label">Yang perlu dibawa</span>
-            <p><StoryText>{scene.bridge}</StoryText></p>
-            <span className="mobile-next-chapter">Selanjutnya, {evidenceStory[1].label}</span>
-            <ArrowDown size={18} aria-hidden="true" />
-          </div>
-        </article>
-      </div>
-    </section>
-  );
-}
 
 function MobileCinematicStory() {
   const storyRef = useRef<HTMLDivElement>(null);
@@ -553,10 +435,7 @@ function MobileCinematicStory() {
         <i><b /></i>
       </div>
 
-      <MobileHistoryChapter activeScene={activeScene} activeStep={activeScene === 0 ? activeStep : 0} />
-
-      {evidenceStory.slice(1).map((scene, storyIndex) => {
-        const index = storyIndex + 1;
+      {evidenceStory.map((scene, index) => {
         const pan = mobileScenePans[index];
         const camera = sceneCameraProfiles[index];
         return (
@@ -590,7 +469,7 @@ function MobileCinematicStory() {
               <div className="mobile-bridge-card">
                 <span className="mobile-step-label">Yang perlu dibawa</span>
                 <p><StoryText>{scene.bridge}</StoryText></p>
-                <span className="mobile-next-chapter">{index < evidenceStory.length - 1 ? `Selanjutnya, ${evidenceStory[index + 1].label}` : "Selanjutnya, komitmen HMI Evidence"}</span>
+                <span className="mobile-next-chapter">{index < evidenceStory.length - 1 ? `Selanjutnya, ${evidenceStory[index + 1].label}` : "Selanjutnya, kondisi HMI saat ini"}</span>
                 <ArrowDown size={18} aria-hidden="true" />
               </div>
             </article>
@@ -606,8 +485,7 @@ function CinematicStory() {
   const track = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const [activeBeat, setActiveBeat] = useState(0);
-  const historyBeatCount = historyMoments.length + 2;
-  const totalBeats = historyBeatCount + evidenceStory.length - 1;
+  const totalBeats = evidenceStory.length;
   const { scrollYProgress } = useScroll({ target: track, offset: ["start start", "end end"] });
   const storyDuration = totalBeats - 0.01;
   const lastBeat = totalBeats - 1;
@@ -620,22 +498,14 @@ function CinematicStory() {
   const spotlight = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, rgba(231, 207, 146, .15), transparent 27%)`;
   useMotionValueEvent(phase, "change", value => setActiveBeat(Math.min(lastBeat, Math.max(0, Math.floor(value)))));
 
-  const activeChapter = activeBeat < historyBeatCount ? 0 : activeBeat - historyBeatCount + 1;
-  const activeEra = activeBeat === 0
-    ? "1947 sampai Reformasi"
-    : activeBeat <= historyMoments.length
-      ? historyMoments[activeBeat - 1].years
-      : activeBeat === historyBeatCount - 1
-        ? "Dari sejarah menuju hari ini"
-        : evidenceStory[activeChapter].era;
-
-  const chapterBeat = (chapterIndex: number) => chapterIndex === 0 ? 0 : historyBeatCount + chapterIndex - 1;
+  const activeChapter = activeBeat;
+  const activeEra = evidenceStory[activeChapter].era;
 
   const goToChapter = (chapterIndex: number) => {
     if (!track.current || !stage.current) return;
     const start = track.current.getBoundingClientRect().top + window.scrollY;
     const distance = track.current.offsetHeight - stage.current.offsetHeight;
-    window.scrollTo({ top: start + distance * ((chapterBeat(chapterIndex) + 0.18) / storyDuration), behavior: "smooth" });
+    window.scrollTo({ top: start + distance * ((chapterIndex + 0.18) / storyDuration), behavior: "smooth" });
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -649,20 +519,16 @@ function CinematicStory() {
       goToChapter(activeChapter + 1);
       return;
     }
-    document.getElementById("komitmen")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("kondisi-hmi")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <div ref={track} className="story-track" id="cerita" style={{ "--story-height": `${totalBeats * 200}svh` } as CSSProperties}>
       <div ref={stage} className="story-stage" onPointerMove={handlePointerMove} onPointerLeave={() => { pointerX.set(72); pointerY.set(42); }}>
-        <DesktopHistoryLayer beatIndex={0} kind="intro" moment={historyMoments[0]} phase={phase} activeBeat={activeBeat} />
-        {historyMoments.map((moment, index) => (
-          <DesktopHistoryLayer key={moment.years} beatIndex={index + 1} kind="moment" moment={moment} phase={phase} activeBeat={activeBeat} />
-        ))}
-        <DesktopHistoryLayer beatIndex={historyBeatCount - 1} kind="reflection" moment={historyMoments[historyMoments.length - 1]} phase={phase} activeBeat={activeBeat} />
+        <DesktopHistoryLayer phase={phase} activeBeat={activeBeat} />
         {evidenceStory.slice(1).map((scene, storyIndex) => {
           const sceneIndex = storyIndex + 1;
-          const beatIndex = historyBeatCount + storyIndex;
+          const beatIndex = sceneIndex;
           return <StoryLayer
             key={scene.label}
             scene={scene}
@@ -690,15 +556,123 @@ function CinematicStory() {
             <span className="chapter-number">0{index + 1}</span><span className="chapter-label">{scene.label}</span><span className="chapter-bar" />
           </button>)}
         </nav>
-        <button type="button" className="story-next" onClick={goForward} aria-label={activeChapter < evidenceStory.length - 1 ? `Lanjut ke ${evidenceStory[activeChapter + 1].label}` : "Lanjut ke komitmen"}>
-          <span>{activeChapter < evidenceStory.length - 1 ? "Bab selanjutnya" : "Penutup"}</span>
-          <strong>{activeChapter < evidenceStory.length - 1 ? evidenceStory[activeChapter + 1].label : "Komitmen"}</strong>
+        <button type="button" className="story-next" onClick={goForward} aria-label={activeChapter < evidenceStory.length - 1 ? `Lanjut ke ${evidenceStory[activeChapter + 1].label}` : "Lanjut ke kondisi HMI"}>
+          <span>{activeChapter < evidenceStory.length - 1 ? "Bab selanjutnya" : "Selanjutnya"}</span>
+          <strong>{activeChapter < evidenceStory.length - 1 ? evidenceStory[activeChapter + 1].label : "Kondisi HMI"}</strong>
           <ArrowDown size={14} />
         </button>
         <AnimatePresence>{activeBeat === 0 && <motion.div className="story-scroll-cue" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} aria-hidden="true"><i /><span>Gulir untuk menelusuri</span></motion.div>}</AnimatePresence>
-        <a className="story-skip" href="#komitmen">Ke komitmen <ArrowDown size={12} /></a>
+        <a className="story-skip" href="#kondisi-hmi">Lewati cerita <ArrowDown size={12} /></a>
       </div>
     </div>
+  );
+}
+
+const indikatorTerbanyak = Math.max(...persoalanHmi.map(persoalan => persoalan.indikator));
+
+/** Dasar pembacaan cerita: 44 indikator kemunduran HMI dan empat ranah perbaikannya. */
+function EvidenceBasis() {
+  return (
+    <section className="evidence-basis" id="kondisi-hmi">
+      <div className="basis-inner">
+        <p className="story-eyebrow">44 Indikator Kemunduran HMI</p>
+        <h2>Kondisi HMI <em>Saat Ini</em></h2>
+        <p className="basis-lede">Pada 2006, Agussalim Sitompul mencatat 44 indikator kemunduran HMI sebagai bahan otokritik. Daftar ini bukan vonis untuk seluruh HMI, melainkan bahan pertanyaan yang masih dapat diperiksa di komisariat, cabang, Badko, dan Pengurus Besar. Dalam buku <cite>HMI Evidence</cite>, ke-44 indikator tersebut dikelompokkan menjadi enam persoalan utama.</p>
+        <ol className="basis-problems">
+          {persoalanHmi.map(persoalan => (
+            <li key={persoalan.judul}>
+              <div className="problem-head">
+                <div><strong>{persoalan.judul}</strong><span>{persoalan.sorotan}</span></div>
+                <b>{persoalan.indikator}<small>indikator</small></b>
+              </div>
+              <i className="problem-meter" aria-hidden="true"><span style={{ width: `${(persoalan.indikator / indikatorTerbanyak) * 100}%` }} /></i>
+              <p>{persoalan.uraian}</p>
+              <p className="problem-symptom"><em>Contoh gejala:</em> {persoalan.gejala}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="basis-note"><strong>Saling terkait.</strong> Enam persoalan ini tidak berdiri sendiri. Rekrutmen yang menurun, misalnya, dapat berhubungan dengan kaderisasi, data, dan tata kelola sekaligus. Karena itu, perbaikannya tidak cukup dengan menambah kegiatan.</p>
+        <p className="basis-source">Sumber: Agussalim Sitompul, <cite>44 Indikator Kemunduran HMI: Suatu Kritikan dan Koreksi untuk Kebangkitan Kembali HMI</cite> (Jakarta: CV Misaka Galiza, 2006); pengelompokan dari buku <cite>HMI Evidence</cite>, Bab 8.</p>
+
+        <div className="basis-divider" />
+
+        <p className="story-eyebrow">4 Ranah Perbaikan</p>
+        <h2>Membangun Perkaderan <em>Berbasis Bukti</em></h2>
+        <p className="basis-lede">Enam persoalan tersebut tidak dijawab dengan enam program baru. Perbaikannya harus masuk ke cara HMI bekerja sehari-hari. Ada empat hal yang perlu diperhatikan dalam membangun ekosistem perkaderan berbasis bukti.</p>
+        <ol className="basis-ranah">
+          {ranahPerbaikan.map((ranah, index) => (
+            <li key={ranah.judul}><span>0{index + 1}</span><h3>{ranah.judul}</h3><p>{ranah.uraian}</p></li>
+          ))}
+        </ol>
+        <div className="basis-principle">
+          <strong>Mulai dari data, bukan dari aplikasi</strong>
+          <p>Prioritas pertama bukan membangun satu aplikasi nasional. HMI perlu lebih dulu menyepakati data minimum, definisi yang sama, dan siapa yang bertanggung jawab. Aplikasi baru berguna setelah alurnya jelas.</p>
+        </div>
+        <p className="story-eyebrow basis-steps-label">Lima langkah penerapan bertahap</p>
+        <ol className="basis-steps">
+          {langkahPenerapan.map((langkah, index) => (
+            <li key={langkah.judul}><span>0{index + 1}</span><strong>{langkah.judul}</strong><p>{langkah.uraian}</p></li>
+          ))}
+        </ol>
+        <p className="basis-source">Diturunkan dari buku <cite>HMI Evidence</cite>, Bab 8: Gerakan Organisasi Berbasis Bukti.</p>
+      </div>
+    </section>
+  );
+}
+
+/** Visi, enam misi, serta enam pilar dan tiga belas program strategis, sama dengan proposal kandidat. */
+function VisiMisiProgram() {
+  return (
+    <section className="evidence-program" id="visi-misi">
+      <div className="program-inner">
+        <p className="story-eyebrow">Visi, Misi, dan Program Strategis</p>
+        <figure className="program-vision">
+          <figcaption>Visi</figcaption>
+          <blockquote>“{visi}”</blockquote>
+        </figure>
+
+        <h2>Enam Misi</h2>
+        <ol className="program-missions">
+          {misi.map((item, index) => (
+            <li key={item}><span>0{index + 1}</span><p><StoryText>{item}</StoryText></p></li>
+          ))}
+        </ol>
+
+        <div className="basis-divider" />
+
+        <p className="story-eyebrow">Pilar dan Program Strategis</p>
+        <h2>Enam pilar, <em>tiga belas program strategis.</em></h2>
+        <p className="basis-lede">Setiap pilar diturunkan langsung dari satu misi, lalu dihubungkan dengan persoalan HMI yang hendak dijawab.</p>
+        <div className="program-pillars">
+          {pilarStrategis.map(pilar => (
+            <article key={pilar.nomor} className="program-pillar">
+              <div className="pillar-head">
+                <span>Pilar {pilar.nomor} · Turunan Misi {pilar.nomor}</span>
+                <h3>{pilar.judul}</h3>
+                <p><StoryText>{pilar.uraian}</StoryText></p>
+                <p className="pillar-answers"><em>Menjawab</em>{pilar.menjawab.join(" · ")}</p>
+              </div>
+              <ol className="pillar-programs">
+                {pilar.program.map(program => (
+                  <li key={program.nomor}>
+                    <span>{program.nomor}</span>
+                    <div>
+                      <h4>{program.judul}</h4>
+                      <p><StoryText>{program.deskripsi}</StoryText></p>
+                      <dl>
+                        <div><dt>Tujuan</dt><dd>{program.tujuan}</dd></div>
+                        <div><dt>Hasil</dt><dd><ul>{program.hasil.map(hasil => <li key={hasil}><StoryText>{hasil}</StoryText></li>)}</ul></dd></div>
+                      </dl>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))}
+        </div>
+        <p className="basis-note"><strong>Cara menjalankan.</strong> Setiap program berjalan melalui lima langkah bertahap: kenali, rancang, uji coba, perluas, dan bakukan. Program yang belum menunjukkan manfaat diperbaiki lebih dulu sebelum diperluas ke seluruh cabang.</p>
+      </div>
+    </section>
   );
 }
 
@@ -739,14 +713,19 @@ export default function HmiEvidencePage() {
           <div className="prologue-content">
             <p className="story-eyebrow">HMI Evidence</p>
             <h1>Transformasi Gerakan Organisasi <em>Berbasis Bukti.</em></h1>
-            <p className="prologue-question">Komitmen HMI Evidence menghadirkan ekosistem perkaderan terbaharukan.</p>
+            <p className="prologue-question">Komitmen HMI Evidence menghadirkan ekosistem perkaderan berkelanjutan.</p>
             <p className="prologue-intro">Sebuah perjalanan untuk mengenali kader, membaca pengalamannya, dan menghadirkan pengetahuan itu ke dalam keputusan organisasi.</p>
-            <a href={readMode ? "#chapter-1" : "#cerita"} className="story-begin">Mulai membaca <ArrowDown size={18} /></a>
+            <div className="prologue-actions">
+              <a href={readMode ? "#chapter-1" : "#cerita"} className="story-begin">Mulai membaca <ArrowDown size={18} /></a>
+              <a href="#visi-misi" className="prologue-shortcut"><span>Langsung ke</span><strong>Visi, Misi, dan Program Strategis</strong><ArrowDown size={16} /></a>
+            </div>
           </div>
           <div className="prologue-bottom"><span>{evidenceStory.length} bagian / Satu rangkaian cerita</span><button onClick={() => setReading(!reading)} aria-pressed={!!readMode} disabled={!!forcedReadMode}>{limitedDevice ? "Mode ringan aktif" : readMode ? "Mode baca" : "Baca tanpa animasi"}</button></div>
         </header>
 
         {readMode ? <ReadingView /> : mobile ? <MobileCinematicStory /> : <CinematicStory />}
+
+        <EvidenceBasis />
 
         <section className="evidence-commitment" id="komitmen">
           <p className="story-eyebrow">Pedoman Perkaderan / Tafsir Tujuan / 5KIC</p>
@@ -754,6 +733,12 @@ export default function HmiEvidencePage() {
           <p>Pengalaman perkaderan berbasis bukti bukan tujuan baru yang menggantikan Pedoman Perkaderan. Ia merupakan ikhtiar untuk memastikan proses pembinaan berjalan sejalan dengan Pedoman Perkaderan dan Tafsir Tujuan HMI.</p>
           <p>Setiap data, evaluasi, keputusan, dan pembaruan program diarahkan untuk membina insan akademis, pencipta, pengabdi, bernafaskan Islam, dan bertanggung jawab bagi terwujudnya masyarakat adil makmur yang diridai Allah SWT.</p>
           <p className="commitment-statement">Dari pengalaman menjadi pengetahuan. Dari pengetahuan menjadi keputusan. Dari keputusan menuju terbinanya lima kualitas Insan Cita.</p>
+        </section>
+
+        <VisiMisiProgram />
+
+        <section className="evidence-commitment evidence-closing" aria-label="Lanjutkan perjalanan">
+          <p className="story-eyebrow">Lanjutkan perjalanan</p>
           <nav className="commitment-choices" aria-label="Lanjutkan perjalanan website">
             <a href="/tentang"><span>01</span><strong>Mengenal Ahmad Zulfikar</strong><ArrowRight size={18} /></a>
             <a href="/catatan"><span>02</span><strong>Membaca Catatan</strong><ArrowRight size={18} /></a>
