@@ -4,6 +4,76 @@ export interface BarisRiwayat {
   peran?: string;
 }
 
+export interface PengalamanAdvokasi {
+  judul: string;
+  uraian: string;
+}
+
+export const ringkasanProfil = [
+  "Ahmad Zulfikar adalah advokat dan anggota PERADI yang menempuh pendidikan Magister Ilmu Hukum di Universitas Trisakti. Akar geraknya tumbuh dari kaderisasi HMI Cabang Gowa Raya dan berlanjut hingga tanggung jawab di Pengurus Besar HMI.",
+  "Pada Musyawarah Daerah 17 Mei 2025, ia ditetapkan sebagai Ketua Pimpinan Daerah F.SPTI–KSPSI DKI Jakarta periode 2025–2030. Amanah ini melanjutkan pengalamannya mendampingi pekerja dan mengelola organisasi buruh di Makassar, dengan perhatian pada perlindungan hak pekerja serta hubungan industrial yang sehat antara pekerja, pengusaha, dan pemerintah.",
+] as const;
+
+export const ruangPengabdian = [
+  {
+    label: "Advokat",
+    uraian: "Menjalani PKPA dan magang sejak 2021, lulus UPA pada 2022, lalu disumpah sebagai advokat pada 2023.",
+  },
+  {
+    label: "Kader HMI",
+    uraian: "Berproses sejak Basic Training 2014 di Cabang Gowa Raya hingga mengemban tanggung jawab di PB HMI.",
+  },
+  {
+    label: "Pemimpin Serikat Pekerja",
+    uraian: "Ketua Pimpinan Daerah F.SPTI–KSPSI DKI Jakarta untuk masa bakti 2025–2030.",
+  },
+] as const;
+
+export const pengalamanAdvokasi: readonly PengalamanAdvokasi[] = [
+  {
+    judul: "Hak 83 buruh PT Eastern Pearl Flour Mills",
+    uraian: "Memimpin pendampingan mogok kerja dan aksi sekitar satu bulan untuk menuntut hak normatif serta pesangon 83 pekerja. Aksi di depan pabrik terigu di Jalan Nusantara Baru juga diwarnai tindakan represif aparat yang menyebabkan Ahmad Zulfikar dan peserta lain mengalami luka.",
+  },
+  {
+    judul: "Upah di bawah minimum di PT Catur Putra Harmoni",
+    uraian: "Mendampingi sekitar 50 pekerja yang dilaporkan menerima upah di bawah ketentuan minimum. Advokasi dilakukan melalui aksi dan pendudukan lima gudang secara serentak agar perusahaan menanggapi tuntutan pekerja.",
+  },
+  {
+    judul: "PHK sepihak di PT Kepuh Kencana",
+    uraian: "Mengadvokasi puluhan pekerja pabrik produksi spandek di Gudang 88 Makassar yang mengalami pemutusan hubungan kerja sepihak, termasuk melalui aksi pendudukan yang berlangsung selama dua minggu.",
+  },
+  {
+    judul: "PHK pekerja PT Mallo di Kabupaten Maros",
+    uraian: "Memberikan pendampingan kepada puluhan pekerja PT Mallo yang kehilangan pekerjaan dan memperjuangkan pemenuhan hak mereka setelah pemutusan hubungan kerja.",
+  },
+  {
+    judul: "Perselisihan industrial di Pelindo dan Pelni Makassar",
+    uraian: "Terlibat dalam aksi dan pendudukan pelabuhan untuk menyuarakan penyelesaian perselisihan hubungan industrial yang melibatkan pekerja, PT Pelindo, dan PT Pelni di Makassar.",
+  },
+  {
+    judul: "PHK sepihak di Mitsubishi Jalan Sultan Alauddin",
+    uraian: "Mendampingi pekerja yang terkena PHK sepihak dan membawa tuntutan mereka melalui aksi pendudukan di lokasi perusahaan Mitsubishi di Jalan Sultan Alauddin, Makassar.",
+  },
+  {
+    judul: "PHK pekerja PT Indo Marco di Kawasan Industri Makassar",
+    uraian: "Mengadvokasi karyawan PT Indo Marco di Kawasan Industri Makassar yang mengalami pemutusan hubungan kerja agar hak-hak ketenagakerjaannya diperiksa dan diperjuangkan.",
+  },
+  {
+    judul: "Penahanan ijazah karyawan",
+    uraian: "Mendampingi pekerja pada sebuah perusahaan kendaraan roda dua di Jalan Bawakaraeng yang ijazahnya ditahan perusahaan, termasuk melalui aksi langsung di lokasi perusahaan.",
+  },
+  {
+    judul: "Syarat BPJS Kesehatan dalam pengurusan SIM dan SKCK",
+    uraian: "Menyuarakan penolakan terhadap persyaratan kepesertaan BPJS Kesehatan untuk pengurusan SIM dan SKCK yang dinilai tidak relevan, terutama bagi calon pekerja. Isu tersebut dibawa melalui Rapat Dengar Pendapat hingga DPR RI di Senayan.",
+  },
+] as const;
+
+export const sumberProfil = {
+  nama: "Potret Nusantara",
+  tanggal: "19 Mei 2025",
+  url: "https://potretnusantara.co.id/2025/05/19/ahmad-zulfikar-jadi-nahkoda-baru-f-spti-dki-jakarta-siap-perjuangkan-hak-pekerja/",
+} as const;
+
 export const jenjangTraining: BarisRiwayat[] = [
   { periode: "2014", lembaga: "Basic Training", peran: "HMI Komisariat Ushuluddin, Filsafat dan Politik, Cabang Gowa Raya" },
   { periode: "2016", lembaga: "Intermediate Training", peran: "HMI Cabang Kuningan" },
@@ -26,7 +96,7 @@ export const organisasiHmi: BarisRiwayat[] = [
 export const organisasiLain: BarisRiwayat[] = [
   { periode: "2020–2023", lembaga: "DPP SIMPOSIUM Sulawesi Selatan", peran: "Ketua Umum" },
   { periode: "Rekam organisasi", lembaga: "FSPTI KSPSI Kota Makassar", peran: "Ketua, advokasi dan konsolidasi pekerja sektor transportasi" },
-  { periode: "Rekam organisasi", lembaga: "FSPTI KSPSI DKI Jakarta", peran: "Ketua Umum, representasi kepentingan anggota dalam hubungan industrial" },
+  { periode: "2025–2030", lembaga: "PD F.SPTI–KSPSI DKI Jakarta", peran: "Ketua Pimpinan Daerah, perlindungan pekerja dan penguatan hubungan industrial" },
 ];
 
 export const kelompok = [
