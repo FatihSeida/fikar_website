@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
-import { kelompok } from "@/lib/riwayat";
+import { kelompok, pengalamanAdvokasi, ringkasanProfil, ruangPengabdian, sumberProfil } from "@/lib/riwayat";
 import { misi, site, visi } from "@/lib/site";
 
 export default function TentangPage() {
@@ -56,7 +57,64 @@ export default function TentangPage() {
           <div className="container mx-auto">
             <span className="eyebrow mb-6 block">Jejak Perjalanan</span>
             <h2 className="max-w-3xl font-serif text-4xl md:text-6xl">Berangkat dari proses, bertumbuh melalui tanggung jawab.</h2>
-            <div className="mt-16 grid gap-x-10 gap-y-16 md:grid-cols-2 md:gap-y-20">
+
+            <div className="mt-16 grid gap-10 border-y border-border py-10 md:grid-cols-12 md:py-14">
+              <div className="md:col-span-4">
+                <span className="eyebrow text-primary">Tiga Ruang Pengabdian</span>
+                <h3 className="mt-5 max-w-sm font-serif text-3xl leading-tight md:text-4xl">Hukum, kaderisasi, dan perjuangan pekerja bertemu dalam satu perjalanan.</h3>
+              </div>
+              <div className="grid content-start gap-5 text-base leading-relaxed text-muted-foreground md:col-span-8 md:pl-8 md:text-lg">
+                {ringkasanProfil.map((paragraf) => <p key={paragraf}>{paragraf}</p>)}
+              </div>
+            </div>
+
+            <div className="grid border-b border-border md:grid-cols-3">
+              {ruangPengabdian.map((ruang, index) => (
+                <motion.article
+                  key={ruang.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ delay: index * 0.08 }}
+                  className="border-border py-8 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+                >
+                  <span className="font-serif text-3xl text-primary">0{index + 1}</span>
+                  <h4 className="mt-4 font-serif text-2xl">{ruang.label}</h4>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{ruang.uraian}</p>
+                </motion.article>
+              ))}
+            </div>
+
+            <section className="mt-24 grid gap-10 md:grid-cols-12 md:gap-14">
+              <div className="md:col-span-4">
+                <span className="eyebrow text-primary">Pengalaman Advokasi</span>
+                <h3 className="mt-5 font-serif text-3xl leading-tight md:text-5xl">Membela hak pekerja dari ruang perundingan hingga aksi lapangan.</h3>
+                <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">Sembilan pengalaman berikut merekam pendampingan buruh yang dilakukan Ahmad Zulfikar di Makassar dan sekitarnya.</p>
+                <a href={sumberProfil.url} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex items-center gap-2 border-b border-primary pb-1 text-xs uppercase tracking-[0.14em] text-primary">
+                  Sumber: {sumberProfil.nama}, {sumberProfil.tanggal}<ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+              <ol className="grid gap-x-10 md:col-span-8 md:grid-cols-2">
+                {pengalamanAdvokasi.map((pengalaman, index) => (
+                  <motion.li
+                    key={pengalaman.judul}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ delay: (index % 2) * 0.07 }}
+                    className="grid grid-cols-[42px_1fr] gap-4 border-t border-border py-7"
+                  >
+                    <span className="font-serif text-2xl text-primary">{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h4 className="font-medium leading-snug">{pengalaman.judul}</h4>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{pengalaman.uraian}</p>
+                    </div>
+                  </motion.li>
+                ))}
+              </ol>
+            </section>
+
+            <div className="mt-24 grid gap-x-10 gap-y-16 md:grid-cols-2 md:gap-y-20">
               {kelompok.map((bagian, index) => (
                 <motion.section key={bagian.judul} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-70px" }} transition={{ delay: (index % 2) * 0.08 }} className="content-start border-t border-foreground pt-5">
                   <h3 className="font-serif text-2xl md:text-3xl">{bagian.judul}</h3>
