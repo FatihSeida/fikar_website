@@ -249,12 +249,9 @@
 .pillar-programs > li > span { color: #e0c98e; font-family: var(--font-serif); font-size: 24px; line-height: 1.1; }
 .pillar-programs h4 { color: #f4ead0; font-size: 17px; font-weight: 500; line-height: 1.35; }
 .pillar-programs > li > div > p { margin-top: 8px; color: #d9e4d8b8; font-size: 14px; line-height: 1.7; }
-.pillar-programs dl { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
+.pillar-programs dl { margin-top: 16px; }
 .pillar-programs dt { margin-bottom: 6px; color: #dcc38a; font-size: 9px; letter-spacing: .17em; text-transform: uppercase; }
 .pillar-programs dd { color: #c9d6c9cc; font-size: 13.5px; line-height: 1.65; }
-.pillar-programs dd li { position: relative; padding-left: 14px; }
-.pillar-programs dd li + li { margin-top: 4px; }
-.pillar-programs dd li::before { content: ""; position: absolute; top: .6em; left: 0; width: 5px; height: 5px; background: #dcc38a; transform: rotate(45deg); }
 .evidence-commitment.evidence-closing { padding-top: 60px; background: none; }
 
 @media (max-width: 1023px) {
@@ -281,7 +278,6 @@
   .program-missions p { font-size: 14px; }
   .evidence-program .basis-divider { margin: 64px 0 56px; }
   .program-pillar { padding: 32px 0; }
-  .pillar-programs dl { grid-template-columns: 1fr; gap: 14px; }
   .evidence-commitment.evidence-closing { padding-top: 32px; }
   .evidence-prologue { padding: 112px 24px 112px; min-height: 100svh; align-items: flex-start; }
   .prologue-content { margin-top: auto; margin-bottom: auto; }
