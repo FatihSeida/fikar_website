@@ -62,6 +62,10 @@ async function buildAll() {
 
   // data geolokasi IP (server/geo.ts), dibaca dari dist/ saat produksi
   await copyFile("server/data/geo-id.bin.gz", "dist/geo-id.bin.gz");
+
+  // connect-pg-simple ikut dibundel, tetapi membaca table.sql dari __dirname
+  // (dist/) untuk membuat tabel session. Tanpa berkas ini login admin gagal.
+  await copyFile("node_modules/connect-pg-simple/table.sql", "dist/table.sql");
 }
 
 buildAll().catch((err) => {

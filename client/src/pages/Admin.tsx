@@ -31,8 +31,12 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
       });
       if (res.ok) {
         onLogin();
-      } else {
+      } else if (res.status === 401) {
         setError("Password salah");
+      } else {
+        // Terkunci (429) atau galat server tidak boleh tampil sebagai password salah.
+        const isi = await res.json().catch(() => null);
+        setError(typeof isi?.message === "string" ? isi.message : "Terjadi kesalahan pada server");
       }
     } catch {
       setError("Terjadi kesalahan");
