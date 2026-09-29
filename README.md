@@ -34,6 +34,9 @@ lalu jalankan `npm run db:push` sekali untuk membuat tabelnya.
 | `SESSION_SECRET` | Opsional | **Wajib**, minimal 32 karakter acak |
 | `ADMIN_PASSWORD` | Opsional | **Wajib**, minimal 12 karakter |
 | `PORT` | Opsional, default 5000 | Opsional, default 5000 |
+| `BATAS_PERMINTAAN_AKTIF` | Opsional, default 200 | Opsional, default 200 |
+| `BATAS_PER_IP_PER_MENIT` | Opsional, default 3000 | Opsional, default 3000 |
+| `BATAS_API_PER_IP_PER_MENIT` | Opsional, default 600 | Opsional, default 600 |
 
 Di produksi server sengaja menolak menyala bila salah satu dari ketiga
 variabel wajib itu kosong, supaya situs tidak pernah berjalan memakai
@@ -53,6 +56,10 @@ session di memori.
 - Konten editor disanitasi dan seluruh masukan memiliki batas panjang serta format yang jelas.
 - Header CSP, HSTS, anti-framing, MIME sniffing, referrer, dan permissions diterapkan di produksi.
 - Server tidak mencatat isi respons API atau kredensial ke log.
+- Perlindungan beban (`server/perlindungan.ts`): bila lebih dari `BATAS_PERMINTAAN_AKTIF` permintaan sedang ditangani sekaligus, permintaan baru langsung dijawab 503 dengan `Retry-After` alih-alih menumpuk di memori VPS. Beacon analytics dilepas lebih dulu saat server mulai penuh.
+- Satu IP (IPv6 dihitung per blok /64) dibatasi `BATAS_PER_IP_PER_MENIT` permintaan per menit dan `BATAS_API_PER_IP_PER_MENIT` untuk API. Satu kunjungan pertama memicu sekitar 20 permintaan, jadi batas bawaan masih memuat sekitar 150 pengunjung baru per menit dari satu WiFi atau CGNAT. Naikkan sementara bila banyak orang membuka situs dari satu jaringan, misalnya di lokasi Kongres.
+- Respons API publik (catatan, galeri, halaman) di-cache 30 detik di memori dan dikosongkan setiap kali admin mengubah konten.
+- JS dan CSS dikompres brotli dan gzip saat build, lalu dikirim terkompresi oleh server.
 
 Jalankan `npm audit` pada proses rilis untuk memastikan dependensi tetap bebas dari temuan yang telah diketahui.
 
@@ -89,6 +96,8 @@ kehabisan memori dan menjatuhkan situs-situs itu. Yang dikirim ke server hanya
 | nginx | `/etc/nginx/sites-available/ahmadzulfikar.com` |
 
 Port 5000–5002 sudah dipakai situs lain di VPS yang sama. Jangan pakai ulang.
+
+Untuk pindah ke VPS lain, ikuti [docs/pindah-vps.md](docs/pindah-vps.md).
 
 ### Secret yang dibutuhkan repositori
 

@@ -8,6 +8,7 @@ import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { insertGallerySchema, insertNoteSchema, insertKunjunganSchema } from "@shared/schema";
 import { lookupGeo } from "./geo";
 import { namaKota, namaProvinsi } from "./wilayah";
+import { buatCacheSingkat, kunciIp } from "./perlindungan";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -54,6 +55,9 @@ const upload = multer({
     cb(null, true);
   },
 });
+
+// Konten publik jarang berubah; cache 30 detik meredam lonjakan kunjungan ke database.
+const cachePublik = buatCacheSingkat(30_000);
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
@@ -197,13 +201,19 @@ export async function registerRoutes(
     return next();
   });
 
+  // Setiap perubahan dari panel admin mengosongkan cache konten publik.
+  app.use(["/api/gallery", "/api/notes", "/api/pages"], (req, res, next) => {
+    if (req.method !== "GET") res.on("finish", () => { if (res.statusCode < 400) cachePublik.kosongkan(); });
+    next();
+  });
+
   // --- Admin Auth ---
   app.post("/api/admin/login", (req, res) => {
     const input = z.object({ password: z.string().min(1).max(256) }).safeParse(req.body);
     if (!input.success) return res.status(400).json({ message: "Kredensial tidak valid" });
 
     const now = Date.now();
-    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const key = kunciIp(req.ip || req.socket.remoteAddress || "unknown");
     const existing = loginAttempts.get(key);
     if (existing?.blockedUntil && existing.blockedUntil > now) {
       const retryAfter = Math.ceil((existing.blockedUntil - now) / 1000);
@@ -245,8 +255,7 @@ export async function registerRoutes(
 
   // --- Gallery ---
   app.get("/api/gallery", async (_req, res) => {
-    const items = await storage.getGalleryItems();
-    res.json(items);
+    res.json(await cachePublik.ambil("galeri", () => storage.getGalleryItems()));
   });
 
   app.post("/api/gallery", requireAdmin, async (req, res) => {
@@ -265,8 +274,7 @@ export async function registerRoutes(
 
   // --- Catatan ---
   app.get("/api/notes", async (_req, res) => {
-    const items = await storage.getNotes();
-    res.json(items);
+    res.json(await cachePublik.ambil("catatan", () => storage.getNotes()));
   });
 
   app.get("/api/notes/:slug", async (req, res) => {
@@ -274,7 +282,7 @@ export async function registerRoutes(
     if (!slug) {
       return res.status(400).json({ message: "Slug catatan tidak valid" });
     }
-    const note = await storage.getNote(slug);
+    const note = await cachePublik.ambil(`catatan:${slug}`, () => storage.getNote(slug));
     if (!note) return res.status(404).json({ message: "Catatan tidak ditemukan" });
     res.json(note);
   });
@@ -310,7 +318,7 @@ export async function registerRoutes(
     if (!slug) {
       return res.status(400).json({ message: "Slug halaman tidak valid" });
     }
-    const page = await storage.getPage(slug);
+    const page = await cachePublik.ambil(`halaman:${slug}`, () => storage.getPage(slug));
     if (!page) return res.status(404).json({ message: "Halaman tidak ditemukan" });
     res.json(page);
   });
@@ -355,7 +363,7 @@ export async function registerRoutes(
     const userAgent = req.get("user-agent") || "";
     if (req.session?.isAdmin || !userAgent || pelacakOtomatis.test(userAgent)) return res.status(204).end();
     const ip = req.ip || req.socket.remoteAddress || "";
-    if (!bolehCatatKunjungan(ip)) return res.status(204).end();
+    if (!bolehCatatKunjungan(kunciIp(ip))) return res.status(204).end();
     const parsed = insertKunjunganSchema.safeParse(req.body);
     if (!parsed.success || parsed.data.path.startsWith("/admin")) return res.status(400).end();
 

@@ -7,6 +7,7 @@ import connectPgSimple from "connect-pg-simple";
 import multer from "multer";
 import { isProduction, usesInMemoryStorage } from "./env";
 import { pool } from "./db";
+import { perlindunganBeban } from "./perlindungan";
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,6 +29,10 @@ app.use((_req, res, next) => {
   }
   next();
 });
+
+// Paling awal, sebelum body parser: permintaan yang ditolak tidak sempat memakan CPU atau memori.
+// Hanya di produksi; di pengembangan Vite menyajikan ratusan modul per halaman.
+if (isProduction) app.use(perlindunganBeban());
 
 declare module "http" {
   interface IncomingMessage {
