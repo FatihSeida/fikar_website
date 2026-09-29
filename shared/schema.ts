@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, integer, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -28,6 +28,23 @@ export const pages = pgTable("pages", {
   title: text("title").notNull(),
   content: text("content").notNull(),
 });
+
+/**
+ * Satu baris per halaman yang dibuka. Alamat IP tidak pernah disimpan: kota
+ * diturunkan saat permintaan masuk, dan `pengunjung` adalah hash yang garamnya
+ * berganti setiap hari sehingga tidak bisa dipakai melacak orang lintas hari.
+ */
+export const kunjungan = pgTable("kunjungan", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  path: text("path").notNull(),
+  referrer: text("referrer"),
+  sumber: text("sumber"),
+  kota: text("kota"),
+  provinsi: text("provinsi"),
+  perangkat: text("perangkat").notNull(),
+  pengunjung: text("pengunjung").notNull(),
+}, (table) => [index("kunjungan_created_at_idx").on(table.createdAt)]);
 
 const internalOrHttpsImage = z.string().trim().min(1).max(2048).refine((value) => {
   if (/^\/(?:uploads|ahmad|galeri|scrollytelling|liputan)\/[a-zA-Z0-9._/-]+$/.test(value)) return true;
@@ -69,6 +86,28 @@ export const insertPageSchema = createInsertSchema(pages).omit({ id: true }).ext
   title: z.string().trim().min(3).max(180),
   content: z.string().min(20).max(200_000),
 });
+
+export const insertKunjunganSchema = z.object({
+  path: z.string().trim().min(1).max(200).regex(/^\/[^\s?#]*$/),
+  referrer: z.string().trim().max(500).nullable().optional(),
+  sumber: z.string().trim().max(60).regex(/^[a-zA-Z0-9._-]*$/).nullable().optional(),
+});
+
+export type Kunjungan = typeof kunjungan.$inferSelect;
+export type InsertKunjungan = typeof kunjungan.$inferInsert;
+
+export interface JumlahBerlabel { nama: string; jumlah: number; }
+
+export interface StatistikKunjungan {
+  hari: number;
+  total: { kunjungan: number; pengunjung: number };
+  perHari: { tanggal: string; kunjungan: number; pengunjung: number }[];
+  kota: (JumlahBerlabel & { provinsi: string })[];
+  provinsi: JumlahBerlabel[];
+  halaman: JumlahBerlabel[];
+  sumber: JumlahBerlabel[];
+  perangkat: JumlahBerlabel[];
+}
 
 export type GalleryItem = typeof gallery.$inferSelect;
 export type InsertGalleryItem = z.infer<typeof insertGallerySchema>;

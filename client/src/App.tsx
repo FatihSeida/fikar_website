@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppLoader from "@/components/AppLoader";
 import JourneyNavigator from "@/components/JourneyNavigator";
 import Home from "@/pages/Home";
+import { catatKunjungan } from "@/lib/analytics";
 
 const NoteDetail = lazy(() => import("@/pages/NoteDetail"));
 const TentangPage = lazy(() => import("@/pages/TentangPage"));
@@ -29,6 +30,7 @@ function Router() {
   const [location] = useLocation();
   useEffect(() => {
     if (!window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
+    catatKunjungan(location);
   }, [location]);
   return (
     <>

@@ -8,6 +8,7 @@ export default function SiteFooter() {
         <div>
           <p className="font-serif text-2xl">{site.nama}</p>
           <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/45">Transformasi gerakan organisasi berbasis bukti</p>
+          <p className="mt-4 max-w-sm text-xs leading-relaxed text-white/40">Situs ini mencatat kunjungan secara anonim, tanpa cookie dan tanpa menyimpan alamat IP.</p>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-[0.14em] text-white/55">
           <Link href="/hmi-evidence" className="evidence-shimmer">HMI Evidence</Link>

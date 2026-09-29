@@ -8,6 +8,13 @@
       "when": 1790051004851,
       "tag": "0000_bored_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790689913243,
+      "tag": "0001_analytics_kunjungan",
+      "breakpoints": true
     }
   ]
 }
