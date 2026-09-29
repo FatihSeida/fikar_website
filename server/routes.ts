@@ -8,7 +8,7 @@ import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { insertGallerySchema, insertNoteSchema, insertKunjunganSchema } from "@shared/schema";
 import { lookupGeo } from "./geo";
 import { namaKota, namaProvinsi } from "./wilayah";
-import { buatCacheSingkat, kunciIp } from "./perlindungan";
+import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -120,6 +120,7 @@ function buatPembatas(batas: number, jendelaMs: number) {
 
 // Batasnya longgar karena banyak pengguna seluler berbagi satu IP publik (CGNAT operator).
 const bolehCatatKunjungan = buatPembatas(300, 60 * 1000);
+const kuotaKunjungan = buatPenghitung(batas.kunjunganPerMenit, 60 * 1000);
 
 const pelacakOtomatis = /bot|crawl|spider|slurp|facebookexternalhit|headless|lighthouse|curl|wget|python|preview/i;
 
@@ -366,6 +367,9 @@ export async function registerRoutes(
     if (!bolehCatatKunjungan(kunciIp(ip))) return res.status(204).end();
     const parsed = insertKunjunganSchema.safeParse(req.body);
     if (!parsed.success || parsed.data.path.startsWith("/admin")) return res.status(400).end();
+
+    // Kuota seluruh situs habis: kunjungan dilewati tanpa galat, pengunjung tidak merasakan apa-apa.
+    if (!kuotaKunjungan("semua").boleh) return res.status(204).end();
 
     const lokasi = lookupGeo(ip);
     const { referrer, sumber } = tentukanSumber(parsed.data.referrer, parsed.data.sumber, req.get("host"));

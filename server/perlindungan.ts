@@ -24,6 +24,9 @@ export const batas = {
   permintaanAktif: angkaEnv("BATAS_PERMINTAAN_AKTIF", 200),
   perIpPerMenit: angkaEnv("BATAS_PER_IP_PER_MENIT", 3000),
   apiPerIpPerMenit: angkaEnv("BATAS_API_PER_IP_PER_MENIT", 600),
+  // Batas total seluruh situs, bukan per IP: serangan dari banyak alamat
+  // sekalipun tidak bisa memenuhi database dengan kunjungan palsu.
+  kunjunganPerMenit: angkaEnv("BATAS_KUNJUNGAN_PER_MENIT", 3000),
 };
 
 /** Penghitung jendela tetap per kunci; memorinya tetap kecil walau diserang dari banyak IP. */
