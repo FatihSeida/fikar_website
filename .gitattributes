@@ -1,0 +1,2 @@
+# Skrip shell dijalankan di VPS Linux; akhir baris CRLF dari Windows membuatnya gagal.
+*.sh text eol=lf
