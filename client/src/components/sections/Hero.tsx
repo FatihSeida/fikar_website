@@ -38,7 +38,7 @@ export default function Hero() {
               Jelajahi HMI Evidence <ArrowUpRight className="h-4 w-4" />
             </Link>
             <Link href="/tentang" className="inline-flex items-center border border-white/40 px-6 py-3 text-xs uppercase tracking-[0.16em] text-white hover:border-white">
-              Tentang Ahmad
+              Siapa Zulfikar
             </Link>
           </div>
         </div>

@@ -1,14 +1,16 @@
 import { db, type Db } from "./db";
 import {
-  gallery, notes, pages, kunjungan,
+  gallery, notes, pages, masalahKomisariat, kunjungan, hasilKuis,
   type GalleryItem, type InsertGalleryItem, type Note, type InsertNote, type Page, type InsertPage,
-  type InsertKunjungan, type Kunjungan, type StatistikKunjungan, type JumlahBerlabel,
+  type MasalahKomisariat, type InsertMasalah, type InsertKunjungan, type Kunjungan, type HasilKuis, type InsertHasilKuis,
+  type StatistikKunjungan, type JumlahBerlabel,
 } from "@shared/schema";
-import { asc, eq, gte, sql } from "drizzle-orm";
+import { asc, desc, eq, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
   getGalleryItems(): Promise<GalleryItem[]>;
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
+  updateGalleryUrutan(id: number, urutan: number): Promise<void>;
   deleteGalleryItem(id: number): Promise<void>;
 
   getNotes(): Promise<Note[]>;
@@ -20,8 +22,16 @@ export interface IStorage {
   getPage(slug: string): Promise<Page | undefined>;
   upsertPage(slug: string, data: { title: string; content: string }): Promise<Page>;
 
+  createMasalah(data: InsertMasalah): Promise<MasalahKomisariat>;
+  getMasalah(): Promise<MasalahKomisariat[]>;
+  updateMasalahStatus(id: number, status: string): Promise<MasalahKomisariat | undefined>;
+  deleteMasalah(id: number): Promise<void>;
+
   recordKunjungan(data: InsertKunjungan): Promise<void>;
   getStatistikKunjungan(hari: number): Promise<StatistikKunjungan>;
+
+  createHasilKuis(data: InsertHasilKuis): Promise<HasilKuis>;
+  getHasilKuis(batas: number): Promise<HasilKuis[]>;
 }
 
 const BATAS_DAFTAR = 15;
@@ -80,17 +90,20 @@ function ringkasKunjungan(baris: Kunjungan[], hari: number): StatistikKunjungan 
   };
 }
 
-
 export class DatabaseStorage implements IStorage {
   constructor(private readonly db: Db) {}
 
   async getGalleryItems(): Promise<GalleryItem[]> {
-    return await this.db.select().from(gallery);
+    return await this.db.select().from(gallery).orderBy(asc(gallery.urutan), asc(gallery.id));
   }
 
   async createGalleryItem(insertItem: InsertGalleryItem): Promise<GalleryItem> {
     const [item] = await this.db.insert(gallery).values(insertItem).returning();
     return item;
+  }
+
+  async updateGalleryUrutan(id: number, urutan: number): Promise<void> {
+    await this.db.update(gallery).set({ urutan }).where(eq(gallery.id, id));
   }
 
   async deleteGalleryItem(id: number): Promise<void> {
@@ -135,6 +148,24 @@ export class DatabaseStorage implements IStorage {
     return page;
   }
 
+  async createMasalah(data: InsertMasalah): Promise<MasalahKomisariat> {
+    const [item] = await this.db.insert(masalahKomisariat).values(data).returning();
+    return item;
+  }
+
+  async getMasalah(): Promise<MasalahKomisariat[]> {
+    return await this.db.select().from(masalahKomisariat).orderBy(desc(masalahKomisariat.createdAt));
+  }
+
+  async updateMasalahStatus(id: number, status: string): Promise<MasalahKomisariat | undefined> {
+    const [item] = await this.db.update(masalahKomisariat).set({ status }).where(eq(masalahKomisariat.id, id)).returning();
+    return item;
+  }
+
+  async deleteMasalah(id: number): Promise<void> {
+    await this.db.delete(masalahKomisariat).where(eq(masalahKomisariat.id, id));
+  }
+
   async recordKunjungan(data: InsertKunjungan): Promise<void> {
     await this.db.insert(kunjungan).values(data);
   }
@@ -171,6 +202,15 @@ export class DatabaseStorage implements IStorage {
       perangkat,
     };
   }
+
+  async createHasilKuis(data: InsertHasilKuis): Promise<HasilKuis> {
+    const [item] = await this.db.insert(hasilKuis).values(data).returning();
+    return item;
+  }
+
+  async getHasilKuis(batas: number): Promise<HasilKuis[]> {
+    return await this.db.select().from(hasilKuis).orderBy(desc(hasilKuis.createdAt)).limit(batas);
+  }
 }
 
 /**
@@ -184,7 +224,9 @@ export class MemStorage implements IStorage {
   private galleryItems: GalleryItem[] = [];
   private noteItems: Note[] = [];
   private pageItems: Page[] = [];
+  private masalahItems: MasalahKomisariat[] = [];
   private kunjunganItems: Kunjungan[] = [];
+  private hasilKuisItems: HasilKuis[] = [];
   private idBerikutnya = 1;
 
   private id(): number {
@@ -192,7 +234,7 @@ export class MemStorage implements IStorage {
   }
 
   async getGalleryItems(): Promise<GalleryItem[]> {
-    return [...this.galleryItems];
+    return [...this.galleryItems].sort((a, b) => a.urutan - b.urutan || a.id - b.id);
   }
 
   async createGalleryItem(insertItem: InsertGalleryItem): Promise<GalleryItem> {
@@ -201,9 +243,18 @@ export class MemStorage implements IStorage {
       image: insertItem.image,
       caption: insertItem.caption,
       colSpan: insertItem.colSpan ?? "col-span-1",
+      tata: insertItem.tata ?? "lebar",
+      posisi: insertItem.posisi ?? null,
+      gambarPenuh: insertItem.gambarPenuh ?? null,
+      urutan: insertItem.urutan ?? 0,
     };
     this.galleryItems.push(item);
     return item;
+  }
+
+  async updateGalleryUrutan(id: number, urutan: number): Promise<void> {
+    const item = this.galleryItems.find((foto) => foto.id === id);
+    if (item) item.urutan = urutan;
   }
 
   async deleteGalleryItem(id: number): Promise<void> {
@@ -263,6 +314,38 @@ export class MemStorage implements IStorage {
     return page;
   }
 
+  async createMasalah(data: InsertMasalah): Promise<MasalahKomisariat> {
+    const item: MasalahKomisariat = {
+      id: this.id(),
+      cabang: data.cabang,
+      komisariat: data.komisariat,
+      kelompok: data.kelompok ?? null,
+      masalah: data.masalah,
+      nama: data.nama ?? null,
+      kontak: data.kontak ?? null,
+      bolehDikutip: data.bolehDikutip ?? false,
+      status: "baru",
+      createdAt: new Date(),
+      hasilKuisId: data.hasilKuisId ?? null,
+    };
+    this.masalahItems.push(item);
+    return item;
+  }
+
+  async getMasalah(): Promise<MasalahKomisariat[]> {
+    return [...this.masalahItems].reverse();
+  }
+
+  async updateMasalahStatus(id: number, status: string): Promise<MasalahKomisariat | undefined> {
+    const item = this.masalahItems.find((masalah) => masalah.id === id);
+    if (item) item.status = status;
+    return item;
+  }
+
+  async deleteMasalah(id: number): Promise<void> {
+    this.masalahItems = this.masalahItems.filter((item) => item.id !== id);
+  }
+
   async recordKunjungan(data: InsertKunjungan): Promise<void> {
     this.kunjunganItems.push({
       id: this.id(),
@@ -280,6 +363,27 @@ export class MemStorage implements IStorage {
   async getStatistikKunjungan(hari: number): Promise<StatistikKunjungan> {
     const sejak = awalRentang(hari).getTime();
     return ringkasKunjungan(this.kunjunganItems.filter((item) => item.createdAt.getTime() >= sejak), hari);
+  }
+
+  async createHasilKuis(data: InsertHasilKuis): Promise<HasilKuis> {
+    const item: HasilKuis = {
+      id: this.id(),
+      createdAt: new Date(),
+      skor: data.skor,
+      jawaban: data.jawaban,
+      komisariat: data.komisariat ?? null,
+      cabang: data.cabang ?? null,
+      pesertaLk1: data.pesertaLk1 ?? null,
+      aktifLk1: data.aktifLk1 ?? null,
+      programRencana: data.programRencana ?? null,
+      programTerlaksana: data.programTerlaksana ?? null,
+    };
+    this.hasilKuisItems.push(item);
+    return item;
+  }
+
+  async getHasilKuis(batas: number): Promise<HasilKuis[]> {
+    return [...this.hasilKuisItems].reverse().slice(0, batas);
   }
 }
 

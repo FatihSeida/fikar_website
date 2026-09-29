@@ -179,8 +179,8 @@
 .evidence-commitment > .commitment-statement { max-width: 760px; margin-top: 36px; color: #e8d19b !important; font-family: var(--font-serif); font-size: clamp(20px, 2vw, 29px) !important; line-height: 1.55; }
 .commitment-link { margin-top: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 20px; background: #dcc38a; color: #071610; padding: 17px 24px; font-size: 13px; }
 .commitment-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(920px, 100%); margin: 52px auto 0; text-align: left; }
-.commitment-choices a { display: grid; grid-template-columns: 1fr auto; min-height: 122px; padding: 20px; border: 1px solid #e8d19b3d; color: #f4ead0; background: #0a2018b3; transition: transform .3s ease, border-color .3s ease, background-color .3s ease; }
-.commitment-choices a:hover { transform: translateY(-4px); border-color: #e8d19b99; background: #102a20; }
+.commitment-choices a, .commitment-choices button { display: grid; grid-template-columns: 1fr auto; min-height: 122px; padding: 20px; border: 1px solid #e8d19b3d; color: #f4ead0; background: #0a2018b3; text-align: left; transition: transform .3s ease, border-color .3s ease, background-color .3s ease; }
+.commitment-choices a:hover, .commitment-choices button:hover { transform: translateY(-4px); border-color: #e8d19b99; background: #102a20; }
 .commitment-choices span { grid-column: 1 / -1; color: #d6bb79; font-family: var(--font-serif); font-size: 12px; }
 .commitment-choices strong { align-self: end; font-family: var(--font-serif); font-size: 18px; font-weight: 400; }
 .commitment-choices svg { align-self: end; color: #dcc38a; }
@@ -226,8 +226,15 @@
 .basis-steps span { font-size: 12px; }
 .basis-steps strong { display: block; margin-top: 6px; font-family: var(--font-serif); font-size: 21px; font-weight: 400; }
 .basis-steps p { margin-top: 10px; color: #c9d6c9b3; font-size: 13px; line-height: 1.65; }
-/* Visi, misi, serta pilar dan program strategis, tepat sebelum pilihan lanjutan. */
+/* Visi, misi, serta pilar dan program strategis di dalam dialog bersama. */
+.visi-dialog-overlay { position: fixed; inset: 0; z-index: 350; background: #010805e8; backdrop-filter: blur(10px); animation: history-detail-in .25s ease both; }
+.visi-dialog-content { position: fixed; z-index: 351; inset: 3vh max(16px, calc((100vw - 1300px) / 2)); overflow-y: auto; overscroll-behavior: contain; border: 1px solid #e8d19b59; background: #071610; color: #f6f4e9; box-shadow: 0 24px 90px #000b; scrollbar-color: #a78d52 #071610; }
+.visi-dialog-content [id] { scroll-margin-top: 90px; }
+.visi-dialog-content:focus-visible { outline: 2px solid #e7cf92; outline-offset: -2px; }
+.visi-dialog-close { position: sticky; z-index: 2; top: 14px; left: calc(100% - 62px); display: grid; place-items: center; width: 46px; height: 46px; margin: 14px 14px -60px auto; border: 1px solid #e8d19b80; background: #071610ed; color: #f4ead0; }
+.visi-dialog-close:hover { background: #173628; }
 .evidence-program { position: relative; padding: 40px 8vw 60px; background: #071610; }
+.visi-dialog-content .evidence-program { padding: 72px clamp(24px, 5vw, 78px) 80px; }
 .program-inner { max-width: 1180px; margin-inline: auto; }
 .program-vision { margin: 28px 0 90px; padding-top: 44px; border-top: 1px solid #e8d19b33; }
 .program-vision figcaption { color: #dcc38a; font-size: 10px; letter-spacing: .19em; text-transform: uppercase; }
@@ -237,6 +244,10 @@
 .program-missions span { color: #e0c98e; font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
 .program-missions p { color: #d9e4d8cc; font-size: 15px; line-height: 1.75; }
 .evidence-program .basis-divider { margin: 90px 0 80px; }
+.program-jump { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 34px; }
+.program-jump button { display: flex; align-items: baseline; gap: 12px; min-height: 54px; padding: 12px 14px; border: 1px solid #e8d19b36; color: #e7ecdf; background: #10271c; font-size: 12px; line-height: 1.45; text-align: left; }
+.program-jump button:hover, .program-jump button:focus-visible { border-color: #e8d19b99; background: #183829; }
+.program-jump span { flex: none; color: #dcc38a; font-family: var(--font-serif); font-size: 18px; }
 .program-pillars { margin-top: 56px; border-bottom: 1px solid #e8d19b26; }
 .program-pillar { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 48px; padding: 44px 0; border-top: 1px solid #e8d19b26; }
 .pillar-head > span { color: #dcc38a; font-size: 10px; letter-spacing: .17em; text-transform: uppercase; }
@@ -244,17 +255,42 @@
 .pillar-head > p { margin-top: 14px; color: #d9e4d8b8; font-size: 14px; line-height: 1.75; }
 .pillar-head > .pillar-answers { color: #c9d6c9b3; font-size: 12px; }
 .pillar-answers em { margin-right: 10px; color: #dcc38a; font-size: 9px; font-style: normal; letter-spacing: .17em; text-transform: uppercase; }
-.pillar-programs { display: grid; gap: 34px; }
-.pillar-programs > li { display: grid; grid-template-columns: 46px 1fr; gap: 14px; }
-.pillar-programs > li > span { color: #e0c98e; font-family: var(--font-serif); font-size: 24px; line-height: 1.1; }
+.pillar-programs { display: grid; gap: 8px; }
+.pillar-programs > li { min-width: 0; }
+.program-entry { border: 1px solid #e8d19b30; background: #0d2118; }
+.program-entry[open] { border-color: #e8d19b66; background: #11271d; }
+.program-entry summary { display: grid; grid-template-columns: 42px 1fr 20px; gap: 12px; align-items: center; min-height: 70px; padding: 16px; cursor: pointer; list-style: none; }
+.program-entry summary::-webkit-details-marker { display: none; }
+.program-entry summary > span:first-child { color: #e0c98e; font-family: var(--font-serif); font-size: 24px; line-height: 1.1; }
+.program-entry-toggle { color: #dcc38a; font-size: 23px; font-weight: 300; line-height: 1; text-align: center; }
+.program-entry[open] .program-entry-toggle { transform: rotate(45deg); }
+.program-entry-body { padding: 0 22px 24px 70px; }
 .pillar-programs h4 { color: #f4ead0; font-size: 17px; font-weight: 500; line-height: 1.35; }
-.pillar-programs > li > div > p { margin-top: 8px; color: #d9e4d8b8; font-size: 14px; line-height: 1.7; }
 .pillar-programs dl { margin-top: 16px; }
 .pillar-programs dt { margin-bottom: 6px; color: #dcc38a; font-size: 9px; letter-spacing: .17em; text-transform: uppercase; }
 .pillar-programs dd { color: #c9d6c9cc; font-size: 13.5px; line-height: 1.65; }
+.program-detail { margin-top: 18px; }
+.program-detail h5 { margin-bottom: 6px; color: #dcc38a; font-size: 9px; font-weight: 500; letter-spacing: .17em; text-transform: uppercase; }
+.program-detail p, .program-detail li { color: #c9d6c9cc; font-size: 13.5px; line-height: 1.7; }
+.program-detail ul { display: grid; gap: 5px; padding-left: 18px; list-style: disc; }
 .evidence-commitment.evidence-closing { padding-top: 60px; background: none; }
+/* Ajakan dukung di akhir halaman: rata kiri di dalam penutup yang rata tengah. */
+.evidence-closing .evidence-dukung { width: min(920px, 100%); margin: 0 auto 64px; text-align: left; }
+.evidence-closing .evidence-dukung h3 { color: #f4ead0; }
+.basis-link { display: inline-flex; align-items: center; gap: 10px; margin-top: 26px; padding-bottom: 6px; border-bottom: 1px solid #dcc38a80; color: #e8d19b; font-size: 14px; }
+.basis-link:hover { border-color: #e8d19b; }
+.program-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; color: #c9d6c999; font-size: 11px; letter-spacing: .04em; transition: color .2s; }
+.program-link:hover { color: #e8d19b; }
+.pillar-programs > li:target h4, .program-pillar:target h3 { color: #f2dda5; }
+.resume-reading { position: fixed; z-index: 55; top: 76px; left: 50%; display: flex; align-items: stretch; transform: translateX(-50%); border: 1px solid #e3c98299; background: #06130fe6; color: #f5e9c7; box-shadow: 0 18px 50px #0009; backdrop-filter: blur(12px); animation: history-detail-in .35s ease both; }
+.resume-reading > button:first-child { display: grid; padding: 10px 18px; text-align: left; }
+.resume-reading span { color: #dfe7dba0; font-size: 8px; letter-spacing: .16em; text-transform: uppercase; }
+.resume-reading strong { margin-top: 2px; font-family: var(--font-serif); font-size: 14px; font-weight: 400; }
+.resume-close { display: grid; place-items: center; width: 38px; border-left: 1px solid #e3c98240; color: #dfe7dba0; }
+.resume-close:hover { color: #f5e9c7; }
 
 @media (max-width: 1023px) {
+  .program-jump { grid-template-columns: repeat(2, 1fr); }
   .program-pillar { grid-template-columns: 1fr; gap: 26px; }
   .basis-problems { grid-template-columns: repeat(2, 1fr); }
   .basis-steps { grid-template-columns: repeat(3, 1fr); row-gap: 34px; }
@@ -272,12 +308,21 @@
   .basis-steps li::before { top: 24px; left: -4px; }
   .basis-divider { margin: 72px 0 64px; }
   .evidence-program { padding: 24px 22px 40px; }
+  .visi-dialog-content { inset: 0; border: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .visi-dialog-content .evidence-program { padding: 84px 22px 56px; }
+  .visi-dialog-close { top: 10px; margin: 10px 12px -56px auto; }
   .program-vision { margin-bottom: 60px; padding-top: 32px; }
   .program-vision blockquote { font-size: clamp(22px, 6vw, 28px); }
   .program-missions { grid-template-columns: 1fr; }
   .program-missions p { font-size: 14px; }
+  .program-jump { display: flex; overflow-x: auto; gap: 8px; margin-inline: -22px; padding: 0 22px 8px; scroll-snap-type: x proximity; }
+  .program-jump button { flex: 0 0 70%; scroll-snap-align: start; }
   .evidence-program .basis-divider { margin: 64px 0 56px; }
   .program-pillar { padding: 32px 0; }
+  .program-entry summary { grid-template-columns: 32px 1fr 18px; gap: 9px; padding: 14px 12px; }
+  .program-entry summary > span:first-child { font-size: 20px; }
+  .program-entry h4 { font-size: 15px; }
+  .program-entry-body { padding: 0 14px 20px 53px; }
   .evidence-commitment.evidence-closing { padding-top: 32px; }
   .evidence-prologue { padding: 112px 24px 112px; min-height: 100svh; align-items: flex-start; }
   .prologue-content { margin-top: auto; margin-bottom: auto; }
@@ -396,7 +441,7 @@
   .evidence-commitment h2 { font-size: clamp(34px, 9vw, 46px); }
   .evidence-commitment > p:not(.story-eyebrow) { font-size: 14px; line-height: 1.75; }
   .commitment-choices { grid-template-columns: 1fr; gap: 8px; margin-top: 38px; }
-  .commitment-choices a { min-height: 92px; padding: 17px 18px; }
+  .commitment-choices a, .commitment-choices button { min-height: 92px; padding: 17px 18px; }
   .commitment-choices strong { font-size: 17px; }
   .evidence-commitment > .story-manifesto { margin-top: 66px; padding-inline: 7px; font-size: clamp(28px, 8vw, 40px) !important; }
 }

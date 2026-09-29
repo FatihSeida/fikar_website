@@ -8,7 +8,7 @@ export default function PaperGrain() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[100] opacity-[0.035] mix-blend-multiply"
+      className="pointer-events-none fixed inset-0 z-[100] opacity-[0.035] mix-blend-multiply print:hidden"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
         <filter id="paperGrain">

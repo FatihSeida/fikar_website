@@ -5,10 +5,13 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
-import { insertGallerySchema, insertNoteSchema, insertKunjunganSchema } from "@shared/schema";
+import { insertGallerySchema, insertNoteSchema, insertMasalahSchema, insertKunjunganSchema, insertHasilKuisSchema, statusMasalahIds } from "@shared/schema";
 import { lookupGeo } from "./geo";
+import { galeriBawaan, galeriSeedLama } from "@shared/galeri";
 import { namaKota, namaProvinsi } from "./wilayah";
 import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan";
+import { auditSudahDibuka, JUMLAH_SOAL_INTI } from "@shared/audit";
+import { isProduction } from "./env";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -119,8 +122,12 @@ function buatPembatas(batas: number, jendelaMs: number) {
 }
 
 // Batasnya longgar karena banyak pengguna seluler berbagi satu IP publik (CGNAT operator).
+const bolehKirimMasalah = buatPembatas(20, 60 * 60 * 1000);
+const bolehKirimKuis = buatPembatas(60, 60 * 60 * 1000);
 const bolehCatatKunjungan = buatPembatas(300, 60 * 1000);
 const kuotaKunjungan = buatPenghitung(batas.kunjunganPerMenit, 60 * 1000);
+const kuotaMasalah = buatPenghitung(batas.masalahPerJam, 60 * 60 * 1000);
+const kuotaKuis = buatPenghitung(batas.kuisPerJam, 60 * 60 * 1000);
 
 const pelacakOtomatis = /bot|crawl|spider|slurp|facebookexternalhit|headless|lighthouse|curl|wget|python|preview/i;
 
@@ -262,7 +269,8 @@ export async function registerRoutes(
   app.post("/api/gallery", requireAdmin, async (req, res) => {
     const parsed = insertGallerySchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
-    const item = await storage.createGalleryItem(parsed.data);
+    const urutan = Math.max(0, ...(await storage.getGalleryItems()).map((foto) => foto.urutan)) + 1;
+    const item = await storage.createGalleryItem({ ...parsed.data, urutan });
     res.status(201).json(item);
   });
 
@@ -359,6 +367,50 @@ export async function registerRoutes(
     },
   }));
 
+  // --- Kirim Masalah Komisariatmu ---
+  // Kuis dan kirim masalah baru dibuka 7 Oktober 2026; di pengembangan selalu terbuka untuk pengujian.
+  const auditDitutup = (res: Response) => {
+    if (!isProduction || auditSudahDibuka()) return false;
+    res.status(403).json({ message: "Audit komisariat dibuka 7 Oktober 2026" });
+    return true;
+  };
+
+  app.post("/api/masalah", async (req, res) => {
+    if (auditDitutup(res)) return;
+    // Kolom jebakan yang disembunyikan dari manusia; bot biasanya mengisinya.
+    if (typeof req.body?.situs === "string" && req.body.situs.trim()) return res.status(201).json({ success: true });
+    if (!bolehKirimMasalah(kunciIp(req.ip || "unknown"))) {
+      return res.status(429).json({ message: "Terlalu banyak kiriman. Coba lagi sekitar satu jam lagi" });
+    }
+    const parsed = insertMasalahSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (!kuotaMasalah("semua").boleh) return res.status(429).json({ message: "Kiriman sedang sangat ramai. Coba lagi beberapa saat lagi" });
+    const { persetujuan: _persetujuan, ...data } = parsed.data;
+    await storage.createMasalah(data);
+    res.status(201).json({ success: true });
+  });
+
+  app.get("/api/admin/masalah", requireAdmin, async (_req, res) => {
+    res.json(await storage.getMasalah());
+  });
+
+  app.patch("/api/admin/masalah/:id", requireAdmin, async (req, res) => {
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID masalah tidak valid" });
+    const parsed = z.object({ status: z.enum(statusMasalahIds) }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: "Status tidak valid" });
+    const item = await storage.updateMasalahStatus(id, parsed.data.status);
+    if (!item) return res.status(404).json({ message: "Masalah tidak ditemukan" });
+    res.json(item);
+  });
+
+  app.delete("/api/admin/masalah/:id", requireAdmin, async (req, res) => {
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID masalah tidak valid" });
+    await storage.deleteMasalah(id);
+    res.json({ success: true });
+  });
+
   // --- Analytics: kunjungan tanpa cookie dan tanpa menyimpan IP ---
   app.post("/api/kunjungan", async (req, res) => {
     const userAgent = req.get("user-agent") || "";
@@ -389,6 +441,47 @@ export async function registerRoutes(
     const hari = Number(req.query.hari ?? 30);
     const rentang = Number.isInteger(hari) ? Math.min(365, Math.max(1, hari)) : 30;
     res.json(await storage.getStatistikKunjungan(rentang));
+  });
+
+  // --- Kuis "Seberapa Evidence Komisariatmu?" ---
+  app.post("/api/kuis", async (req, res) => {
+    if (auditDitutup(res)) return;
+    if (!bolehKirimKuis(kunciIp(req.ip || "unknown"))) {
+      return res.status(429).json({ message: "Terlalu banyak kiriman. Coba lagi nanti" });
+    }
+    const parsed = insertHasilKuisSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (!kuotaKuis("semua").boleh) return res.status(429).json({ message: "Kiriman sedang sangat ramai. Coba lagi beberapa saat lagi" });
+    const data = parsed.data;
+    const hasil = await storage.createHasilKuis({
+      // Skor utama hanya dari soal inti supaya komisariat yang mengikuti audit lanjutan tetap sebanding.
+      skor: data.jawaban.slice(0, JUMLAH_SOAL_INTI).reduce((jumlah, nilai) => jumlah + nilai, 0),
+      jawaban: data.jawaban.join(","),
+      komisariat: data.komisariat ?? null,
+      cabang: data.cabang ?? null,
+      pesertaLk1: data.pesertaLk1 ?? null,
+      aktifLk1: data.aktifLk1 ?? null,
+      programRencana: data.programRencana ?? null,
+      programTerlaksana: data.programTerlaksana ?? null,
+    });
+    // Cerita kondisi komisariat masuk ke kotak Masalah Komisariat, terhubung ke hasil kuisnya.
+    if (data.cerita && data.komisariat && data.cabang) {
+      await storage.createMasalah({
+        cabang: data.cabang,
+        komisariat: data.komisariat,
+        kelompok: null,
+        masalah: data.cerita,
+        nama: data.nama ?? null,
+        kontak: data.kontak ?? null,
+        bolehDikutip: data.bolehDikutip,
+        hasilKuisId: hasil.id,
+      });
+    }
+    res.status(201).json({ success: true });
+  });
+
+  app.get("/api/admin/kuis", requireAdmin, async (_req, res) => {
+    res.json(await storage.getHasilKuis(1000));
   });
 
   await seedDatabase();
@@ -495,17 +588,22 @@ async function seedDatabase() {
   for (const item of await storage.getGalleryItems()) {
     if (legacyCaptions.has(item.caption)) await storage.deleteGalleryItem(item.id);
   }
-  const gallerySeeds = [
-    { image: "/ahmad/portrait-standing.webp", caption: "Ruang pengabdian" },
-    { image: "/ahmad/gallery-01.webp", caption: "Menyampaikan gagasan" },
-    { image: "/ahmad/gallery-02.webp", caption: "Jejak perjalanan" },
-    { image: "/ahmad/portrait-hmi.webp", caption: "Bersama HMI" },
-    { image: "/ahmad/gallery-03.webp", caption: "Percakapan tentang arah" },
-    { image: "/ahmad/gallery-04.webp", caption: "Dokumentasi kegiatan" },
-  ];
-  const existingImages = new Set((await storage.getGalleryItems()).map((item) => item.image));
-  for (const seed of gallerySeeds) {
-    if (!existingImages.has(seed.image)) await storage.createGalleryItem({ ...seed, colSpan: "col-span-1" });
+  // Galeri publik dulu ditanam di kode dan tidak membaca database. Sekarang
+  // database menjadi sumbernya: seed lama yang tidak pernah tampil dibuang,
+  // lalu foto yang selama ini tampil dimasukkan sekali, berurutan. Penandanya
+  // adalah foto dengan urutan > 0, jadi foto yang dihapus admin tidak kembali.
+  const seedLama = new Set(galeriSeedLama.map(([image, caption]) => `${image}|${caption}`));
+  for (const item of await storage.getGalleryItems()) {
+    if (seedLama.has(`${item.image}|${item.caption}`)) await storage.deleteGalleryItem(item.id);
+  }
+  const galeriSekarang = await storage.getGalleryItems();
+  if (!galeriSekarang.some((item) => item.urutan > 0)) {
+    let urutan = 1;
+    for (const foto of galeriBawaan) {
+      await storage.createGalleryItem({ ...foto, colSpan: "col-span-1", posisi: foto.posisi ?? null, gambarPenuh: foto.gambarPenuh ?? null, urutan: urutan++ });
+    }
+    // Unggahan admin yang sudah ada sebelumnya ditaruh sesudah foto bawaan.
+    for (const item of galeriSekarang) await storage.updateGalleryUrutan(item.id, urutan++);
   }
 
   const pemikiranPage = await storage.getPage("pemikiran-ide");
