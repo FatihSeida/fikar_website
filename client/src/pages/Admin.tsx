@@ -8,11 +8,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut, BarChart3 } from "lucide-react";
+import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut, BarChart3, Inbox, ListChecks } from "lucide-react";
 import { Link } from "wouter";
 import type { GalleryItem, Note, Page } from "@shared/schema";
+import { labelTataGaleri, tataGaleri, type TataGaleri } from "@shared/galeri";
 import RichTextEditor from "@/components/RichTextEditor";
 import PengunjungPanel from "@/components/admin/PengunjungPanel";
+import MasalahPanel from "@/components/admin/MasalahPanel";
+import KuisPanel from "@/components/admin/KuisPanel";
 
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
@@ -89,10 +92,11 @@ function GalleryManager() {
   const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [tata, setTata] = useState<TataGaleri>("lebar");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const createMutation = useMutation({
-    mutationFn: async (data: { image: string; caption: string }) => {
+    mutationFn: async (data: { image: string; caption: string; tata: TataGaleri }) => {
       await apiRequest("POST", "/api/gallery", { ...data, colSpan: "col-span-1" });
     },
     onSuccess: () => {
@@ -133,7 +137,10 @@ function GalleryManager() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-serif font-bold">Kelola Galeri</h2>
+        <div>
+          <h2 className="text-2xl font-serif font-bold">Kelola Galeri</h2>
+          <p className="text-sm text-muted-foreground">Urutan di sini sama dengan urutan di halaman Galeri. Foto baru tampil paling akhir.</p>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-gallery"><Plus className="w-4 h-4 mr-2" /> Tambah Gambar</Button>
@@ -171,8 +178,19 @@ function GalleryManager() {
                   data-testid="input-gallery-caption"
                 />
               </div>
+              <div>
+                <Label htmlFor="tata-galeri">Bentuk di halaman Galeri</Label>
+                <select
+                  id="tata-galeri"
+                  value={tata}
+                  onChange={(e) => setTata(e.target.value as TataGaleri)}
+                  className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {tataGaleri.map((pilihan) => <option key={pilihan} value={pilihan}>{labelTataGaleri[pilihan]}</option>)}
+                </select>
+              </div>
               <Button
-                onClick={() => createMutation.mutate({ image: imageUrl, caption })}
+                onClick={() => createMutation.mutate({ image: imageUrl, caption, tata })}
                 disabled={!imageUrl || !caption || createMutation.isPending}
                 className="w-full"
                 data-testid="button-submit-gallery"
@@ -193,7 +211,7 @@ function GalleryManager() {
               <div className="aspect-square relative">
                 <img src={item.image} alt={item.caption} className="w-full h-full object-cover" />
                 <button
-                  onClick={() => deleteMutation.mutate(item.id)}
+                  onClick={() => { if (window.confirm("Hapus foto ini dari galeri?")) deleteMutation.mutate(item.id); }}
                   className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   data-testid={`button-delete-gallery-${item.id}`}
                 >
@@ -202,6 +220,7 @@ function GalleryManager() {
               </div>
               <CardContent className="p-3">
                 <p className="text-sm text-muted-foreground truncate">{item.caption}</p>
+                <p className="mt-1 text-xs text-muted-foreground/70">{labelTataGaleri[item.tata as TataGaleri] ?? item.tata}</p>
               </CardContent>
             </Card>
           ))}
@@ -565,6 +584,12 @@ export default function Admin() {
             <TabsTrigger value="pengunjung" className="gap-2">
               <BarChart3 className="w-4 h-4" /> Pengunjung
             </TabsTrigger>
+            <TabsTrigger value="masalah" className="gap-2">
+              <Inbox className="w-4 h-4" /> Masalah Komisariat
+            </TabsTrigger>
+            <TabsTrigger value="kuis" className="gap-2">
+              <ListChecks className="w-4 h-4" /> Hasil Kuis
+            </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2" data-testid="tab-gallery">
               <Image className="w-4 h-4" /> Galeri
             </TabsTrigger>
@@ -575,6 +600,12 @@ export default function Admin() {
 
           <TabsContent value="pengunjung">
             <PengunjungPanel />
+          </TabsContent>
+          <TabsContent value="masalah">
+            <MasalahPanel />
+          </TabsContent>
+          <TabsContent value="kuis">
+            <KuisPanel />
           </TabsContent>
           <TabsContent value="gallery">
             <GalleryManager />

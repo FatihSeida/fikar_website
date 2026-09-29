@@ -16,7 +16,7 @@ export default function About() {
       <div className="container mx-auto px-6 md:px-10">
         <div className="grid items-start gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
           <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="lg:sticky lg:top-32">
-            <span className="eyebrow mb-6 block">Tentang Ahmad</span>
+            <span className="eyebrow mb-6 block">Tentang Zulfikar</span>
             <h2 className="font-serif text-4xl leading-tight md:text-5xl">
               Ditempa dalam kaderisasi. Bertumbuh melalui pengabdian.
             </h2>

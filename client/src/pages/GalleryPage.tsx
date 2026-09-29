@@ -1,9 +1,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
+import { galeriBawaan, type TataGaleri } from "@shared/galeri";
+import type { GalleryItem } from "@shared/schema";
 
 type GalleryPhoto = {
   src: string;
@@ -13,33 +16,31 @@ type GalleryPhoto = {
   position?: string;
 };
 
-const photos: GalleryPhoto[] = [
-  { src: "/ahmad/standing-centered.webp", alt: "Ahmad Zulfikar berdiri mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
-  { src: "/ahmad/gallery-02.webp?v=oriented", fullSrc: "/ahmad/gallery-02-cropped.webp", alt: "Potret Ahmad Zulfikar mengenakan batik", className: "md:col-span-4 md:aspect-[4/5]" },
-  { src: "/ahmad/profile-centered.webp", alt: "Ahmad Zulfikar duduk mengenakan atribut HMI", className: "md:col-span-4 md:aspect-[4/5]" },
-  { src: "/ahmad/gallery-01.webp", alt: "Ahmad Zulfikar berbicara dalam sesi dokumentasi", className: "md:col-span-6 md:aspect-video" },
-  { src: "/ahmad/gallery-03.webp", alt: "Ahmad Zulfikar dalam sesi wawancara", className: "md:col-span-6 md:aspect-video" },
-  { src: "/ahmad/journey-training.webp", alt: "Ahmad Zulfikar menyampaikan materi dalam forum perkaderan HMI", className: "md:col-span-4 md:aspect-[4/5]" },
-  { src: "/ahmad/journey-hmi-pinrang.webp", alt: "Ahmad Zulfikar berbicara dalam kegiatan HMI Cabang Pinrang", className: "md:col-span-8 md:aspect-[16/9]" },
-  { src: "/ahmad/journey-hmi-tv.webp", alt: "Ahmad Zulfikar menyampaikan laporan dalam forum nasional HMI", className: "md:col-span-6 md:aspect-video" },
-  { src: "/ahmad/journey-court-wide.webp", alt: "Ahmad Zulfikar bersama tim dalam kegiatan advokasi", className: "md:col-span-6 md:aspect-video" },
-  { src: "/ahmad/journey-court-detail.webp", alt: "Ahmad Zulfikar dalam kegiatan profesi hukum", className: "md:col-span-12 md:aspect-[21/9]" },
-  { src: "/ahmad/gallery-forum-integritas.webp", alt: "Ahmad Zulfikar berbicara dalam forum integritas organisasi", className: "md:col-span-4 md:aspect-square", position: "70% center" },
-  { src: "/ahmad/gallery-diskusi-komunitas.webp", alt: "Ahmad Zulfikar berdiskusi bersama komunitas", className: "md:col-span-4 md:aspect-square", position: "center center" },
-  { src: "/ahmad/gallery-forum-profesi.webp", alt: "Ahmad Zulfikar menyampaikan pandangan dalam forum profesi", className: "md:col-span-4 md:aspect-square", position: "60% center" },
-  { src: "/ahmad/gallery-aksi-mahasiswa.webp", alt: "Ahmad Zulfikar dalam aksi mahasiswa", className: "md:col-span-4 md:aspect-[4/5]", position: "42% center" },
-  { src: "/ahmad/gallery-aksi-advokasi.webp", alt: "Ahmad Zulfikar dalam aksi advokasi", className: "md:col-span-4 md:aspect-[4/5]", position: "36% center" },
-  { src: "/ahmad/gallery-intermediate-training.webp", alt: "Ahmad Zulfikar dalam kegiatan Intermediate Training HMI", className: "md:col-span-4 md:aspect-[4/5]", position: "center 34%" },
-  { src: "/ahmad/gallery-kebersamaan-komunitas.webp", alt: "Ahmad Zulfikar bersama peserta pertemuan komunitas", className: "md:col-span-6 md:aspect-video", position: "center 48%" },
-  { src: "/ahmad/gallery-diskusi-terbuka.webp", alt: "Ahmad Zulfikar memandu diskusi terbuka", className: "md:col-span-6 md:aspect-video", position: "center 54%" },
-  { src: "/ahmad/gallery-forum-warga.webp", alt: "Suasana forum dialog bersama warga", className: "md:col-span-6 md:aspect-video", position: "center center" },
-  { src: "/ahmad/gallery-forum-organisasi.webp", alt: "Ahmad Zulfikar bersama peserta forum organisasi", className: "md:col-span-6 md:aspect-video", position: "center center" },
-  { src: "/ahmad/gallery-rapat-dengar-pendapat.webp", alt: "Ahmad Zulfikar menyampaikan pandangan dalam rapat dengar pendapat", className: "md:col-span-12 md:aspect-[21/9]", position: "center 42%" },
-];
+/** Kelas ditulis utuh supaya Tailwind menyertakannya saat build. */
+const kelasTata: Record<TataGaleri, string> = {
+  potret: "md:col-span-4 md:aspect-[4/5]",
+  lebar: "md:col-span-6 md:aspect-video",
+  panjang: "md:col-span-8 md:aspect-[16/9]",
+  penuh: "md:col-span-12 md:aspect-[21/9]",
+  persegi: "md:col-span-4 md:aspect-square",
+};
+
+function keFoto(item: { image: string; caption: string; tata?: string | null; posisi?: string | null; gambarPenuh?: string | null }): GalleryPhoto {
+  return {
+    src: item.image,
+    fullSrc: item.gambarPenuh ?? undefined,
+    alt: item.caption,
+    className: kelasTata[(item.tata as TataGaleri) in kelasTata ? (item.tata as TataGaleri) : "lebar"],
+    position: item.posisi ?? undefined,
+  };
+}
 
 export default function GalleryPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
+  // Galeri dikelola dari panel admin. Daftar bawaan hanya dipakai bila data belum bisa dimuat.
+  const { data } = useQuery<GalleryItem[]>({ queryKey: ["/api/gallery"] });
+  const photos = (data && data.length > 0 ? data : galeriBawaan).map(keFoto);
 
   useEffect(() => {
     if (selected === null) return;
@@ -55,7 +56,7 @@ export default function GalleryPage() {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [selected]);
+  }, [selected, photos.length]);
 
   const move = (direction: number) => setSelected(current => current === null ? null : (current + direction + photos.length) % photos.length);
 

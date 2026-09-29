@@ -8,12 +8,17 @@ import AppLoader from "@/components/AppLoader";
 import JourneyNavigator from "@/components/JourneyNavigator";
 import Home from "@/pages/Home";
 import { catatKunjungan } from "@/lib/analytics";
+import { GerbangAudit } from "@/components/SegeraHadir";
 
 const NoteDetail = lazy(() => import("@/pages/NoteDetail"));
 const TentangPage = lazy(() => import("@/pages/TentangPage"));
 const HmiEvidencePage = lazy(() => import("@/pages/HmiEvidencePage"));
 const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
 const NotesPage = lazy(() => import("@/pages/NotesPage"));
+const IndikatorPage = lazy(() => import("@/pages/IndikatorPage"));
+const IndikatorDetailPage = lazy(() => import("@/pages/IndikatorDetailPage"));
+const KuisPage = lazy(() => import("@/pages/KuisPage"));
+const IkutPage = lazy(() => import("@/pages/IkutPage"));
 const Admin = lazy(() => import("@/pages/Admin"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -44,6 +49,10 @@ function Router() {
           <Route path="/pemikiran-ide"><Redirect to="/hmi-evidence" /></Route>
           <Route path="/catatan" component={NotesPage} />
           <Route path="/tentang" component={TentangPage} />
+          <Route path="/indikator/:nomor" component={IndikatorDetailPage} />
+          <Route path="/indikator" component={IndikatorPage} />
+          <Route path="/kuis">{() => <GerbangAudit halaman={KuisPage} />}</Route>
+          <Route path="/ikut">{() => <GerbangAudit halaman={IkutPage} />}</Route>
           <Route path="/admin" component={Admin} />
           <Route component={NotFound} />
         </Switch>

@@ -58,7 +58,7 @@ export default function AppLoader() {
               transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
               aria-hidden="true"
             >
-              <img src="/ahmad/indonesia-loader-v2.png" alt="" />
+              <img src="/ahmad/indonesia-loader-1400.webp" srcSet="/ahmad/indonesia-loader-800.webp 800w, /ahmad/indonesia-loader-1400.webp 1400w" sizes="(max-width: 767px) 100vw, 1100px" width={1400} height={560} alt="" />
               <div className="app-loader-signal" aria-hidden="true">
                 <span />
                 <span />

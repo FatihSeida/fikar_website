@@ -42,8 +42,9 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
     <>
       <nav aria-label="Navigasi utama" className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-500 ${cinematic ? "border-white/10 bg-[#071610]/85 py-3 backdrop-blur-xl" : isScrolled ? "border-border/70 bg-background/95 py-3 backdrop-blur-xl" : "border-transparent bg-transparent py-5"}`}>
         <div className="container mx-auto flex items-center justify-between px-5 md:px-8">
-          <Link href="/" className={`font-serif text-lg tracking-tight ${ink}`}>
-            {site.namaDepan} <span className={muted}>{site.namaBelakang}</span>
+          <Link href="/" className={`flex items-center gap-3 font-serif text-lg tracking-tight ${ink}`}>
+            <img src="/hmi-logo.png" alt="Logo HMI" width={147} height={400} className="h-9 w-auto" />
+            <span>{site.namaDepan} <span className={muted}>{site.namaBelakang}</span></span>
           </Link>
           <div className="hidden items-center gap-6 lg:flex">
             {navLinks.map((link) => (
@@ -65,7 +66,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
           const evidence = link.href === "/hmi-evidence";
           return (
             <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`${active ? "is-active" : ""} ${evidence ? "is-evidence" : ""}`}>
-              <span>{Icon ? <Icon aria-hidden="true" /> : <img className="mobile-hmi-logo" src="/favicon.svg?v=2" alt="" aria-hidden="true" />}</span>
+              <span>{Icon ? <Icon aria-hidden="true" /> : <img className="mobile-hmi-logo" src="/hmi-logo.png" alt="" aria-hidden="true" />}</span>
               <small>{link.shortName ?? link.name}</small>
             </Link>
           );

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
-import { ArrowDown, ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowDown, ArrowRight, RotateCcw, X } from "lucide-react";
+import { Link } from "wouter";
+import AjakDukung from "@/components/AjakDukung";
+import VisiMisiDialog from "@/components/VisiMisiDialog";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/sections/SiteFooter";
 import { evidenceStory, historyImage, historyMoments, langkahPenerapan, persoalanHmi, ranahPerbaikan, storyImage } from "@/lib/evidence-story";
-import { pilarStrategis } from "@/lib/program";
-import { misi, visi } from "@/lib/site";
 import "@/styles/evidence.css";
 
 type Scene = (typeof evidenceStory)[number];
@@ -593,6 +594,7 @@ function EvidenceBasis() {
         </ol>
         <p className="basis-note"><strong>Saling terkait.</strong> Enam persoalan ini tidak berdiri sendiri. Rekrutmen yang menurun, misalnya, dapat berhubungan dengan kaderisasi, data, dan tata kelola sekaligus. Karena itu, perbaikannya tidak cukup dengan menambah kegiatan.</p>
         <p className="basis-source">Sumber: Agussalim Sitompul, <cite>44 Indikator Kemunduran HMI: Suatu Kritikan dan Koreksi untuk Kebangkitan Kembali HMI</cite> (Jakarta: CV Misaka Galiza, 2006); pengelompokan dari buku <cite>HMI Evidence</cite>, Bab 8.</p>
+        <Link href="/indikator" className="basis-link">Jelajahi 44 indikator satu per satu <ArrowRight size={16} /></Link>
 
         <div className="basis-divider" />
 
@@ -620,67 +622,81 @@ function EvidenceBasis() {
   );
 }
 
-/** Visi, enam misi, serta enam pilar dan tiga belas program strategis, sama dengan proposal kandidat. */
-function VisiMisiProgram() {
+const penandaBaca = [
+  { id: "cerita", label: "Cerita HMI Evidence" },
+  { id: "kondisi-hmi", label: "Kondisi HMI" },
+  { id: "komitmen", label: "Komitmen" },
+];
+const KUNCI_BACA = "hmi-evidence-terakhir-dibaca";
+
+/** Mengingat posisi baca terakhir di peramban ini dan menawarkan untuk melanjutkannya. */
+function LanjutkanMembaca() {
+  const [tersimpan, setTersimpan] = useState<{ rasio: number; label: string } | null>(null);
+
+  useEffect(() => {
+    if (window.location.hash) return;
+    try {
+      const data = JSON.parse(localStorage.getItem(KUNCI_BACA) || "null");
+      if (data && typeof data.rasio === "number" && data.rasio > 0.06 && data.rasio < 0.97 && typeof data.label === "string") setTersimpan(data);
+    } catch {
+      // Penyimpanan peramban bisa diblokir; fitur ini cukup dilewati.
+    }
+  }, []);
+
+  useEffect(() => {
+    let jeda = 0;
+    const simpan = () => {
+      jeda = 0;
+      const maksimum = document.documentElement.scrollHeight - window.innerHeight;
+      if (maksimum <= 0 || window.scrollY < window.innerHeight) return;
+      const aktif = penandaBaca.filter(({ id }) => {
+        const elemen = document.getElementById(id);
+        return elemen && elemen.getBoundingClientRect().top <= window.innerHeight * 0.4;
+      }).pop();
+      try {
+        localStorage.setItem(KUNCI_BACA, JSON.stringify({ rasio: window.scrollY / maksimum, label: aktif?.label ?? "HMI Evidence" }));
+      } catch {
+        // Abaikan bila penyimpanan penuh atau diblokir.
+      }
+    };
+    const onScroll = () => {
+      if (window.scrollY > window.innerHeight) setTersimpan(null);
+      if (!jeda) jeda = window.setTimeout(simpan, 600);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (jeda) window.clearTimeout(jeda);
+    };
+  }, []);
+
+  if (!tersimpan) return null;
+  const lanjutkan = () => {
+    const maksimum = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: tersimpan.rasio * maksimum, behavior: "instant" });
+    setTersimpan(null);
+  };
   return (
-    <section className="evidence-program" id="visi-misi">
-      <div className="program-inner">
-        <p className="story-eyebrow">Visi, Misi, dan Program Strategis</p>
-        <figure className="program-vision">
-          <figcaption>Visi</figcaption>
-          <blockquote>“{visi}”</blockquote>
-        </figure>
-
-        <h2>Enam Misi</h2>
-        <ol className="program-missions">
-          {misi.map((item, index) => (
-            <li key={item}><span>0{index + 1}</span><p><StoryText>{item}</StoryText></p></li>
-          ))}
-        </ol>
-
-        <div className="basis-divider" />
-
-        <p className="story-eyebrow">Pilar dan Program Strategis</p>
-        <h2>Enam pilar, <em>tiga belas program strategis.</em></h2>
-        <p className="basis-lede">Setiap pilar diturunkan langsung dari satu misi, lalu dihubungkan dengan persoalan HMI yang hendak dijawab.</p>
-        <div className="program-pillars">
-          {pilarStrategis.map(pilar => (
-            <article key={pilar.nomor} className="program-pillar">
-              <div className="pillar-head">
-                <span>Pilar {pilar.nomor} · Turunan Misi {pilar.nomor}</span>
-                <h3>{pilar.judul}</h3>
-                <p><StoryText>{pilar.uraian}</StoryText></p>
-                <p className="pillar-answers"><em>Menjawab</em>{pilar.menjawab.join(" · ")}</p>
-              </div>
-              <ol className="pillar-programs">
-                {pilar.program.map(program => (
-                  <li key={program.nomor}>
-                    <span>{program.nomor}</span>
-                    <div>
-                      <h4>{program.judul}</h4>
-                      <p><StoryText>{program.deskripsi}</StoryText></p>
-                      <dl>
-                        <div><dt>Tujuan</dt><dd>{program.tujuan}</dd></div>
-                      </dl>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          ))}
-        </div>
-        <p className="basis-note"><strong>Cara menjalankan.</strong> Setiap program berjalan melalui lima langkah bertahap: kenali, rancang, uji coba, perluas, dan bakukan. Program yang belum menunjukkan manfaat diperbaiki lebih dulu sebelum diperluas ke seluruh cabang.</p>
-      </div>
-    </section>
+    <div className="resume-reading" role="status">
+      <button type="button" onClick={lanjutkan}>
+        <span>Lanjutkan membaca</span>
+        <strong>{tersimpan.label} · {Math.round(tersimpan.rasio * 100)}%</strong>
+      </button>
+      <button type="button" className="resume-close" onClick={() => setTersimpan(null)} aria-label="Tutup"><X size={14} /></button>
+    </div>
   );
 }
 
 export default function HmiEvidencePage() {
   const reducedMotion = useReducedMotion();
   const [reading, setReading] = useState(false);
-  const [shortScreen, setShortScreen] = useState(false);
-  const [mobile, setMobile] = useState(false);
+  // Dibaca langsung saat render pertama supaya HP tidak sempat merender versi
+  // desktop dan mengunduh semua gambarnya.
+  const [shortScreen, setShortScreen] = useState(() => window.matchMedia("(max-height: 520px), (max-width: 767px) and (max-height: 650px)").matches);
+  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 767px)").matches);
   const [limitedDevice, setLimitedDevice] = useState(false);
+  const [visiMisiOpen, setVisiMisiOpen] = useState(false);
+  const [visiMisiTarget, setVisiMisiTarget] = useState<string | undefined>();
   useEffect(() => {
     const query = window.matchMedia("(max-height: 520px), (max-width: 767px) and (max-height: 650px)");
     const update = () => setShortScreen(query.matches);
@@ -700,11 +716,46 @@ export default function HmiEvidencePage() {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
+  useEffect(() => {
+    const target = decodeURIComponent(window.location.hash.slice(1));
+    if (!target) return;
+    if (/^(?:visi-misi|pilar-\d{2}|program-\d{2})$/.test(target)) {
+      setVisiMisiTarget(target);
+      setVisiMisiOpen(true);
+      return;
+    }
+    // Halaman panjang ini baru stabil setelah pemuat pembuka selesai, jadi
+    // lompatannya diulang beberapa kali kecuali pembaca sudah menggulir sendiri.
+    let batal = false;
+    const hentikan = () => { batal = true; };
+    const lompat = () => { if (!batal) document.getElementById(target)?.scrollIntoView({ behavior: "instant", block: "start" }); };
+    const jeda = [80, 900, 2700].map((ms) => window.setTimeout(lompat, ms));
+    window.addEventListener("wheel", hentikan, { passive: true });
+    window.addEventListener("touchstart", hentikan, { passive: true });
+    window.addEventListener("keydown", hentikan);
+    return () => {
+      jeda.forEach((id) => window.clearTimeout(id));
+      window.removeEventListener("wheel", hentikan);
+      window.removeEventListener("touchstart", hentikan);
+      window.removeEventListener("keydown", hentikan);
+    };
+  }, []);
+  useEffect(() => {
+    const bukaDariTautan = () => {
+      const target = decodeURIComponent(window.location.hash.slice(1));
+      if (!/^(?:visi-misi|pilar-\d{2}|program-\d{2})$/.test(target)) return;
+      setVisiMisiTarget(target);
+      setVisiMisiOpen(true);
+    };
+    window.addEventListener("hashchange", bukaDariTautan);
+    return () => window.removeEventListener("hashchange", bukaDariTautan);
+  }, []);
   const forcedReadMode = reducedMotion || shortScreen || limitedDevice;
   const readMode = forcedReadMode || reading;
   return (
     <div className="evidence-page">
       <Navbar dark />
+      <LanjutkanMembaca />
       <main>
         <header className="evidence-prologue">
           <img src={storyImage("04-lingkaran-organisasi")} alt="Ilustrasi perjalanan kader di dalam organisasi" loading="eager" />
@@ -716,7 +767,7 @@ export default function HmiEvidencePage() {
             <p className="prologue-intro">Sebuah perjalanan untuk mengenali kader, membaca pengalamannya, dan menghadirkan pengetahuan itu ke dalam keputusan organisasi.</p>
             <div className="prologue-actions">
               <a href={readMode ? "#chapter-1" : "#cerita"} className="story-begin">Mulai membaca <ArrowDown size={18} /></a>
-              <a href="#visi-misi" className="prologue-shortcut"><span>Langsung ke</span><strong>Visi, Misi, dan Program Strategis</strong><ArrowDown size={16} /></a>
+              <button type="button" onClick={() => { setVisiMisiTarget(undefined); setVisiMisiOpen(true); }} className="prologue-shortcut"><span>Buka dialog</span><strong>Visi, Misi, dan Program Strategis</strong><ArrowRight size={16} /></button>
             </div>
           </div>
           <div className="prologue-bottom"><span>{evidenceStory.length} bagian / Satu rangkaian cerita</span><button onClick={() => setReading(!reading)} aria-pressed={!!readMode} disabled={!!forcedReadMode}>{limitedDevice ? "Mode ringan aktif" : readMode ? "Mode baca" : "Baca tanpa animasi"}</button></div>
@@ -734,20 +785,34 @@ export default function HmiEvidencePage() {
           <p className="commitment-statement">Dari pengalaman menjadi pengetahuan. Dari pengetahuan menjadi keputusan. Dari keputusan menuju terbinanya lima kualitas Insan Cita.</p>
         </section>
 
-        <VisiMisiProgram />
-
         <section className="evidence-commitment evidence-closing" aria-label="Lanjutkan perjalanan">
+          <AjakDukung
+            gelap
+            className="evidence-dukung"
+            uraian="Sudah membaca HMI Evidence sampai akhir? Bagikan ke grup WhatsApp atau Instagram Story, supaya lebih banyak kader ikut membangun HMI yang belajar dari bukti."
+            path="/hmi-evidence"
+            pesan="Jangan bicara HMI tanpa bukti. Baca HMI Evidence: Transformasi Gerakan Organisasi Berbasis Bukti, lalu ukur komisariatmu lewat kuis audit komisariat."
+            namaFile="story-hmi-evidence.png"
+            story={{
+              label: "HMI Evidence",
+              judul: "Transformasi Gerakan Organisasi Berbasis Bukti",
+              isi: "Dukung perbaikan kaderisasi HMI dengan transformasi gerakan organisasi berbasis bukti. Baca gagasannya dan audit tata kelola komisariatmu lewat mini kuis yang kami miliki.",
+              tautan: "ahmadzulfikar.com/hmi-evidence",
+              gambarSiap: "/ahmad/story-hmi-evidence-v2.png",
+            }}
+          />
           <p className="story-eyebrow">Lanjutkan perjalanan</p>
           <nav className="commitment-choices" aria-label="Lanjutkan perjalanan website">
             <a href="/tentang"><span>01</span><strong>Mengenal Ahmad Zulfikar</strong><ArrowRight size={18} /></a>
-            <a href="/catatan"><span>02</span><strong>Membaca Catatan</strong><ArrowRight size={18} /></a>
-            <a href="/galeri"><span>03</span><strong>Melihat Aktivitas</strong><ArrowRight size={18} /></a>
+            <button type="button" onClick={() => { setVisiMisiTarget(undefined); setVisiMisiOpen(true); }}><span>02</span><strong>Visi Misi Ahmad Zulfikar</strong><ArrowRight size={18} /></button>
+            <a href="/catatan"><span>03</span><strong>Membaca Catatan</strong><ArrowRight size={18} /></a>
           </nav>
           <a href="#" className="story-restart"><RotateCcw size={14} /> Kembali ke awal</a>
           <p className="story-manifesto">Jangan bicara HMI tanpa bukti</p>
         </section>
       </main>
       <SiteFooter />
+      <VisiMisiDialog open={visiMisiOpen} onOpenChange={setVisiMisiOpen} target={visiMisiTarget} />
     </div>
   );
 }

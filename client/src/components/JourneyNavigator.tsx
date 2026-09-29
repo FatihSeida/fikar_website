@@ -7,8 +7,11 @@ const destinations = [
   { href: "/", index: "01", title: "Beranda", description: "Rangkuman perjalanan dan gagasan Ahmad Zulfikar." },
   { href: "/hmi-evidence", index: "02", title: "HMI Evidence", description: "Scrollytelling, visi, misi, dan program strategis HMI Evidence." },
   { href: "/tentang", index: "03", title: "Tentang", description: "Profil serta rekam jejak organisasi." },
-  { href: "/galeri", index: "04", title: "Galeri", description: "Dokumentasi gagasan, kaderisasi, dan pengabdian." },
-  { href: "/catatan", index: "05", title: "Catatan", description: "Tulisan, gagasan, dan aktivitas Ahmad Zulfikar." },
+  { href: "/indikator", index: "04", title: "Indikator", description: "44 indikator kemunduran HMI, satu per satu." },
+  { href: "/kuis", index: "05", title: "Kuis", description: "Seberapa evidence komisariatmu? 20 pertanyaan inti dan audit lanjutan." },
+  { href: "/ikut", index: "06", title: "Audit Komisariat", description: "Seberapa evidence komisariatmu? Kuis audit dan kirim masalah." },
+  { href: "/galeri", index: "07", title: "Galeri", description: "Dokumentasi gagasan, kaderisasi, dan pengabdian." },
+  { href: "/catatan", index: "08", title: "Catatan", description: "Tulisan, gagasan, dan aktivitas Ahmad Zulfikar." },
 ];
 
 function destinationIndex(location: string) {
