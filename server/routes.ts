@@ -5,7 +5,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
-import { insertGallerySchema, insertNoteSchema } from "@shared/schema";
+import { insertGallerySchema, insertNoteSchema, insertKunjunganSchema } from "@shared/schema";
+import { lookupGeo } from "./geo";
+import { namaKota, namaProvinsi } from "./wilayah";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -92,6 +94,73 @@ async function hasValidImageSignature(filePath: string, mimetype: string): Promi
   } finally {
     await handle.close();
   }
+}
+
+/** Pembatas sederhana per kunci (biasanya IP) dengan jendela waktu bergeser. */
+function buatPembatas(batas: number, jendelaMs: number) {
+  const catatan = new Map<string, number[]>();
+  return (kunci: string): boolean => {
+    const sekarang = Date.now();
+    const daftar = (catatan.get(kunci) ?? []).filter((waktu) => sekarang - waktu < jendelaMs);
+    const boleh = daftar.length < batas;
+    if (boleh) daftar.push(sekarang);
+    catatan.set(kunci, daftar);
+    if (catatan.size > 10_000) {
+      catatan.forEach((waktu, key) => {
+        if (!waktu.length || sekarang - waktu[waktu.length - 1] >= jendelaMs) catatan.delete(key);
+      });
+    }
+    return boleh;
+  };
+}
+
+// Batasnya longgar karena banyak pengguna seluler berbagi satu IP publik (CGNAT operator).
+const bolehCatatKunjungan = buatPembatas(300, 60 * 1000);
+
+const pelacakOtomatis = /bot|crawl|spider|slurp|facebookexternalhit|headless|lighthouse|curl|wget|python|preview/i;
+
+/** Garam acak yang berganti setiap hari WIB, hanya hidup di memori. */
+let garamHarian = { tanggal: "", nilai: "" };
+function garamHariIni(): string {
+  const tanggal = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  if (garamHarian.tanggal !== tanggal) garamHarian = { tanggal, nilai: randomBytes(16).toString("hex") };
+  return garamHarian.nilai;
+}
+
+function jenisPerangkat(userAgent: string): string {
+  if (/iPad|Tablet/i.test(userAgent)) return "Tablet";
+  if (/Mobi|Android|iPhone/i.test(userAgent)) return "HP";
+  return "Desktop";
+}
+
+const sumberDikenal: [RegExp, string][] = [
+  [/whatsapp|wa\.me/, "WhatsApp"],
+  [/instagram/, "Instagram"],
+  [/facebook|fb\.com|fb\.me/, "Facebook"],
+  [/(^|\.)t\.co$|twitter|(^|\.)x\.com$/, "X"],
+  [/tiktok/, "TikTok"],
+  [/youtube|youtu\.be/, "YouTube"],
+  [/telegram|(^|\.)t\.me$/, "Telegram"],
+  [/linkedin/, "LinkedIn"],
+  [/google/, "Google"],
+  [/bing|yahoo|duckduckgo/, "Mesin pencari lain"],
+];
+
+/** Tautan bertanda (?ref=...) diutamakan; selain itu sumber dibaca dari referrer. */
+function tentukanSumber(referrer: string | null | undefined, ref: string | null | undefined, hostSendiri: string | undefined) {
+  let hostReferrer: string | null = null;
+  if (referrer) {
+    try {
+      hostReferrer = new URL(referrer).host.toLowerCase().replace(/^www\./, "") || null;
+    } catch {
+      hostReferrer = null;
+    }
+  }
+  if (hostReferrer && hostSendiri && hostReferrer === hostSendiri.toLowerCase().replace(/^www\./, "")) hostReferrer = null;
+  if (ref) return { referrer: hostReferrer, sumber: `Tautan: ${ref.toLowerCase()}` };
+  if (!hostReferrer) return { referrer: null, sumber: "Langsung" };
+  const dikenal = sumberDikenal.find(([pola]) => pola.test(hostReferrer as string));
+  return { referrer: hostReferrer, sumber: dikenal ? dikenal[1] : hostReferrer };
 }
 
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
@@ -280,6 +349,35 @@ export async function registerRoutes(
       res.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
     },
   }));
+
+  // --- Analytics: kunjungan tanpa cookie dan tanpa menyimpan IP ---
+  app.post("/api/kunjungan", async (req, res) => {
+    const userAgent = req.get("user-agent") || "";
+    if (req.session?.isAdmin || !userAgent || pelacakOtomatis.test(userAgent)) return res.status(204).end();
+    const ip = req.ip || req.socket.remoteAddress || "";
+    if (!bolehCatatKunjungan(ip)) return res.status(204).end();
+    const parsed = insertKunjunganSchema.safeParse(req.body);
+    if (!parsed.success || parsed.data.path.startsWith("/admin")) return res.status(400).end();
+
+    const lokasi = lookupGeo(ip);
+    const { referrer, sumber } = tentukanSumber(parsed.data.referrer, parsed.data.sumber, req.get("host"));
+    await storage.recordKunjungan({
+      path: parsed.data.path,
+      referrer,
+      sumber,
+      kota: namaKota(lokasi?.city),
+      provinsi: namaProvinsi(lokasi?.region),
+      perangkat: jenisPerangkat(userAgent),
+      pengunjung: createHash("sha256").update(garamHariIni()).update(ip).update(userAgent).digest("hex").slice(0, 16),
+    });
+    res.status(204).end();
+  });
+
+  app.get("/api/admin/kunjungan", requireAdmin, async (req, res) => {
+    const hari = Number(req.query.hari ?? 30);
+    const rentang = Number.isInteger(hari) ? Math.min(365, Math.max(1, hari)) : 30;
+    res.json(await storage.getStatistikKunjungan(rentang));
+  });
 
   await seedDatabase();
 

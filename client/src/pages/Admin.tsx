@@ -8,10 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut } from "lucide-react";
+import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut, BarChart3 } from "lucide-react";
 import { Link } from "wouter";
 import type { GalleryItem, Note, Page } from "@shared/schema";
 import RichTextEditor from "@/components/RichTextEditor";
+import PengunjungPanel from "@/components/admin/PengunjungPanel";
 
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
@@ -555,8 +556,11 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="gallery">
-          <TabsList className="mb-8" data-testid="tabs-admin">
+        <Tabs defaultValue="pengunjung">
+          <TabsList className="mb-8 h-auto flex-wrap justify-start" data-testid="tabs-admin">
+            <TabsTrigger value="pengunjung" className="gap-2">
+              <BarChart3 className="w-4 h-4" /> Pengunjung
+            </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2" data-testid="tab-gallery">
               <Image className="w-4 h-4" /> Galeri
             </TabsTrigger>
@@ -565,6 +569,9 @@ export default function Admin() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="pengunjung">
+            <PengunjungPanel />
+          </TabsContent>
           <TabsContent value="gallery">
             <GalleryManager />
           </TabsContent>
