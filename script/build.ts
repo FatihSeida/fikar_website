@@ -1,6 +1,8 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile, copyFile } from "fs/promises";
+import { rm, readFile, copyFile, readdir, writeFile } from "fs/promises";
+import path from "path";
+import { brotliCompressSync, gzipSync, constants as zlibConstants } from "zlib";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -66,6 +68,28 @@ async function buildAll() {
   // connect-pg-simple ikut dibundel, tetapi membaca table.sql dari __dirname
   // (dist/) untuk membuat tabel session. Tanpa berkas ini login admin gagal.
   await copyFile("node_modules/connect-pg-simple/table.sql", "dist/table.sql");
+
+  await kompresAset("dist/public/assets");
+}
+
+/**
+ * nginx di VPS hanya mengompres HTML, sehingga JS dan CSS terkirim utuh.
+ * Versi .br dan .gz dibuat sekali saat build lalu dikirim apa adanya oleh
+ * server/static.ts, tanpa membebani CPU server di setiap permintaan.
+ */
+async function kompresAset(folder: string) {
+  let hemat = 0;
+  for (const nama of await readdir(folder)) {
+    if (!/\.(js|css|svg|json)$/.test(nama)) continue;
+    const berkas = path.join(folder, nama);
+    const isi = await readFile(berkas);
+    if (isi.length < 1024) continue;
+    const br = brotliCompressSync(isi, { params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 11, [zlibConstants.BROTLI_PARAM_SIZE_HINT]: isi.length } });
+    await writeFile(`${berkas}.br`, br);
+    await writeFile(`${berkas}.gz`, gzipSync(isi, { level: 9 }));
+    hemat += isi.length - br.length;
+  }
+  console.log(`aset dikompres: hemat ${Math.round(hemat / 1024)} KB dengan brotli`);
 }
 
 buildAll().catch((err) => {
