@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUp, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { useLocation } from "wouter";
 import TeksIstilah from "@/components/TeksIstilah";
 import { pesanAudiens, type AudiensId } from "@/lib/pesan";
@@ -42,6 +42,22 @@ export default function SambutanDialog() {
   const [peran, setPeran] = useState<AudiensId | null>(null);
   const [, navigate] = useLocation();
   const animasi = !useReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const gantiRef = useRef<HTMLButtonElement>(null);
+  const peranTerakhir = useRef<AudiensId | null>(null);
+  // Di HP dan tablet daftar peran dan pesannya tampil bergantian dalam satu lembar,
+  // jadi fokus dipindahkan ke bagian yang baru tampil.
+  const hp = window.matchMedia("(max-width: 1279px)").matches;
+
+  useEffect(() => {
+    if (!hp) return;
+    if (peran) {
+      panelRef.current?.scrollTo({ top: 0 });
+      gantiRef.current?.focus({ preventScroll: true });
+    } else if (peranTerakhir.current) {
+      document.querySelector<HTMLElement>(`.sambutan-peran [data-peran="${peranTerakhir.current}"]`)?.focus({ preventScroll: true });
+    }
+  }, [peran, hp]);
 
   useEffect(() => {
     let paksa = false;
@@ -77,6 +93,10 @@ export default function SambutanDialog() {
     tutup();
     navigate(href);
   };
+  const gantiPeran = () => {
+    peranTerakhir.current = peran;
+    setPeran(null);
+  };
   const pesan = pesanAudiens.find((item) => item.id === peran);
   const muncul = (urutan: number) => (animasi
     ? { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.35 + urutan * 0.07, ease: lembut } }
@@ -101,10 +121,22 @@ export default function SambutanDialog() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, ease: lembut }}
           >
-            <div className="sambutan-panel">
+            <div className="sambutan-panel" ref={panelRef}>
               <div className="sambutan-cincin" aria-hidden="true"><i /><i /><i /></div>
-              <div className="sambutan-isi">
-                <div>
+              <div className="sambutan-isi" data-peran={peran ? "dipilih" : "belum"}>
+                {/* Kepala lembar di HP: foto kecil, nama, dan tombol tutup dalam satu baris. */}
+                <div className="sambutan-profil">
+                  <span className="sambutan-avatar" aria-hidden="true"><img src="/ahmad/hero-cutout-v2.webp" alt="" /></span>
+                  <div>
+                    <strong>Ahmad Zulfikar</strong>
+                    <span>Kandidat Ketua Umum PB HMI<br />Periode 2026–2028</span>
+                  </div>
+                  <DialogPrimitive.Close className="sambutan-tutup-hp" aria-label="Tutup sambutan">
+                    <X size={14} />
+                  </DialogPrimitive.Close>
+                </div>
+
+                <div className="sambutan-kiri">
                   <motion.p className="sambutan-eyebrow" {...muncul(0)}>Selamat datang</motion.p>
                   <DialogPrimitive.Title asChild>
                     <motion.h2 className="sambutan-judul" {...muncul(1)}>Saya adalah…</motion.h2>
@@ -112,20 +144,28 @@ export default function SambutanDialog() {
                   <DialogPrimitive.Description className="sr-only">
                     Pilih peranmu di HMI untuk melihat bagian gagasan HMI Evidence yang paling dekat denganmu, atau kenali Zulfikar lebih dulu.
                   </DialogPrimitive.Description>
+                  <motion.p className="sambutan-sub" {...muncul(1)}>Pilih peranmu. Kami tunjukkan gagasan HMI Evidence yang paling dekat denganmu.</motion.p>
                   <motion.div className="sambutan-peran" role="group" aria-label="Pilih peranmu" {...muncul(2)}>
                     {pesanAudiens.map((item, index) => (
-                      <button key={item.id} type="button" aria-pressed={peran === item.id} onClick={() => setPeran(item.id)}>
+                      <button key={item.id} type="button" data-peran={item.id} aria-pressed={peran === item.id} onClick={() => setPeran(item.id)}>
                         <span>0{index + 1}</span>
                         <strong>{item.label}</strong>
+                        <ArrowRight size={16} aria-hidden="true" />
                       </button>
                     ))}
                   </motion.div>
-                  <motion.button type="button" className="sambutan-kenali" onClick={() => pergi("/tentang")} {...muncul(3)}>
-                    Kenali Zulfikar <ArrowRight size={16} />
-                  </motion.button>
+                  <motion.div className="sambutan-aksi" {...muncul(3)}>
+                    <button type="button" className="sambutan-kenali" onClick={() => pergi("/tentang")}>
+                      Kenali Zulfikar <ArrowRight size={16} />
+                    </button>
+                    <button type="button" className="sambutan-nanti-hp" onClick={tutup}>Nanti saja</button>
+                  </motion.div>
                 </div>
 
                 <motion.div className="sambutan-tengah" aria-live="polite" {...muncul(2)}>
+                  <button type="button" ref={gantiRef} className="sambutan-ganti" onClick={gantiPeran}>
+                    <ArrowLeft size={14} /> Ganti peran
+                  </button>
                   <AnimatePresence mode="wait" initial={false}>
                     {pesan ? (
                       <motion.div key={pesan.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35 }}>
@@ -140,14 +180,13 @@ export default function SambutanDialog() {
                           ))}
                         </div>
                       </motion.div>
-                    ) : (
+                    ) : !hp && (
                       <motion.div key="awal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35 }}>
                         <p className="sambutan-eyebrow">HMI Evidence</p>
                         <h3 className="mt-4">Satu gerakan, banyak peran.</h3>
                         <p>Setiap kader memegang bagian dari perbaikan HMI. Pilih peranmu, dan kami tunjukkan gagasan HMI Evidence yang paling dekat dengan keseharianmu.</p>
                         <span className="sambutan-petunjuk">
-                          <ArrowLeft size={14} className="sambutan-panah-kiri" />
-                          <ArrowUp size={14} className="sambutan-panah-atas" />
+                          <ArrowLeft size={14} />
                           Pilih peranmu
                         </span>
                       </motion.div>
