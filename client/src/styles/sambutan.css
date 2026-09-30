@@ -1,4 +1,4 @@
-/* Dialog sambutan: panel hijau tua dengan satu lengkung besar dan bingkai emas
+/* Dialog sambutan di desktop: panel hijau tua dengan satu lengkung besar dan bingkai emas
    yang mengikuti bentuknya. Figur Zulfikar setinggi panel berdiri di sisi paling
    kanan, keluar dari panel; namanya berada di kiri kepala. */
 .sambutan-overlay {
@@ -124,7 +124,8 @@
 .sambutan-nama em { display: block; color: rgb(220 195 138 / .75); font-size: 10px; font-style: normal; letter-spacing: .26em; text-transform: uppercase; }
 .sambutan-nama strong { display: block; margin-top: 10px; color: #e8d19b; font-family: var(--font-serif); font-size: clamp(24px, calc(var(--h) * 0.06), 34px); font-weight: 400; line-height: 1.05; letter-spacing: -.02em; }
 .sambutan-nama > span { display: block; margin-top: 10px; color: rgb(233 238 227 / .6); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; }
-.sambutan-panah-atas { display: none; }
+/* Elemen lembar HP; di desktop tidak dipakai. */
+.sambutan-profil, .sambutan-sub, .sambutan-nanti-hp, .sambutan-ganti, .sambutan-peran button svg { display: none; }
 /* Tinggi panel dikunci supaya komposisi figur tidak berubah saat peran diganti;
    pesan yang panjang digulir di dalam kolom tengah. */
 @media (min-width: 1280px) {
@@ -158,29 +159,60 @@
   .sambutan-tutup { top: 4px; right: 4px; }
 }
 
-/* HP dan tablet: lembar dari bawah. Figur berdiri di atas lembar, di sisi
-   kanan, dengan nama di kiri kepalanya; isi lembar digulir di bawahnya. */
+/* HP dan tablet: lembar ringkas dari bawah. Kepala lembar berisi foto kecil,
+   nama, dan tombol tutup; daftar peran dan pesan peran tampil bergantian. */
 @media (max-width: 1279px) {
-  .sambutan {
-    --wm: min(360px, 77vw); --hm: calc(var(--wm) / 1.3216);
-    top: auto; bottom: 0; transform: translateX(-50%); width: min(640px, 100vw);
+  .sambutan { top: auto; bottom: 0; transform: translateX(-50%); width: min(640px, 100vw); }
+  .sambutan-panel {
+    width: 100%; height: auto; max-height: calc(100dvh - 24px); overflow-y: auto;
+    border-radius: 28px 28px 0 0;
+    background: linear-gradient(170deg, #0f2e21 0%, #0a2018 45%, #061410 100%);
   }
-  .sambutan-panel { width: 100%; height: auto; max-height: calc(100dvh - var(--hm) + 12px); overflow-y: auto; border-radius: 96px 22px 0 0; }
-  .sambutan-isi::before { border-radius: 84px 12px 0 0; bottom: -2px; }
-  .sambutan-isi { height: auto; grid-template-columns: 1fr; gap: 30px; padding: 44px 26px 34px; }
-  .sambutan-ruang-foto { display: none; }
-  .sambutan-foto { top: auto; bottom: calc(100% - 26px); right: 4px; width: var(--wm); height: var(--hm); }
-  .sambutan-nama { top: auto; bottom: 63%; width: min(250px, calc(min(640px, 100vw) - var(--wm) * 0.64 - 30px)); }
-  .sambutan-nama em { font-size: 9px; letter-spacing: .2em; }
-  .sambutan-nama strong { margin-top: 6px; font-size: clamp(19px, 5.4vw, 26px); }
-  .sambutan-nama > span { margin-top: 8px; font-size: 9px; letter-spacing: .12em; line-height: 1.6; }
-  .sambutan-panah-kiri { display: none; }
-  .sambutan-panah-atas { display: block; }
-  .sambutan-cincin { right: auto; left: 70px; top: 90px; }
-  .sambutan-tengah { min-height: 0; overflow: visible; padding-left: 0; padding-top: 26px; border-left: 0; border-top: 1px solid rgb(220 195 138 / .16); }
-  .sambutan-peran button { height: 84px; }
-  .sambutan-peran button strong { font-size: 16px; }
-  .sambutan-tutup { top: 16px; right: 16px; }
+  .sambutan-isi::before, .sambutan-cincin, .sambutan-foto, .sambutan-ruang-foto, .sambutan-tutup { display: none; }
+  .sambutan-isi { height: auto; grid-template-columns: 1fr; gap: 22px; padding: 24px 24px calc(28px + env(safe-area-inset-bottom)); }
+  .sambutan-isi[data-peran="dipilih"] > .sambutan-kiri,
+  .sambutan-isi[data-peran="belum"] > .sambutan-tengah { display: none; }
+
+  .sambutan-profil { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid rgb(220 195 138 / .22); }
+  .sambutan-avatar {
+    position: relative; flex: none; width: 58px; height: 58px; overflow: hidden; border-radius: 50%;
+    border: 1px solid rgb(220 195 138 / .55); background: radial-gradient(circle at 50% 35%, #1d4a36, #0b2219);
+  }
+  /* Foto figur 1200x908 diperkecil sehingga kepala dan bahu mengisi lingkaran. */
+  .sambutan-avatar img { position: absolute; top: 1px; left: -77px; width: 212px; max-width: none; }
+  .sambutan-profil > div { flex: 1; min-width: 0; }
+  .sambutan-profil strong { display: block; color: #e8d19b; font-family: var(--font-serif); font-size: 20px; font-weight: 400; letter-spacing: -.01em; }
+  .sambutan-profil span { display: block; margin-top: 3px; color: rgb(233 238 227 / .68); font-size: 11px; line-height: 1.45; }
+  .sambutan-tutup-hp {
+    display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid rgb(220 195 138 / .4); color: #e8d19b;
+  }
+
+  .sambutan-judul { margin-top: 12px; font-size: 30px; }
+  .sambutan-sub { display: block; margin-top: 10px; color: rgb(233 238 227 / .68); font-size: 14px; line-height: 1.6; }
+  .sambutan-peran { grid-template-columns: 1fr; gap: 0; margin-top: 20px; border-top: 1px solid rgb(220 195 138 / .22); }
+  .sambutan-peran button {
+    flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; height: 58px; padding: 0;
+    border: 0; border-bottom: 1px solid rgb(220 195 138 / .22); border-radius: 0; background: transparent;
+  }
+  .sambutan-peran button:hover { transform: none; border-color: rgb(220 195 138 / .22); }
+  .sambutan-peran button:active { background: rgb(220 195 138 / .08); }
+  .sambutan-peran button span { width: 22px; }
+  .sambutan-peran button strong { flex: 1; font-size: 18px; }
+  .sambutan-peran button svg { display: block; flex: none; color: #dcc38a; }
+  .sambutan-aksi { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
+  .sambutan-kenali { gap: 10px; width: auto; height: 48px; margin-top: 0; padding: 0 20px; border-color: rgb(220 195 138 / .6); color: #e8d19b; }
+  .sambutan-nanti-hp { display: block; color: rgb(233 238 227 / .55); font-size: 12.5px; }
+
+  .sambutan-tengah { min-height: 0; overflow: visible; padding: 0; border: 0; }
+  .sambutan-ganti { display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; margin-bottom: 16px; color: rgb(233 238 227 / .68); font-size: 12.5px; }
+  .sambutan-tengah h3 { font-size: 25px; }
+  .sambutan-tengah p { margin-top: 12px; font-size: 14px; line-height: 1.65; }
+  .sambutan-tengah .sambutan-eyebrow { margin-top: 0; color: #dcc38a; font-size: 10px; line-height: normal; }
+  .sambutan-langkah { margin-top: 18px; }
+  .sambutan-langkah button:first-child { border-color: transparent; background: linear-gradient(150deg, #e5cf95, #c9a95e); color: #0a1f16; font-weight: 500; }
+  .sambutan-langkah button:first-child svg { color: #0a1f16; }
+  .sambutan-nanti { align-self: flex-end; }
 }
 
 @media (prefers-reduced-motion: reduce) {
