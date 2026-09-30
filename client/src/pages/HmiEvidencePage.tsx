@@ -763,8 +763,8 @@ export default function HmiEvidencePage() {
           <div className="prologue-content">
             <p className="story-eyebrow">HMI Evidence</p>
             <h1>Transformasi Gerakan Organisasi <em>Berbasis Bukti.</em></h1>
-            <p className="prologue-question">Komitmen HMI Evidence menghadirkan ekosistem perkaderan berkelanjutan.</p>
-            <p className="prologue-intro">Sebuah perjalanan untuk mengenali kader, membaca pengalamannya, dan menghadirkan pengetahuan itu ke dalam keputusan organisasi.</p>
+            <p className="prologue-question">HMI Evidence berangkat dari tanggung jawab untuk menjaga keberlanjutan perkaderan HMI.</p>
+            <p className="prologue-intro">Pembinaan kader memerlukan pemahaman atas keadaan mereka. Pengalaman perkaderan di komisariat dan cabang harus menjadi bahan pertimbangan dalam menetapkan kebijakan organisasi.</p>
             <div className="prologue-actions">
               <a href={readMode ? "#chapter-1" : "#cerita"} className="story-begin">Mulai membaca <ArrowDown size={18} /></a>
               <button type="button" onClick={() => { setVisiMisiTarget(undefined); setVisiMisiOpen(true); }} className="prologue-shortcut"><span>Buka dialog</span><strong>Visi, Misi, dan Program Strategis</strong><ArrowRight size={16} /></button>
@@ -779,9 +779,9 @@ export default function HmiEvidencePage() {
 
         <section className="evidence-commitment" id="komitmen">
           <p className="story-eyebrow">Pedoman Perkaderan / Tafsir Tujuan / 5KIC</p>
-          <h2>Perkaderan tidak kehilangan arah.<br /><em>Ia memperoleh cara untuk terus belajar.</em></h2>
-          <p>Pengalaman perkaderan berbasis bukti bukan tujuan baru yang menggantikan Pedoman Perkaderan. Ia merupakan ikhtiar untuk memastikan proses pembinaan berjalan sejalan dengan Pedoman Perkaderan dan Tafsir Tujuan HMI.</p>
-          <p>Setiap data, evaluasi, keputusan, dan pembaruan program diarahkan untuk membina insan akademis, pencipta, pengabdi, bernafaskan Islam, dan bertanggung jawab bagi terwujudnya masyarakat adil makmur yang diridai Allah SWT.</p>
+          <h2>Memperkuat pelaksanaan perkaderan<br /><em>sesuai tujuan HMI.</em></h2>
+          <p>Perkaderan berbasis bukti merupakan pendekatan untuk memperkuat pelaksanaan Pedoman Perkaderan dan Tafsir Tujuan HMI. Pencatatan perkembangan kader serta evaluasi pembinaan diperlukan untuk menilai sejauh mana proses perkaderan telah berjalan sesuai dengan arah tersebut.</p>
+          <p>Pengelolaan data, evaluasi, dan perbaikan program harus tetap mengacu pada pembinaan lima kualitas Insan Cita: akademis, pencipta, pengabdi, bernafaskan Islam, serta bertanggung jawab bagi terwujudnya masyarakat adil makmur yang diridai Allah SWT.</p>
           <p className="commitment-statement">Dari pengalaman menjadi pengetahuan. Dari pengetahuan menjadi keputusan. Dari keputusan menuju terbinanya lima kualitas Insan Cita.</p>
         </section>
 
