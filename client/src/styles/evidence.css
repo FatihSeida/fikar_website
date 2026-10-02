@@ -38,7 +38,6 @@
 .story-copy h2 { margin-top: 22px; font-weight: 500; font-size: clamp(34px, 4.5vw, 66px); line-height: 1.13; letter-spacing: -.045em; text-wrap: balance; text-shadow: 0 2px 30px #0008; }
 .story-copy h2.story-title-long { font-size: clamp(29px, 3.45vw, 52px); line-height: 1.16; }
 .story-body { margin-top: 24px; max-width: 510px; font-size: clamp(15px, 1.25vw, 18px); line-height: 1.8; color: #f0f1e6d4; }
-.story-bridge { margin-top: 26px; padding-left: 18px; border-left: 1px solid #d7bd7680; max-width: 490px; font-size: 14px; line-height: 1.7; color: #e4cc90; }
 .story-term { font-style: italic; }
 .desktop-history-layer .story-shade { background: linear-gradient(90deg, #030d0af5 0%, #030d0ad9 30%, #030d0a8c 52%, #030d0aa6 100%), linear-gradient(0deg, #071610ed 0%, transparent 44%, #07161038 100%); }
 .desktop-history-copy { inset: 126px auto 148px 7.5vw; width: min(540px, 38vw); justify-content: center; }
@@ -339,7 +338,6 @@
   .story-copy h2 { font-size: clamp(29px, 7.7vw, 40px); margin-top: 16px; line-height: 1.1; }
   .story-copy h2.story-title-long { font-size: clamp(26px, 6.9vw, 34px); }
   .story-body { font-size: 14px; line-height: 1.75; margin-top: 19px; }
-  .story-bridge { font-size: 12px; margin-top: 21px; line-height: 1.65; }
   .story-eyebrow { font-size: 8px; gap: 12px; letter-spacing: .14em; }
 
   /* Mobile menggunakan ritme narasi, visual, lalu kesimpulan sebelum berpindah bab. */
@@ -358,7 +356,7 @@
   .mobile-story-step { display: flex; min-height: 92svh; align-items: center; padding: 104px 34px 102px 22px; }
   .mobile-narrative-step { min-height: 112svh; }
   .mobile-visual-step { min-height: 128svh; align-items: flex-start; padding-top: 18svh; padding-bottom: 164px; }
-  .mobile-story-card, .mobile-visual-card, .mobile-bridge-card { width: 100%; }
+  .mobile-story-card, .mobile-visual-card { width: 100%; }
   .mobile-story-card { padding: 24px 0; }
   .mobile-story-title { max-width: 10.5em; margin-top: 17px; font-size: clamp(31px, 8.25vw, 43px); font-weight: 500; line-height: 1.075; letter-spacing: -.04em; text-shadow: 0 3px 32px #000c; text-wrap: balance; }
   .mobile-story-title.is-long { font-size: clamp(28px, 7.5vw, 37px); }
@@ -368,11 +366,6 @@
   .mobile-step-label { color: #d9bd79; font-size: 8px; letter-spacing: .19em; text-transform: uppercase; }
   .mobile-visual-card > h3 { max-width: 16em; margin-top: 11px; color: #f4ead2; font-size: clamp(24px, 6.5vw, 30px); font-weight: 400; line-height: 1.15; }
   .mobile-diagram-caption { margin-top: 17px; color: #dfe7dcc2; font-size: 12px; line-height: 1.65; }
-  .mobile-bridge-step { min-height: 104svh; align-items: center; padding-bottom: 154px; }
-  .mobile-bridge-card { padding: 30px 25px; border-left: 1px solid #dfc67f; background: linear-gradient(90deg, #0a2119e8, #071610a8); box-shadow: 0 20px 70px #0007; }
-  .mobile-bridge-card > p { margin-top: 15px; color: #f1dca4; font-family: var(--font-serif); font-size: clamp(23px, 6.2vw, 29px); line-height: 1.35; }
-  .mobile-next-chapter { display: block; margin-top: 25px; color: #d8e1d5a3; font-size: 9px; letter-spacing: .08em; }
-  .mobile-bridge-card > svg { margin-top: 15px; color: #e5cb88; animation: story-next-pulse 1.8s ease-in-out infinite; }
 
   .mobile-story-progress { position: fixed; z-index: 45; top: 50%; right: max(7px, env(safe-area-inset-right)); display: grid; justify-items: center; gap: 10px; opacity: 0; pointer-events: none; transform: translateY(-50%) translateX(10px); transition: opacity .3s ease, transform .3s ease; }
   .mobile-story-progress.is-visible { opacity: 1; transform: translateY(-50%) translateX(0); }
@@ -449,7 +442,6 @@
   .story-copy { inset-block: 110px 112px; }
   .story-copy h2 { font-size: 40px; margin-top: 12px; }
   .story-body { font-size: 14px; margin-top: 14px; }
-  .story-bridge { margin-top: 16px; font-size: 12px; }
   .evidence-cycle { margin-top: 16px; }
   .knowledge-fragments { display: none; }
   .story-next, .story-scroll-cue { display: none; }
@@ -458,7 +450,6 @@
   .story-copy { inset-block: 112px 110px; }
   .story-copy h2 { font-size: 27px; margin-top: 10px; }
   .story-body { font-size: 12px; margin-top: 12px; line-height: 1.65; }
-  .story-bridge { font-size: 11px; margin-top: 12px; }
   .evidence-cycle { margin-top: 12px; }
   .story-symbol { display: none; }
 }

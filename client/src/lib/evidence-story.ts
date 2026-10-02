@@ -5,7 +5,6 @@ export type EvidenceScene = {
   title: string;
   body: string;
   bodySecondary?: string;
-  bridge: string;
   image: string;
   position: string;
   symbol: string;
@@ -109,7 +108,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     title: "Bagaimana HMI menjawab persoalan pada setiap zamannya?",
     body: "Sejarah HMI memperlihatkan pergulatan kader dalam menjawab persoalan keislaman, keindonesiaan, dan perkaderan. Perubahan keadaan menuntut kemampuan memahami persoalan serta keberanian menentukan sikap. Tuntutan itu tetap melekat pada HMI hari ini.",
     bodySecondary: "Persoalan yang dihadapi HMI hari ini tidak seluruhnya sama dengan persoalan pada masa pendiriannya. Keberlanjutan perjuangan yang dirintis Lafran Pane perlu diwujudkan melalui pembinaan kader dan kerja organisasi yang menjawab keadaan sekarang.",
-    bridge: "Kepengurusan terus berganti. Sejauh mana organisasi mengetahui perkembangan kader yang dibinanya?",
     image: "01-indonesia",
     position: "50% 50%",
     symbol: "1947",
@@ -120,7 +118,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     chapter: "Nama tercatat, perjalanan diabaikan",
     title: "Setelah Latihan Kader, bagaimana kelanjutan pembinaannya?",
     body: "Daftar peserta Latihan Kader umumnya tersedia. Yang belum selalu diketahui ialah kelanjutan pembinaan mereka: siapa yang masih aktif di komisariat, siapa yang mulai meninggalkan kegiatan, kemampuan apa yang berkembang, serta kendala yang menyebabkan proses perkaderannya terhenti. Keadaan tersebut perlu diketahui agar pengurus dapat menentukan tindak lanjut yang sesuai.",
-    bridge: "Jumlah peserta latihan merupakan bagian dari laporan perkaderan. Penilaian atas keberhasilannya juga harus memperhatikan keaktifan, perkembangan kemampuan, dan keterlibatan kader setelah latihan.",
     image: "02-kelahiran-hmi",
     position: "58% 50%",
     symbol: "Kader",
@@ -131,7 +128,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     chapter: "Notulensi dan dokumentasi belum terhubung",
     title: "Catatan organisasi belum digunakan secara optimal untuk menentukan kebijakan.",
     body: "Komisariat, Cabang, Badko, dan PB HMI memiliki catatan kegiatan, notulensi rapat, serta data kader. Pengelolaannya belum saling terhubung, sehingga pengalaman di satu tingkat kepengurusan belum selalu menjadi bahan pertimbangan bagi tingkat lainnya. Akibatnya, banyak catatan organisasi belum digunakan untuk mengevaluasi perkaderan dan memperbaiki kebijakan.",
-    bridge: "Kesamaan pengertian dan tata pencatatan diperlukan agar pengurus berikutnya dapat memahami keadaan organisasi serta melanjutkan pekerjaan yang belum selesai.",
     image: "01-indonesia",
     position: "52% 50%",
     symbol: "Data",
@@ -142,7 +138,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     chapter: "Ketika asumsi menjadi dasar",
     title: "Apakah program HMI sudah menjawab Student Needs dan Student Interest?",
     body: "Pemahaman atas keadaan kader harus menjadi bahan dalam Rapat Bidang, Rapat Presidium, Rapat Harian, maupun Pleno. Tanpa pemahaman tersebut, penyusunan dan evaluasi program mudah bertumpu pada perkiraan pengurus. Program kepengurusan pun dapat menjauh dari kebutuhan kader dan arah perjuangan organisasi.",
-    bridge: "Perubahan kebutuhan dan minat mahasiswa perlu diperhatikan agar kegiatan HMI tetap relevan dengan persoalan yang mereka hadapi.",
     image: "03-perubahan-zaman",
     position: "65% 50%",
     symbol: "?",
@@ -153,7 +148,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     chapter: "Yang lebih mudah dipetakan",
     title: "Kita mengetahui konstelasi atau konfigurasi politik, tetapi belum tentu mengetahui keadaan perkaderan.",
     body: "Menjelang RAK, Konfercab, Musda, atau Kongres, kita dapat mengetahui arah dukungan dan kekuatan delegasi dengan cukup rinci. Ketelitian yang sama perlu digunakan untuk mengetahui komisariat yang kadernya tidak lagi aktif setelah latihan serta cabang yang membutuhkan penguatan perkaderan. Hal ini menyangkut perhatian organisasi terhadap fungsi pembinaan yang menjadi tanggung jawabnya.",
-    bridge: "Kesibukan mengurus kontestasi internal dapat mengurangi perhatian HMI terhadap pembinaan kader, persoalan mahasiswa, dan tanggung jawab pengabdian kepada masyarakat.",
     image: "04-lingkaran-organisasi",
     position: "53% 50%",
     symbol: "HMI",
@@ -165,7 +159,6 @@ export const evidenceStory: readonly EvidenceScene[] = [
     title: "Menjadikan keadaan perkaderan sebagai dasar kebijakan organisasi.",
     body: "Melalui ekosistem perkaderan berbasis bukti atau evidence-based, Komisariat mencatat perkembangan kader dan melaksanakan tindak lanjut pembinaan. Cabang menelaah keadaan perkaderan di komisariat, sedangkan Badko menghimpun persoalan dan pengalaman antarcabang. PB HMI menggunakan hasilnya untuk merumuskan kebijakan, menyempurnakan pedoman, serta menentukan dukungan perkaderan sesuai kebutuhan.",
     bodySecondary: "Ekosistem ini mengikhtiarkan tata kelola data yang menghadirkan pencatatan dan pengkajian yang tertib, forum organisasi memiliki bahan yang dapat ditinjau bersama. Perbedaan pandangan dapat dibahas dengan merujuk pada keadaan yang diketahui, sehingga keputusan mempunyai dasar pertimbangan yang dapat dipertanggungjawabkan dan diskusi yang lebih terarah.",
-    bridge: "Bukti alat untuk mengetahui kebutuhan pembinaan, mempelajari pengalaman yang berhasil, dan menentukan bagian perkaderan yang perlu diperbaiki.",
     image: "05-berbasis-bukti",
     position: "62% 50%",
     symbol: "Bukti",

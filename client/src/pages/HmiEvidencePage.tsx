@@ -276,7 +276,6 @@ function DesktopHistoryLayer({ phase, activeBeat }: { phase: MotionValue<number>
         <p className="story-eyebrow"><span>01</span>{scene.chapter}</p>
         <h2><StoryText>{scene.title}</StoryText></h2>
         <p className="story-body"><StoryText>{scene.body}</StoryText></p>
-        <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
       </motion.div>
       <motion.div className="desktop-history-explorer" style={{ opacity: active ? 1 : 0, y: copyY }}>
         <HistoryExplorer variant="stage" selected={selected} onSelect={setSelected} />
@@ -323,7 +322,6 @@ function StoryLayer({
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2>
         <p className="story-body"><StoryText>{scene.body}</StoryText></p>
         {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
-        <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
       </motion.div>
     </motion.section>
   );
@@ -339,7 +337,6 @@ function ReadingView() {
         <h2 className={scene.title.length > 85 ? "story-title-long" : undefined}><StoryText>{scene.title}</StoryText></h2><p className="story-body"><StoryText>{scene.body}</StoryText></p>
         {scene.bodySecondary && <p className="story-body story-body-secondary"><StoryText>{scene.bodySecondary}</StoryText></p>}
         {index === 0 && <HistoryCard />}
-        <p className="story-bridge"><StoryText>{scene.bridge}</StoryText></p>
         {index > 0 && <div className="story-reading-diagram">
           <h3>{mobileDiagramCopy[index].title}</h3>
           <MobileStoryDiagram index={index} />
@@ -349,7 +346,7 @@ function ReadingView() {
   ))}</div>;
 }
 
-const mobileChapterStepCounts = evidenceStory.map(() => 3);
+const mobileChapterStepCounts = evidenceStory.map(() => 2);
 const mobileScenePans = [
   { x: -4, y: -6 },
   { x: 4, y: -5 },
@@ -466,14 +463,6 @@ function MobileCinematicStory() {
               </div>
             </article>
 
-            <article className="mobile-story-step mobile-bridge-step" data-mobile-step data-scene={index} data-step="2" data-pan-x={pan.x / 3} data-pan-y={pan.y / 2 - 1.5} data-camera-origin-x={camera.focusX} data-camera-origin-y={camera.focusY} data-camera-start={camera.zoom - 0.2} data-camera-zoom={camera.zoom + 0.14}>
-              <div className="mobile-bridge-card">
-                <span className="mobile-step-label">Yang perlu dibawa</span>
-                <p><StoryText>{scene.bridge}</StoryText></p>
-                <span className="mobile-next-chapter">{index < evidenceStory.length - 1 ? `Selanjutnya, ${evidenceStory[index + 1].label}` : "Selanjutnya, kondisi HMI saat ini"}</span>
-                <ArrowDown size={18} aria-hidden="true" />
-              </div>
-            </article>
           </div>
         </section>
         );
