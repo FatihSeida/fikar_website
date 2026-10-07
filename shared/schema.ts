@@ -80,6 +80,12 @@ export const hasilKuis = pgTable("hasil_kuis", {
   aktifLk1: integer("aktif_lk1"),
   programRencana: integer("program_rencana"),
   programTerlaksana: integer("program_terlaksana"),
+  // Perkiraan lokasi pengisi dari IP; IP-nya sendiri tidak disimpan.
+  kota: text("kota"),
+  provinsi: text("provinsi"),
+  // Hash SHA-256 dari kunci yang hanya dipegang peramban pengisi, supaya hanya
+  // pengisi itu yang bisa melengkapi komisariat dan cabang pada hasilnya.
+  kunciUbah: text("kunci_ubah"),
 });
 
 const internalOrHttpsImage = z.string().trim().min(1).max(2048).refine((value) => {
@@ -151,11 +157,22 @@ export const insertKunjunganSchema = z.object({
 
 const angkaOpsional = z.number().int().min(0).max(9999).nullable().optional();
 
+type DataCerita = { komisariat?: string | null; cabang?: string | null; cerita?: string | null; nama?: string | null; kontak?: string | null; persetujuan?: boolean };
+
 /**
- * Hasil kuis beserta angka opsional dan cerita kondisi komisariat. Cerita
- * disimpan sebagai masalah komisariat, jadi aturannya sama: komisariat dan
- * cabang wajib, begitu pula persetujuan bila ada cerita atau kontak.
+ * Cerita kondisi komisariat disimpan sebagai masalah komisariat, jadi aturannya
+ * sama: komisariat dan cabang wajib, begitu pula persetujuan bila ada cerita atau kontak.
  */
+function periksaCerita(data: DataCerita, ctx: z.RefinementCtx) {
+  const galat = (message: string) => ctx.addIssue({ code: "custom", message });
+  if (data.cerita) {
+    if (data.cerita.length < 20) galat("Ceritakan kondisi komisariatmu minimal 20 karakter");
+    if (!data.komisariat || !data.cabang) galat("Isi nama komisariat dan cabang supaya ceritamu bisa ditindaklanjuti");
+  }
+  if ((data.cerita || data.nama || data.kontak) && data.persetujuan !== true) galat("Persetujuan penyimpanan data diperlukan");
+}
+
+/** Hasil kuis beserta angka opsional dan cerita kondisi komisariat. */
 export const insertHasilKuisSchema = z.object({
   // 20 jawaban inti, atau 30 bila audit lanjutan (pasca-LK 2 dan LK 3) diikuti.
   jawaban: z.array(z.number().int().min(0).max(3)).refine((daftar) => daftar.length === JUMLAH_SOAL_INTI || daftar.length === JUMLAH_SOAL_INTI + JUMLAH_SOAL_LANJUTAN, "Jumlah jawaban kuis tidak sesuai"),
@@ -177,12 +194,23 @@ export const insertHasilKuisSchema = z.object({
   if (ada(data.pesertaLk1) && ada(data.aktifLk1) && data.aktifLk1! > data.pesertaLk1!) galat("Kader yang masih aktif tidak bisa lebih banyak dari peserta LK 1");
   if (ada(data.programRencana) !== ada(data.programTerlaksana)) galat("Isi jumlah program yang direncanakan dan yang terlaksana bersamaan");
   if (ada(data.programRencana) && ada(data.programTerlaksana) && data.programTerlaksana! > data.programRencana!) galat("Program yang terlaksana tidak bisa lebih banyak dari yang direncanakan");
-  if (data.cerita) {
-    if (data.cerita.length < 20) galat("Ceritakan kondisi komisariatmu minimal 20 karakter");
-    if (!data.komisariat || !data.cabang) galat("Isi nama komisariat dan cabang supaya ceritamu bisa ditindaklanjuti");
-  }
-  if ((data.cerita || data.nama || data.kontak) && data.persetujuan !== true) galat("Persetujuan penyimpanan data diperlukan");
+  periksaCerita(data, ctx);
 });
+
+/**
+ * Melengkapi hasil kuis yang sudah tersimpan otomatis: komisariat dan cabang,
+ * serta cerita bila ada. Hanya pemegang kunci yang dikembalikan saat hasil disimpan.
+ */
+export const lengkapiHasilKuisSchema = z.object({
+  kunci: z.string().regex(/^[a-f0-9]{32}$/),
+  komisariat: teksOpsional(120),
+  cabang: teksOpsional(80),
+  cerita: teksOpsional(3000),
+  nama: teksOpsional(80),
+  kontak: teksOpsional(120),
+  bolehDikutip: z.boolean().optional().default(false),
+  persetujuan: z.boolean().optional(),
+}).superRefine(periksaCerita);
 
 export type MasalahKomisariat = typeof masalahKomisariat.$inferSelect;
 export type InsertMasalah = Omit<z.infer<typeof insertMasalahSchema>, "persetujuan"> & { hasilKuisId?: number | null };

@@ -42,12 +42,12 @@ function kirimanTerakhir(data: HasilKuis[]) {
 function unduhCsv(data: HasilKuis[]) {
   const sel = (nilai: unknown) => `"${String(nilai ?? "").replace(/"/g, '""')}"`;
   const kepala = [
-    "Waktu", "Komisariat", "Cabang", "Skor", "Tingkat",
+    "Waktu", "Komisariat", "Cabang", "Kota", "Provinsi", "Skor", "Tingkat",
     "Peserta LK 1", "Aktif 3 bulan", "Retensi (%)", "Program direncanakan", "Program terlaksana", "Keterlaksanaan (%)",
     ...[...pertanyaanKuis, ...pertanyaanLanjutan].map((pertanyaan) => `${pertanyaan.id.toUpperCase()} ${pertanyaan.teks}`),
   ];
   const baris = data.map((hasil) => [
-    waktu(hasil.createdAt), hasil.komisariat, hasil.cabang, hasil.skor, tingkatDari(hasil.skor),
+    waktu(hasil.createdAt), hasil.komisariat, hasil.cabang, hasil.kota, hasil.provinsi, hasil.skor, tingkatDari(hasil.skor),
     hasil.pesertaLk1, hasil.aktifLk1, rasio(hasil.aktifLk1, hasil.pesertaLk1),
     hasil.programRencana, hasil.programTerlaksana, rasio(hasil.programTerlaksana, hasil.programRencana),
     ...hasil.jawaban.split(","),
@@ -139,6 +139,8 @@ export default function KuisPanel() {
   const sesuaiCabang = (hasil: HasilKuis) => cabang === "semua" || normal(hasil.cabang) === cabang;
   const semuaKiriman = data.filter(sesuaiCabang);
   const unik = kirimanTerakhir(data).filter(sesuaiCabang);
+  // Hasil tersimpan otomatis tanpa nama; komisariat dan cabang menyusul bila pengisi melengkapinya.
+  const teridentifikasi = unik.filter((hasil) => normal(hasil.komisariat) && normal(hasil.cabang)).length;
 
   // Hanya hasil yang panjang jawabannya cocok dengan versi kuis sekarang yang dirinci per pertanyaan.
   const semuaJawaban = unik.map((hasil) => hasil.jawaban.split(",").map(Number));
@@ -190,12 +192,12 @@ export default function KuisPanel() {
       </div>
 
       {isLoading && <p className="text-muted-foreground">Memuat hasil kuis…</p>}
-      {!isLoading && unik.length === 0 && <p className="text-muted-foreground">Belum ada hasil kuis{cabang === "semua" ? " yang dikirim" : " dari cabang ini"}.</p>}
+      {!isLoading && unik.length === 0 && <p className="text-muted-foreground">Belum ada hasil kuis{cabang === "semua" ? " yang tersimpan" : " dari cabang ini"}.</p>}
 
       {unik.length > 0 && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Angka judul="Komisariat" nilai={angka.format(unik.length)} catatan={`dari ${angka.format(semuaKiriman.length)} kiriman · ${angka.format(lanjutan.length)} ikut audit lanjutan`} />
+            <Angka judul="Hasil audit" nilai={angka.format(unik.length)} catatan={`${angka.format(teridentifikasi)} sudah mengisi komisariat dan cabang · ${angka.format(lanjutan.length)} ikut audit lanjutan`} />
             <Angka judul="Rata-rata skor" nilai={`${angka.format(rataSkor)} / ${pertanyaanKuis.length * 3}`} catatan={`n = ${unik.length}`} />
             <Angka judul="Retensi kader setelah LK 1" nilai={retensi === null ? "—" : `${retensi}%`} catatan={denganRetensi.length ? `gabungan ${angka.format(jumlahkan(denganRetensi, "aktifLk1"))} dari ${angka.format(jumlahkan(denganRetensi, "pesertaLk1"))} peserta · n = ${denganRetensi.length}` : "Belum ada yang mengisi"} />
             <Angka judul="Keterlaksanaan program" nilai={keterlaksanaan === null ? "—" : `${keterlaksanaan}%`} catatan={denganProgram.length ? `gabungan ${angka.format(jumlahkan(denganProgram, "programTerlaksana"))} dari ${angka.format(jumlahkan(denganProgram, "programRencana"))} program · n = ${denganProgram.length}` : "Belum ada yang mengisi"} />
@@ -235,12 +237,13 @@ export default function KuisPanel() {
           {lanjutan.length > 0 && <SebaranJawaban judul="Audit lanjutan: kader pasca-LK 2 dan LK 3" pertanyaan={pertanyaanLanjutan} daftar={lanjutan} />}
 
           <Card><CardContent className="overflow-x-auto p-0">
-            <table className="w-full min-w-[760px] text-sm">
+            <table className="w-full min-w-[860px] text-sm">
               <thead className="border-b border-border text-left text-xs uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3 font-normal">Waktu</th>
                   <th className="px-5 py-3 font-normal">Komisariat</th>
                   <th className="px-5 py-3 font-normal">Cabang</th>
+                  <th className="px-5 py-3 font-normal">Kota</th>
                   <th className="px-5 py-3 text-right font-normal">Skor</th>
                   <th className="px-5 py-3 font-normal">Tingkat</th>
                   <th className="px-5 py-3 text-right font-normal">Retensi</th>
@@ -254,8 +257,9 @@ export default function KuisPanel() {
                   return (
                     <tr key={hasil.id} className="border-b border-border last:border-0">
                       <td className="whitespace-nowrap px-5 py-3 text-muted-foreground">{waktu(hasil.createdAt)}</td>
-                      <td className="px-5 py-3">{hasil.komisariat || <span className="text-muted-foreground">Tidak diisi</span>}</td>
-                      <td className="px-5 py-3">{hasil.cabang || <span className="text-muted-foreground">Tidak diisi</span>}</td>
+                      <td className="px-5 py-3">{hasil.komisariat || <span className="text-muted-foreground">-</span>}</td>
+                      <td className="px-5 py-3">{hasil.cabang || <span className="text-muted-foreground">-</span>}</td>
+                      <td className="px-5 py-3">{hasil.kota || <span className="text-muted-foreground">-</span>}</td>
                       <td className="px-5 py-3 text-right tabular-nums">{hasil.skor}</td>
                       <td className="px-5 py-3">{tingkatDari(hasil.skor)}</td>
                       <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">{r === null ? "—" : `${hasil.aktifLk1}/${hasil.pesertaLk1} (${r}%)`}</td>

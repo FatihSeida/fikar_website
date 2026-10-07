@@ -5,7 +5,7 @@ import {
   type MasalahKomisariat, type InsertMasalah, type InsertKunjungan, type Kunjungan, type HasilKuis, type InsertHasilKuis,
   type StatistikKunjungan, type JumlahBerlabel,
 } from "@shared/schema";
-import { asc, desc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
   getGalleryItems(): Promise<GalleryItem[]>;
@@ -31,8 +31,18 @@ export interface IStorage {
   getStatistikKunjungan(hari: number): Promise<StatistikKunjungan>;
 
   createHasilKuis(data: InsertHasilKuis): Promise<HasilKuis>;
+  /** Mengisi komisariat dan cabang; undefined bila hasilnya tidak ada atau kuncinya salah. */
+  lengkapiHasilKuis(id: number, kunciUbah: string, data: IdentitasKuis): Promise<HasilKuis | undefined>;
   getHasilKuis(batas: number): Promise<HasilKuis[]>;
 }
+
+export type IdentitasKuis = { komisariat?: string | null; cabang?: string | null };
+
+// Kolom yang tidak dikirim tidak menimpa nilai yang sudah ada.
+const identitasTerisi = (data: IdentitasKuis) => ({
+  ...(data.komisariat ? { komisariat: data.komisariat } : {}),
+  ...(data.cabang ? { cabang: data.cabang } : {}),
+});
 
 const BATAS_DAFTAR = 15;
 // Ditulis sebagai literal SQL, bukan parameter: ekspresi tanggal di SELECT dan
@@ -208,6 +218,17 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
+  async lengkapiHasilKuis(id: number, kunciUbah: string, data: IdentitasKuis): Promise<HasilKuis | undefined> {
+    const kondisi = and(eq(hasilKuis.id, id), eq(hasilKuis.kunciUbah, kunciUbah));
+    const isi = identitasTerisi(data);
+    if (Object.keys(isi).length === 0) {
+      const [item] = await this.db.select().from(hasilKuis).where(kondisi);
+      return item;
+    }
+    const [item] = await this.db.update(hasilKuis).set(isi).where(kondisi).returning();
+    return item;
+  }
+
   async getHasilKuis(batas: number): Promise<HasilKuis[]> {
     return await this.db.select().from(hasilKuis).orderBy(desc(hasilKuis.createdAt)).limit(batas);
   }
@@ -377,8 +398,17 @@ export class MemStorage implements IStorage {
       aktifLk1: data.aktifLk1 ?? null,
       programRencana: data.programRencana ?? null,
       programTerlaksana: data.programTerlaksana ?? null,
+      kota: data.kota ?? null,
+      provinsi: data.provinsi ?? null,
+      kunciUbah: data.kunciUbah ?? null,
     };
     this.hasilKuisItems.push(item);
+    return item;
+  }
+
+  async lengkapiHasilKuis(id: number, kunciUbah: string, data: IdentitasKuis): Promise<HasilKuis | undefined> {
+    const item = this.hasilKuisItems.find((hasil) => hasil.id === id && hasil.kunciUbah === kunciUbah);
+    if (item) Object.assign(item, identitasTerisi(data));
     return item;
   }
 
