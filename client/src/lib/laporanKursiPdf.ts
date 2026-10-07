@@ -6,9 +6,10 @@ import type { HasilKursi } from "@/lib/kursiKetua";
 export async function unduhLaporanKursi(hasil: HasilKursi, data: { kursi: string; komisariat: string; cabang: string; tanggal: string; komitmen: string }, namaBerkas: string) {
   const pdf = await siapkanPdf();
   const paragraf = (isi: string, atas = 0): Content => ({ text: isi, fontSize: 10.5, lineHeight: 1.5, margin: [0, atas, 0, 8] });
-  const judulBagian = (eyebrow: string, judul: string): Content[] => [
-    { ...label(eyebrow, HIJAU), margin: [0, 22, 0, 0] },
-    { text: judul, font: "Serif", fontSize: 16, margin: [0, 6, 0, 10] },
+  // Judul bagian selalu berpindah halaman bersama isi pertamanya, tidak tertinggal sendirian.
+  const judulBagian = (eyebrow: string, judul: string, [pertama, ...sisa]: Content[]): Content[] => [
+    { stack: [{ ...label(eyebrow, HIJAU), margin: [0, 22, 0, 0] }, { text: judul, font: "Serif", fontSize: 16, margin: [0, 6, 0, 10] }, pertama], unbreakable: true },
+    ...sisa,
   ];
 
   const pembuka: Content[] = [
@@ -23,22 +24,18 @@ export async function unduhLaporanKursi(hasil: HasilKursi, data: { kursi: string
   ];
 
   const caraMemimpin: Content[] = [
-    ...judulBagian("Cara kamu memimpin", "Lima dimensi dalam keputusanmu"),
-    ...hasil.dimensi.map((d) => batang(d.nama, d.persen, 495, d.label)),
+    ...judulBagian("Cara kamu memimpin", "Lima dimensi dalam keputusanmu", [{ stack: hasil.dimensi.map((d) => batang(d.nama, d.persen, 495, d.label)) }]),
     ...hasil.praktik.map((t): Content => ({ text: [{ text: "Sudah muncul: ", bold: true }, `Dalam simulasi ini, kamu memilih ${t.pilihan.ringkas}. ${t.pilihan.konsekuensi}`], fontSize: 9.5, lineHeight: 1.4, margin: [0, 4, 0, 4] })),
     ...hasil.perhatian.map((t): Content => ({ text: [{ text: "Perlu diperhatikan: ", bold: true }, `Dalam simulasi ini, kamu memilih ${t.pilihan.ringkas}. ${t.pilihan.konsekuensi}`], fontSize: 9.5, lineHeight: 1.4, margin: [0, 4, 0, 4] })),
   ];
 
   const dukungan: Content[] = [
-    ...judulBagian("Siapa yang menjagamu?", hasil.dukungan.judul),
-    paragraf(hasil.dukungan.uraian),
-    ...judulBagian("Kader seperti apa yang mendapat ruang tumbuh?", hasil.ruangTumbuh.judul),
-    paragraf(`${hasil.ruangTumbuh.uraian} Bagian ini menjelaskan lingkungan yang didorong oleh pilihanmu, bukan sifat kader.`),
+    ...judulBagian("Siapa yang menjagamu?", hasil.dukungan.judul, [paragraf(hasil.dukungan.uraian)]),
+    ...judulBagian("Kader seperti apa yang mendapat ruang tumbuh?", hasil.ruangTumbuh.judul, [paragraf(`${hasil.ruangTumbuh.uraian} Bagian ini menjelaskan lingkungan yang didorong oleh pilihanmu, bukan sifat kader.`)]),
   ];
 
   const ditinjau: Content[] = [
-    ...judulBagian("Tiga keputusan yang paling layak ditinjau", "Pilihanmu, manfaatnya, dan yang mungkin terlewat"),
-    ...hasil.ditinjau.map((t): Content => ({
+    ...judulBagian("Tiga keputusan yang paling layak ditinjau", "Pilihanmu, manfaatnya, dan yang mungkin terlewat", hasil.ditinjau.map((t): Content => ({
       stack: [
         { text: t.pilihan.temuan!.judul, font: "Serif", fontSize: 12, margin: [0, 0, 0, 4] },
         { text: `${t.pilihan.temuan!.manfaat} ${t.pilihan.temuan!.terlewat}`, fontSize: 9.5, lineHeight: 1.4 },
@@ -46,19 +43,18 @@ export async function unduhLaporanKursi(hasil: HasilKursi, data: { kursi: string
       ],
       margin: [0, 0, 0, 14],
       unbreakable: true,
-    })),
+    }))),
   ];
 
   const langkah: Content[] = [
-    ...judulBagian("Tiga langkah untuk tujuh hari berikutnya", "Coba bersama pengurus"),
-    ...hasil.langkah.map((l, i): Content => ({
+    ...judulBagian("Tiga langkah untuk tujuh hari berikutnya", "Coba bersama pengurus", hasil.langkah.map((l, i): Content => ({
       columns: [
         { text: String(i + 1).padStart(2, "0"), font: "Serif", fontSize: 16, color: HIJAU, width: 30 },
         { stack: [{ text: l.kebutuhan, bold: true, fontSize: 10 }, { text: l.langkah, fontSize: 9.5, lineHeight: 1.4, margin: [0, 2, 0, 0] }] },
       ],
       margin: [0, 0, 0, 10],
       unbreakable: true,
-    })),
+    }))),
     { text: [{ text: "Komitmen pekan ini: ", bold: true }, data.komitmen], fontSize: 10, margin: [0, 6, 0, 0] },
   ];
 
