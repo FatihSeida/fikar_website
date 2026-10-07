@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Download, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, ChevronsUpDown, Download, RotateCcw } from "lucide-react";
 import { Link } from "wouter";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
@@ -8,7 +8,9 @@ import TeksIstilah from "@/components/TeksIstilah";
 import AjakDukung from "@/components/AjakDukung";
 import ProfilDialog from "@/components/ProfilDialog";
 import VisiMisiDialog from "@/components/VisiMisiDialog";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { kelompokIndikator } from "@/lib/indikator";
 import {
@@ -161,29 +163,76 @@ function KelompokTemuan({ idKelompok, judul, sorotan, persen, butir, terbukaAwal
   );
 }
 
-/** Cabang dipilih dari daftar per Badko; cabang yang belum terdata bisa diketik sendiri. */
+/**
+ * Pencarian cabang per kata, bukan huruf berserakan: nama yang diawali kata yang
+ * diketik tampil paling atas, lalu nama yang mengandungnya, lalu nama Badko-nya.
+ * Nilai setiap pilihan berbentuk "Nama cabang · Badko".
+ */
+function cocokCabang(nilai: string, cari: string) {
+  const kata = cari.trim().toLowerCase();
+  if (!kata) return 1;
+  const [nama, badko = ""] = nilai.toLowerCase().split(" · ");
+  if (nama.startsWith(kata)) return 1;
+  if (nama.includes(kata)) return 0.8;
+  if (badko.includes(kata)) return 0.4;
+  return 0;
+}
+
+/** Cabang dicari dan dipilih dari daftar per Badko; cabang yang belum terdata bisa diketik sendiri. */
 function PilihCabang({ pilihan, setPilihan, lainnya, setLainnya }: {
   pilihan: string;
   setPilihan: (nilai: string) => void;
   lainnya: string;
   setLainnya: (nilai: string) => void;
 }) {
+  const [buka, setBuka] = useState(false);
+  const pilih = (nilai: string) => {
+    setPilihan(nilai);
+    setBuka(false);
+  };
   return (
     <div className="grid gap-2">
-      <select
-        value={pilihan}
-        onChange={(e) => setPilihan(e.target.value)}
-        aria-label="Pilih cabang"
-        className={`h-10 w-full rounded-md border border-input bg-background px-3 text-sm ${pilihan ? "" : "text-muted-foreground"}`}
-      >
-        <option value="">Pilih cabang</option>
-        {badkoCabang.map((badko) => (
-          <optgroup key={badko.badko} label={badko.badko}>
-            {badko.cabang.map((nama) => <option key={nama} value={nama}>{nama}</option>)}
-          </optgroup>
-        ))}
-        <option value={CABANG_LAINNYA}>Cabang lainnya (belum ada di daftar)</option>
-      </select>
+      <Popover open={buka} onOpenChange={setBuka}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            role="combobox"
+            aria-expanded={buka}
+            aria-label="Pilih cabang"
+            className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm"
+          >
+            <span className={`truncate ${pilihan ? "" : "text-muted-foreground"}`}>
+              {pilihan === CABANG_LAINNYA ? "Cabang lainnya" : pilihan || "Pilih cabang"}
+            </span>
+            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-[--radix-popover-trigger-width] min-w-[260px] p-0">
+          <Command filter={cocokCabang}>
+            <CommandInput placeholder="Ketik nama cabang…" />
+            <CommandList>
+              <CommandEmpty>Cabang tidak ditemukan.</CommandEmpty>
+              {badkoCabang.map((badko) => (
+                <CommandGroup key={badko.badko} heading={badko.badko}>
+                  {badko.cabang.map((nama) => (
+                    <CommandItem key={nama} value={`${nama} · ${badko.badko}`} onSelect={() => pilih(nama)}>
+                      <Check className={`h-4 w-4 ${pilihan === nama ? "opacity-100" : "opacity-0"}`} />
+                      {nama}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+              {/* Selalu tampil, juga saat pencarian tidak menemukan apa pun. */}
+              <CommandGroup forceMount>
+                <CommandItem forceMount value="Cabang lainnya" onSelect={() => pilih(CABANG_LAINNYA)}>
+                  <Check className={`h-4 w-4 ${pilihan === CABANG_LAINNYA ? "opacity-100" : "opacity-0"}`} />
+                  Cabang lainnya (belum ada di daftar)
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
       {pilihan === CABANG_LAINNYA && (
         <Input value={lainnya} onChange={(e) => setLainnya(e.target.value)} maxLength={80} placeholder="Tulis nama cabang" aria-label="Nama cabang" />
       )}
@@ -242,6 +291,40 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
   const urutTemuan = [...perKelompok].sort((a, b) => a.persen - b.persen);
   const perLanjutan = adaLanjutan ? hitungKelompok(kelompokLanjutan, pertanyaanLanjutan, jawabanLanjutan) : [];
 
+  // Hasil disimpan otomatis begitu tampil, tanpa nama. Kunci dari server dipakai
+  // untuk melengkapi komisariat, cabang, dan cerita pada hasil yang sama.
+  const [simpanan, setSimpanan] = useState<{ id: number; kunci: string } | null>(null);
+  const sudahDisimpan = useRef(false);
+  useEffect(() => {
+    if (sudahDisimpan.current) return;
+    sudahDisimpan.current = true;
+    fetch("/api/kuis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jawaban, ...angka }) })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((isi) => {
+        if (typeof isi?.id === "number" && typeof isi?.kunci === "string") setSimpanan({ id: isi.id, kunci: isi.kunci });
+      })
+      .catch(() => {});
+  }, [jawaban, angka]);
+
+  const lengkapi = (data: Record<string, unknown>) => fetch(`/api/kuis/${simpanan?.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kunci: simpanan?.kunci, ...data }),
+  });
+
+  // Komisariat dan cabang ikut tersimpan sesaat setelah keduanya terisi.
+  const identitasTersimpan = useRef("");
+  useEffect(() => {
+    const nilai = `${komisariat.trim()}|${cabang}`;
+    if (!simpanan || !identitasLengkap || identitasTersimpan.current === nilai) return;
+    const jeda = window.setTimeout(() => {
+      lengkapi({ komisariat: komisariat.trim(), cabang })
+        .then((res) => { if (res.ok) identitasTersimpan.current = nilai; })
+        .catch(() => {});
+    }, 1200);
+    return () => window.clearTimeout(jeda);
+  }, [simpanan, identitasLengkap, komisariat, cabang]);
+
   const adaCerita = cerita.trim().length > 0;
   const perluPersetujuan = adaCerita || nama.trim().length > 0 || kontak.trim().length > 0;
   const kurang = adaCerita && cerita.trim().length < 20
@@ -250,17 +333,21 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
       ? "Isi nama komisariat dan cabang supaya ceritamu bisa ditindaklanjuti."
       : perluPersetujuan && !persetujuan
         ? "Centang persetujuan penyimpanan data untuk mengirim cerita atau kontak."
-        : "";
+        : simpanan && !adaCerita && !identitasLengkap
+          ? "Isi nama komisariat dan cabang, atau ceritakan kondisi komisariatmu."
+          : "";
 
   const kirimHasil = async () => {
     setKirim("mengirim");
     setPesanGalat("");
     try {
-      const res = await fetch("/api/kuis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jawaban, komisariat, cabang, ...angka, cerita, nama, kontak, bolehDikutip, persetujuan }),
-      });
+      const res = simpanan
+        ? await lengkapi({ komisariat, cabang, cerita, nama, kontak, bolehDikutip, persetujuan })
+        : await fetch("/api/kuis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jawaban, komisariat, cabang, ...angka, cerita, nama, kontak, bolehDikutip, persetujuan }),
+        });
       if (res.ok) {
         setKirim("terkirim");
         return;
@@ -278,12 +365,48 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
   const namaKomisariat = komisariat.trim().replace(/^komisariat\s+/i, "");
   const namaCabang = cabang.replace(/^(?:hmi\s+)?cabang\s+/i, "");
 
-  // Judul dokumen menjadi nama berkas bawaan saat laporan disimpan sebagai PDF.
-  const cetak = () => {
-    const judulAsli = document.title;
-    document.title = `Laporan Audit Komisariat ${namaKomisariat} - Cabang ${namaCabang} - HMI Evidence`;
-    window.addEventListener("afterprint", () => { document.title = judulAsli; }, { once: true });
-    window.print();
+  // Laporan dibuat sebagai berkas PDF di peramban dan langsung terunduh, juga di HP.
+  // Pembuat PDF baru dimuat saat tombol ditekan supaya halaman tetap ringan.
+  const [pdf, setPdf] = useState<"diam" | "menyiapkan" | "gagal">("diam");
+  const unduhPdf = async () => {
+    setPdf("menyiapkan");
+    try {
+      const { unduhLaporanPdf } = await import("@/lib/laporanPdf");
+      const keLaporan = (daftar: { kelompok: { id: KelompokKuis; judul: string; sorotan: string }; persen: number; butir: ButirTemuan[] }[]) => daftar.map(({ kelompok, persen, butir }) => ({
+        judul: kelompok.judul,
+        sorotan: kelompok.sorotan,
+        persen,
+        saran: saranKelompok[kelompok.id].saran,
+        butir: butir.map(({ pertanyaan, skor: nilai }) => {
+          const pilihan = pertanyaan.pilihan.find((item) => item.skor === nilai) ?? pertanyaan.pilihan[0];
+          return { teks: pertanyaan.teks, skor: nilai, jawaban: pilihan.label, temuan: pilihan.temuan, langkah: pilihan.langkah, indikator: pertanyaan.indikatorTerkait };
+        }),
+      }));
+      const retensi = rasio(angka.aktifLk1, angka.pesertaLk1);
+      const keterlaksanaan = rasio(angka.programTerlaksana, angka.programRencana);
+      await unduhLaporanPdf({
+        komisariat: namaKomisariat,
+        cabang: namaCabang,
+        tanggal,
+        skor,
+        skorMaksimal,
+        tingkat: tingkat.judul,
+        uraianTingkat: tingkat.uraian,
+        kekuatan: perKelompok.map(({ kelompok, persen }) => ({ judul: kelompok.judul, persen })),
+        lanjutan: adaLanjutan
+          ? { skor: skorLanjutan, maksimal: pertanyaanLanjutan.length * 3, kelompok: perLanjutan.map(({ kelompok, persen }) => ({ judul: kelompok.judul, sorotan: kelompok.sorotan, persen })) }
+          : null,
+        angkaKunci: [
+          ...(retensi !== null ? [{ judul: "Retensi kader setelah LK 1", nilai: retensi, rinci: `${angka.aktifLk1} dari ${angka.pesertaLk1} peserta masih aktif tiga bulan kemudian` }] : []),
+          ...(keterlaksanaan !== null ? [{ judul: "Keterlaksanaan program", nilai: keterlaksanaan, rinci: `${angka.programTerlaksana} dari ${angka.programRencana} program sudah terlaksana` }] : []),
+        ],
+        temuan: keLaporan(urutTemuan),
+        temuanLanjutan: keLaporan(perLanjutan),
+      }, `Laporan Audit Komisariat ${namaKomisariat} - Cabang ${namaCabang} - HMI Evidence.pdf`.replace(/[\\/:*?"<>|]+/g, "-"));
+      setPdf("diam");
+    } catch {
+      setPdf("gagal");
+    }
   };
 
   return (
@@ -385,10 +508,11 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
               <h3 className="font-serif text-2xl">Temuan audit</h3>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Setiap jawabanmu dibaca sebagai temuan, lengkap dengan satu langkah untuk naik satu tingkat. Kelompok yang paling perlu diperkuat tampil lebih dulu.</p>
             </div>
-            <button type="button" onClick={() => (identitasLengkap ? cetak() : setMintaIdentitas(true))} className="inline-flex items-center gap-2 border border-primary px-4 py-2.5 text-xs font-medium uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground print:hidden">
-              <Download className="h-4 w-4" /> Unduh laporan (PDF)
+            <button type="button" onClick={() => (identitasLengkap ? unduhPdf() : setMintaIdentitas(true))} disabled={pdf === "menyiapkan"} className="inline-flex items-center gap-2 border border-primary px-4 py-2.5 text-xs font-medium uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-60 print:hidden">
+              <Download className="h-4 w-4" /> {pdf === "menyiapkan" ? "Menyiapkan PDF…" : "Unduh laporan (PDF)"}
             </button>
           </div>
+          {pdf === "gagal" && <p className="mt-3 text-sm text-destructive print:hidden" role="alert">PDF belum berhasil dibuat. Periksa koneksi lalu coba lagi.</p>}
           {mintaIdentitas && (
             <div className="mt-6 border border-primary/40 bg-primary/[0.04] p-5 print:hidden">
               <p className="font-medium">Lengkapi identitas komisariat untuk mengunduh laporan</p>
@@ -399,7 +523,7 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
               </div>
               <button
                 type="button"
-                onClick={() => { setMintaIdentitas(false); cetak(); }}
+                onClick={() => { setMintaIdentitas(false); unduhPdf(); }}
                 disabled={!identitasLengkap}
                 className="mt-4 inline-flex items-center gap-2 bg-primary px-5 py-3 text-xs font-medium uppercase tracking-[0.14em] text-primary-foreground disabled:opacity-50"
               >
@@ -425,9 +549,9 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
         </section>
 
         <section className="mt-14 border-t border-border pt-8 print:hidden">
-          <h3 className="font-serif text-2xl">Kirim hasil audit dan ceritakan kondisi komisariatmu</h3>
+          <h3 className="font-serif text-2xl">Lengkapi hasil audit dan ceritakan kondisi komisariatmu</h3>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Mengirim hasil audit adalah bagian dari komitmen HMI Evidence: data ini menjadi rujukan perbaikan. Isi nama komisariat dan cabang supaya petanya lengkap. Cerita dan kontak tidak wajib, dan hanya dibaca tim.
+            Hasil auditmu sudah tersimpan tanpa nama dan menjadi rujukan perbaikan HMI Evidence. Isi nama komisariat dan cabang supaya petanya lengkap. Cerita dan kontak tidak wajib, dan hanya dibaca tim.
           </p>
           {kirim === "terkirim" ? (
             <p className="mt-5 inline-flex items-center gap-2 text-sm text-primary" role="status">
@@ -472,7 +596,7 @@ function Hasil({ jawaban, angka, ulangi }: { jawaban: number[]; angka: AngkaKuis
               )}
               <div className="flex flex-wrap items-center gap-4">
                 <button type="button" onClick={kirimHasil} disabled={kirim === "mengirim" || kurang !== ""} className="bg-primary px-6 py-3 text-xs font-medium uppercase tracking-[0.14em] text-primary-foreground disabled:opacity-60">
-                  {kirim === "mengirim" ? "Mengirim…" : "Kirim hasil audit"}
+                  {kirim === "mengirim" ? "Mengirim…" : simpanan ? "Simpan" : "Kirim hasil audit"}
                 </button>
                 {kurang && <p className="text-sm text-muted-foreground">{kurang}</p>}
               </div>
@@ -700,7 +824,7 @@ export default function KuisPage() {
             <button type="button" onClick={() => setMulai(true)} className="mt-10 inline-flex items-center gap-2 bg-primary px-7 py-4 text-xs font-medium uppercase tracking-[0.16em] text-primary-foreground">
               Mulai kuis <ArrowRight className="h-4 w-4" />
             </button>
-            <p className="mt-4 text-xs text-muted-foreground">Tidak perlu mendaftar. Jawabanmu tidak dikirim ke mana pun kecuali kamu memilih mengirimnya di akhir.</p>
+            <p className="mt-4 text-xs text-muted-foreground">Tidak perlu mendaftar. Hasil kuis tersimpan otomatis tanpa nama, beserta perkiraan kota asal, untuk memetakan keadaan komisariat. Nama komisariat, cabang, dan ceritamu hanya tersimpan bila kamu mengisinya.</p>
           </header>
         )}
 

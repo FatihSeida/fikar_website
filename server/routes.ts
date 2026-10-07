@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
-import { insertGallerySchema, insertNoteSchema, insertMasalahSchema, insertKunjunganSchema, insertHasilKuisSchema, statusMasalahIds } from "@shared/schema";
+import { insertGallerySchema, insertNoteSchema, insertMasalahSchema, insertKunjunganSchema, insertHasilKuisSchema, lengkapiHasilKuisSchema, statusMasalahIds } from "@shared/schema";
 import { lookupGeo } from "./geo";
 import { galeriBawaan, galeriSeedLama } from "@shared/galeri";
 import { namaKota, namaProvinsi } from "./wilayah";
@@ -89,6 +89,25 @@ function validationMessage(error: z.ZodError): string {
   return error.issues[0]?.message || "Data yang dikirim tidak valid";
 }
 
+const hashKunci = (kunci: string) => createHash("sha256").update(kunci).digest("hex");
+
+type CeritaKuis = { komisariat?: string | null; cabang?: string | null; cerita?: string | null; nama?: string | null; kontak?: string | null; bolehDikutip: boolean };
+
+/** Cerita kondisi komisariat masuk ke kotak Masalah Komisariat, terhubung ke hasil kuisnya. */
+async function simpanCeritaKuis(hasilKuisId: number, data: CeritaKuis) {
+  if (!data.cerita || !data.komisariat || !data.cabang) return;
+  await storage.createMasalah({
+    cabang: data.cabang,
+    komisariat: data.komisariat,
+    kelompok: null,
+    masalah: data.cerita,
+    nama: data.nama ?? null,
+    kontak: data.kontak ?? null,
+    bolehDikutip: data.bolehDikutip,
+    hasilKuisId,
+  });
+}
+
 async function hasValidImageSignature(filePath: string, mimetype: string): Promise<boolean> {
   const handle = await fs.promises.open(filePath, "r");
   try {
@@ -123,7 +142,8 @@ function buatPembatas(batas: number, jendelaMs: number) {
 
 // Batasnya longgar karena banyak pengguna seluler berbagi satu IP publik (CGNAT operator).
 const bolehKirimMasalah = buatPembatas(20, 60 * 60 * 1000);
-const bolehKirimKuis = buatPembatas(60, 60 * 60 * 1000);
+// Setiap kuis yang selesai tersimpan otomatis, jadi satu WiFi kampus bisa mengirim ratusan hasil per jam.
+const bolehKirimKuis = buatPembatas(300, 60 * 60 * 1000);
 const bolehCatatKunjungan = buatPembatas(300, 60 * 1000);
 const kuotaKunjungan = buatPenghitung(batas.kunjunganPerMenit, 60 * 1000);
 const kuotaMasalah = buatPenghitung(batas.masalahPerJam, 60 * 60 * 1000);
@@ -453,6 +473,9 @@ export async function registerRoutes(
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
     if (!kuotaKuis("semua").boleh) return res.status(429).json({ message: "Kiriman sedang sangat ramai. Coba lagi beberapa saat lagi" });
     const data = parsed.data;
+    const lokasi = lookupGeo(req.ip || req.socket.remoteAddress || "");
+    // Kunci dikirim sekali ke peramban pengisi; yang disimpan hanya hash-nya.
+    const kunci = randomBytes(16).toString("hex");
     const hasil = await storage.createHasilKuis({
       // Skor utama hanya dari soal inti supaya komisariat yang mengikuti audit lanjutan tetap sebanding.
       skor: data.jawaban.slice(0, JUMLAH_SOAL_INTI).reduce((jumlah, nilai) => jumlah + nilai, 0),
@@ -463,25 +486,34 @@ export async function registerRoutes(
       aktifLk1: data.aktifLk1 ?? null,
       programRencana: data.programRencana ?? null,
       programTerlaksana: data.programTerlaksana ?? null,
+      kota: namaKota(lokasi?.city),
+      provinsi: namaProvinsi(lokasi?.region),
+      kunciUbah: hashKunci(kunci),
     });
-    // Cerita kondisi komisariat masuk ke kotak Masalah Komisariat, terhubung ke hasil kuisnya.
-    if (data.cerita && data.komisariat && data.cabang) {
-      await storage.createMasalah({
-        cabang: data.cabang,
-        komisariat: data.komisariat,
-        kelompok: null,
-        masalah: data.cerita,
-        nama: data.nama ?? null,
-        kontak: data.kontak ?? null,
-        bolehDikutip: data.bolehDikutip,
-        hasilKuisId: hasil.id,
-      });
+    await simpanCeritaKuis(hasil.id, data);
+    res.status(201).json({ success: true, id: hasil.id, kunci });
+  });
+
+  // Hasil yang tersimpan otomatis dilengkapi komisariat, cabang, dan cerita oleh pengisinya.
+  app.patch("/api/kuis/:id", async (req, res) => {
+    if (auditDitutup(res)) return;
+    const id = parsePositiveId(req.params.id);
+    if (!id) return res.status(400).json({ message: "ID hasil kuis tidak valid" });
+    const parsed = lengkapiHasilKuisSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    const data = parsed.data;
+    // Cerita menambah baris masalah baru, jadi dibatasi seperti kiriman kuis.
+    if (data.cerita && (!bolehKirimKuis(kunciIp(req.ip || "unknown")) || !kuotaKuis("semua").boleh)) {
+      return res.status(429).json({ message: "Terlalu banyak kiriman. Coba lagi nanti" });
     }
-    res.status(201).json({ success: true });
+    const hasil = await storage.lengkapiHasilKuis(id, hashKunci(data.kunci), data);
+    if (!hasil) return res.status(404).json({ message: "Hasil kuis tidak ditemukan" });
+    await simpanCeritaKuis(hasil.id, { ...data, komisariat: hasil.komisariat, cabang: hasil.cabang });
+    res.json({ success: true });
   });
 
   app.get("/api/admin/kuis", requireAdmin, async (_req, res) => {
-    res.json(await storage.getHasilKuis(1000));
+    res.json((await storage.getHasilKuis(1000)).map(({ kunciUbah: _kunci, ...hasil }) => hasil));
   });
 
   await seedDatabase();

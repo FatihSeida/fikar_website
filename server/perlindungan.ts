@@ -28,7 +28,7 @@ export const batas = {
   // sekalipun tidak bisa memenuhi database dengan kunjungan palsu.
   kunjunganPerMenit: angkaEnv("BATAS_KUNJUNGAN_PER_MENIT", 3000),
   masalahPerJam: angkaEnv("BATAS_MASALAH_PER_JAM", 300),
-  kuisPerJam: angkaEnv("BATAS_KUIS_PER_JAM", 1000),
+  kuisPerJam: angkaEnv("BATAS_KUIS_PER_JAM", 5000),
 };
 
 /** Penghitung jendela tetap per kunci; memorinya tetap kecil walau diserang dari banyak IP. */
