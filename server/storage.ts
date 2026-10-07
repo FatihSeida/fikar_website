@@ -1,9 +1,10 @@
 import { db, type Db } from "./db";
 import {
-  gallery, notes, pages, masalahKomisariat, kunjungan, hasilKuis,
+  gallery, notes, pages, masalahKomisariat, kunjungan, hasilKuis, seri, tanggapan, kirimanFitur,
   type GalleryItem, type InsertGalleryItem, type Note, type InsertNote, type Page, type InsertPage,
   type MasalahKomisariat, type InsertMasalah, type InsertKunjungan, type Kunjungan, type HasilKuis, type InsertHasilKuis,
   type StatistikKunjungan, type JumlahBerlabel,
+  type Seri, type UbahSeri, type Tanggapan, type InsertTanggapan, type KirimanFitur, type InsertKirimanFitur,
 } from "@shared/schema";
 import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 
@@ -34,6 +35,23 @@ export interface IStorage {
   /** Mengisi komisariat dan cabang; undefined bila hasilnya tidak ada atau kuncinya salah. */
   lengkapiHasilKuis(id: number, kunciUbah: string, data: IdentitasKuis): Promise<HasilKuis | undefined>;
   getHasilKuis(batas: number): Promise<HasilKuis[]>;
+
+  getSemuaSeri(): Promise<Seri[]>;
+  getSeri(slug: string): Promise<Seri | undefined>;
+  /** Menambahkan seri yang belum ada; naskah yang sudah diedit tidak disentuh. */
+  pastikanSeri(daftar: { slug: string; nomor: number; judul: string }[]): Promise<void>;
+  updateSeri(slug: string, data: UbahSeri): Promise<Seri | undefined>;
+
+  createTanggapan(data: InsertTanggapan): Promise<Tanggapan>;
+  getTanggapanTampil(seriSlug: string, batas: number): Promise<Tanggapan[]>;
+  getSemuaTanggapan(batas: number): Promise<Tanggapan[]>;
+  updateStatusTanggapan(id: number, status: string): Promise<Tanggapan | undefined>;
+  deleteTanggapan(id: number): Promise<void>;
+
+  createKiriman(data: InsertKirimanFitur): Promise<KirimanFitur>;
+  lengkapiKiriman(id: number, fitur: string, kunciUbah: string, data: IdentitasKuis): Promise<KirimanFitur | undefined>;
+  getKiriman(fitur: string, batas: number): Promise<KirimanFitur[]>;
+  hitungKiriman(fitur: string): Promise<number>;
 }
 
 export type IdentitasKuis = { komisariat?: string | null; cabang?: string | null };
@@ -232,6 +250,73 @@ export class DatabaseStorage implements IStorage {
   async getHasilKuis(batas: number): Promise<HasilKuis[]> {
     return await this.db.select().from(hasilKuis).orderBy(desc(hasilKuis.createdAt)).limit(batas);
   }
+
+  async getSemuaSeri(): Promise<Seri[]> {
+    return await this.db.select().from(seri).orderBy(asc(seri.nomor));
+  }
+
+  async getSeri(slug: string): Promise<Seri | undefined> {
+    const [item] = await this.db.select().from(seri).where(eq(seri.slug, slug));
+    return item;
+  }
+
+  async pastikanSeri(daftar: { slug: string; nomor: number; judul: string }[]): Promise<void> {
+    if (daftar.length) await this.db.insert(seri).values(daftar).onConflictDoNothing({ target: seri.slug });
+  }
+
+  async updateSeri(slug: string, data: UbahSeri): Promise<Seri | undefined> {
+    const [item] = await this.db.update(seri).set({ ...data, diperbaruiAt: new Date() }).where(eq(seri.slug, slug)).returning();
+    return item;
+  }
+
+  async createTanggapan(data: InsertTanggapan): Promise<Tanggapan> {
+    const [item] = await this.db.insert(tanggapan).values(data).returning();
+    return item;
+  }
+
+  async getTanggapanTampil(seriSlug: string, batas: number): Promise<Tanggapan[]> {
+    return await this.db.select().from(tanggapan)
+      .where(and(eq(tanggapan.seriSlug, seriSlug), eq(tanggapan.status, "tampil")))
+      .orderBy(desc(tanggapan.createdAt)).limit(batas);
+  }
+
+  async getSemuaTanggapan(batas: number): Promise<Tanggapan[]> {
+    return await this.db.select().from(tanggapan).orderBy(desc(tanggapan.createdAt)).limit(batas);
+  }
+
+  async updateStatusTanggapan(id: number, status: string): Promise<Tanggapan | undefined> {
+    const [item] = await this.db.update(tanggapan).set({ status }).where(eq(tanggapan.id, id)).returning();
+    return item;
+  }
+
+  async deleteTanggapan(id: number): Promise<void> {
+    await this.db.delete(tanggapan).where(eq(tanggapan.id, id));
+  }
+
+  async createKiriman(data: InsertKirimanFitur): Promise<KirimanFitur> {
+    const [item] = await this.db.insert(kirimanFitur).values(data).returning();
+    return item;
+  }
+
+  async lengkapiKiriman(id: number, fitur: string, kunciUbah: string, data: IdentitasKuis): Promise<KirimanFitur | undefined> {
+    const kondisi = and(eq(kirimanFitur.id, id), eq(kirimanFitur.fitur, fitur), eq(kirimanFitur.kunciUbah, kunciUbah));
+    const isi = identitasTerisi(data);
+    if (Object.keys(isi).length === 0) {
+      const [item] = await this.db.select().from(kirimanFitur).where(kondisi);
+      return item;
+    }
+    const [item] = await this.db.update(kirimanFitur).set(isi).where(kondisi).returning();
+    return item;
+  }
+
+  async getKiriman(fitur: string, batas: number): Promise<KirimanFitur[]> {
+    return await this.db.select().from(kirimanFitur).where(eq(kirimanFitur.fitur, fitur)).orderBy(desc(kirimanFitur.createdAt)).limit(batas);
+  }
+
+  async hitungKiriman(fitur: string): Promise<number> {
+    const [hasil] = await this.db.select({ jumlah: sql<number>`count(*)::int` }).from(kirimanFitur).where(eq(kirimanFitur.fitur, fitur));
+    return hasil?.jumlah ?? 0;
+  }
 }
 
 /**
@@ -248,6 +333,9 @@ export class MemStorage implements IStorage {
   private masalahItems: MasalahKomisariat[] = [];
   private kunjunganItems: Kunjungan[] = [];
   private hasilKuisItems: HasilKuis[] = [];
+  private seriItems: Seri[] = [];
+  private tanggapanItems: Tanggapan[] = [];
+  private kirimanItems: KirimanFitur[] = [];
   private idBerikutnya = 1;
 
   private id(): number {
@@ -410,6 +498,85 @@ export class MemStorage implements IStorage {
     const item = this.hasilKuisItems.find((hasil) => hasil.id === id && hasil.kunciUbah === kunciUbah);
     if (item) Object.assign(item, identitasTerisi(data));
     return item;
+  }
+
+  async getSemuaSeri(): Promise<Seri[]> {
+    return [...this.seriItems].sort((a, b) => a.nomor - b.nomor);
+  }
+
+  async getSeri(slug: string): Promise<Seri | undefined> {
+    return this.seriItems.find((item) => item.slug === slug);
+  }
+
+  async pastikanSeri(daftar: { slug: string; nomor: number; judul: string }[]): Promise<void> {
+    for (const awal of daftar) {
+      if (this.seriItems.some((item) => item.slug === awal.slug)) continue;
+      this.seriItems.push({
+        id: this.id(), ...awal, subjudul: null, penulis: "Ahmad Zulfikar", ringkasan: null, isi: "",
+        gambar: null, tautanMedia: null, namaMedia: null, diperbaruiAt: new Date(),
+      });
+    }
+  }
+
+  async updateSeri(slug: string, data: UbahSeri): Promise<Seri | undefined> {
+    const item = this.seriItems.find((s) => s.slug === slug);
+    if (item) Object.assign(item, {
+      ...data,
+      subjudul: data.subjudul ?? null, ringkasan: data.ringkasan ?? null, gambar: data.gambar ?? null,
+      tautanMedia: data.tautanMedia ?? null, namaMedia: data.namaMedia ?? null, diperbaruiAt: new Date(),
+    });
+    return item;
+  }
+
+  async createTanggapan(data: InsertTanggapan): Promise<Tanggapan> {
+    const item: Tanggapan = {
+      id: this.id(), createdAt: new Date(), seriSlug: data.seriSlug, komisariat: data.komisariat, cabang: data.cabang,
+      nama: data.nama ?? null, isi: data.isi, status: "baru", kota: data.kota ?? null, provinsi: data.provinsi ?? null,
+    };
+    this.tanggapanItems.push(item);
+    return item;
+  }
+
+  async getTanggapanTampil(seriSlug: string, batas: number): Promise<Tanggapan[]> {
+    return this.tanggapanItems.filter((item) => item.seriSlug === seriSlug && item.status === "tampil").reverse().slice(0, batas);
+  }
+
+  async getSemuaTanggapan(batas: number): Promise<Tanggapan[]> {
+    return [...this.tanggapanItems].reverse().slice(0, batas);
+  }
+
+  async updateStatusTanggapan(id: number, status: string): Promise<Tanggapan | undefined> {
+    const item = this.tanggapanItems.find((t) => t.id === id);
+    if (item) item.status = status;
+    return item;
+  }
+
+  async deleteTanggapan(id: number): Promise<void> {
+    this.tanggapanItems = this.tanggapanItems.filter((item) => item.id !== id);
+  }
+
+  async createKiriman(data: InsertKirimanFitur): Promise<KirimanFitur> {
+    const item: KirimanFitur = {
+      id: this.id(), createdAt: new Date(), fitur: data.fitur, komisariat: data.komisariat ?? null, cabang: data.cabang ?? null,
+      nama: data.nama ?? null, kontak: data.kontak ?? null, kota: data.kota ?? null, provinsi: data.provinsi ?? null,
+      data: data.data, kunciUbah: data.kunciUbah ?? null,
+    };
+    this.kirimanItems.push(item);
+    return item;
+  }
+
+  async lengkapiKiriman(id: number, fitur: string, kunciUbah: string, data: IdentitasKuis): Promise<KirimanFitur | undefined> {
+    const item = this.kirimanItems.find((k) => k.id === id && k.fitur === fitur && k.kunciUbah === kunciUbah);
+    if (item) Object.assign(item, identitasTerisi(data));
+    return item;
+  }
+
+  async getKiriman(fitur: string, batas: number): Promise<KirimanFitur[]> {
+    return this.kirimanItems.filter((item) => item.fitur === fitur).reverse().slice(0, batas);
+  }
+
+  async hitungKiriman(fitur: string): Promise<number> {
+    return this.kirimanItems.filter((item) => item.fitur === fitur).length;
   }
 
   async getHasilKuis(batas: number): Promise<HasilKuis[]> {

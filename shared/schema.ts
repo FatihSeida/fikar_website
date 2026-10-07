@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, integer, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, integer, timestamp, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { tataGaleri } from "./galeri";
@@ -67,6 +67,59 @@ export const kunjungan = pgTable("kunjungan", {
   perangkat: text("perangkat").notNull(),
   pengunjung: text("pengunjung").notNull(),
 }, (table) => [index("kunjungan_created_at_idx").on(table.createdAt)]);
+
+/**
+ * Naskah seri tulisan di tab Series. Isinya diedit lewat panel admin; jadwal
+ * terbit setiap seri ada di shared/rilis.ts, bukan di database.
+ */
+export const seri = pgTable("seri", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  nomor: integer("nomor").notNull(),
+  judul: text("judul").notNull(),
+  subjudul: text("subjudul"),
+  penulis: text("penulis").notNull().default("Ahmad Zulfikar"),
+  ringkasan: text("ringkasan"),
+  isi: text("isi").notNull().default(""),
+  gambar: text("gambar"),
+  tautanMedia: text("tautan_media"),
+  namaMedia: text("nama_media"),
+  diperbaruiAt: timestamp("diperbarui_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Tanggapan kader atas seri tulisan; tampil di halaman setelah dibaca moderator. */
+export const tanggapan = pgTable("tanggapan", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  seriSlug: text("seri_slug").notNull(),
+  komisariat: text("komisariat").notNull(),
+  cabang: text("cabang").notNull(),
+  nama: text("nama"),
+  isi: text("isi").notNull(),
+  status: text("status").notNull().default("baru"),
+  kota: text("kota"),
+  provinsi: text("provinsi"),
+}, (table) => [index("tanggapan_seri_idx").on(table.seriSlug, table.status)]);
+
+/**
+ * Kiriman dari fitur kampanye (Sehari di Kursi Ketum, Bangun HMI Bersama,
+ * Maturity Level Cabang, dan unduhan templatnya). Isi khas setiap fitur ada di
+ * kolom `data` dan divalidasi oleh skema fitur masing-masing di bawah.
+ */
+export const kirimanFitur = pgTable("kiriman_fitur", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  fitur: text("fitur").notNull(),
+  komisariat: text("komisariat"),
+  cabang: text("cabang"),
+  nama: text("nama"),
+  kontak: text("kontak"),
+  kota: text("kota"),
+  provinsi: text("provinsi"),
+  data: jsonb("data").notNull(),
+  // Hash SHA-256 dari kunci milik peramban pengisi, untuk melengkapi identitas belakangan.
+  kunciUbah: text("kunci_ubah"),
+}, (table) => [index("kiriman_fitur_idx").on(table.fitur, table.createdAt)]);
 
 /** Hasil kuis yang dikirim secara anonim. */
 export const hasilKuis = pgTable("hasil_kuis", {
@@ -211,6 +264,42 @@ export const lengkapiHasilKuisSchema = z.object({
   bolehDikutip: z.boolean().optional().default(false),
   persetujuan: z.boolean().optional(),
 }).superRefine(periksaCerita);
+
+/** Naskah seri yang diedit admin. Isi HTML dibersihkan di server sebelum disimpan. */
+export const ubahSeriSchema = z.object({
+  judul: teksPendek(3, 180),
+  subjudul: teksOpsional(240),
+  penulis: teksPendek(2, 120),
+  ringkasan: teksOpsional(600),
+  isi: z.string().max(200_000),
+  gambar: internalOrHttpsImage.nullable().optional(),
+  tautanMedia: optionalHttpsUrl,
+  namaMedia: teksOpsional(100),
+});
+
+/** Tanggapan kader: komisariat dan cabang wajib, nama pribadi boleh kosong. */
+export const insertTanggapanSchema = z.object({
+  komisariat: teksPendek(2, 120),
+  cabang: teksPendek(2, 80),
+  nama: teksOpsional(80),
+  isi: teksPendek(10, 2000),
+});
+
+export const statusTanggapanIds = ["baru", "tampil", "ditolak"] as const;
+
+/** Identitas yang menyusul pada kiriman fitur yang tersimpan otomatis. */
+export const lengkapiKirimanSchema = z.object({
+  kunci: z.string().regex(/^[a-f0-9]{32}$/),
+  komisariat: teksOpsional(120),
+  cabang: teksOpsional(80),
+});
+
+export type Seri = typeof seri.$inferSelect;
+export type UbahSeri = z.infer<typeof ubahSeriSchema>;
+export type Tanggapan = typeof tanggapan.$inferSelect;
+export type InsertTanggapan = z.infer<typeof insertTanggapanSchema> & { seriSlug: string; kota?: string | null; provinsi?: string | null };
+export type KirimanFitur = typeof kirimanFitur.$inferSelect;
+export type InsertKirimanFitur = Omit<typeof kirimanFitur.$inferInsert, "id" | "createdAt">;
 
 export type MasalahKomisariat = typeof masalahKomisariat.$inferSelect;
 export type InsertMasalah = Omit<z.infer<typeof insertMasalahSchema>, "persetujuan"> & { hasilKuisId?: number | null };

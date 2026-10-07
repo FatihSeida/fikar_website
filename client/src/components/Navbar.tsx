@@ -1,12 +1,15 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { FileText, Home as HomeIcon, Images, Menu, UserRound, X } from "lucide-react";
+import { BookOpen, FileText, Home as HomeIcon, Images, Menu, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
+import { sudahRilis } from "@shared/rilis";
 
-const navLinks = [
+const semuaTautan = [
   { name: "Beranda", href: "/", icon: HomeIcon },
   { name: "HMI Evidence", shortName: "Evidence", href: "/hmi-evidence", icon: null },
+  // Tab Series baru tampil setelah seri pertama terbit.
+  { name: "Series", href: "/series", icon: BookOpen, fitur: "series-1" as const },
   { name: "Tentang", href: "/tentang", icon: UserRound },
   { name: "Galeri", href: "/galeri", icon: Images },
   { name: "Catatan", href: "/catatan", icon: FileText },
@@ -16,6 +19,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const navLinks = semuaTautan.filter((link) => !link.fitur || sudahRilis(link.fitur));
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 32);

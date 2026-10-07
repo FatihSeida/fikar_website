@@ -12,6 +12,7 @@ import { namaKota, namaProvinsi } from "./wilayah";
 import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan";
 import { auditSudahDibuka, JUMLAH_SOAL_INTI } from "@shared/audit";
 import { isProduction } from "./env";
+import { registerKampanyeRoutes } from "./kampanye";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -515,6 +516,8 @@ export async function registerRoutes(
   app.get("/api/admin/kuis", requireAdmin, async (_req, res) => {
     res.json((await storage.getHasilKuis(1000)).map(({ kunciUbah: _kunci, ...hasil }) => hasil));
   });
+
+  await registerKampanyeRoutes(app, { requireAdmin, sanitizeHtml });
 
   await seedDatabase();
 
