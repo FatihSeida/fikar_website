@@ -1,13 +1,5 @@
 import type { Content, ContentText, TDocumentDefinitions } from "pdfmake/interfaces";
-import { polaIstilah } from "@/lib/istilah";
-import serif400 from "@fontsource/noto-serif/files/noto-serif-latin-400-normal.woff?url";
-import serif400i from "@fontsource/noto-serif/files/noto-serif-latin-400-italic.woff?url";
-import serif600 from "@fontsource/noto-serif/files/noto-serif-latin-600-normal.woff?url";
-import serif600i from "@fontsource/noto-serif/files/noto-serif-latin-600-italic.woff?url";
-import sans400 from "@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff?url";
-import sans400i from "@fontsource/dm-sans/files/dm-sans-latin-400-italic.woff?url";
-import sans600 from "@fontsource/dm-sans/files/dm-sans-latin-600-normal.woff?url";
-import sans600i from "@fontsource/dm-sans/files/dm-sans-latin-600-italic.woff?url";
+import { ALAS, GARIS, HIJAU, LEBAR, REDUP, TINTA, batang, fotoJpeg, garis, halamanDasar, kop as kopLaporan, label, siapkanPdf, teks } from "@/lib/pdfDasar";
 
 /**
  * Laporan audit komisariat sebagai berkas PDF yang langsung terunduh, juga di HP,
@@ -32,38 +24,7 @@ export type DataLaporan = {
   temuanLanjutan: KelompokLaporan[];
 };
 
-// Warna tema situs (lihat index.css), dalam hex untuk PDF.
-const HIJAU = "#155B3C";
-const TINTA = "#151E1A";
-const REDUP = "#516158";
-const GARIS = "#DAD5C8";
-const ALAS = "#ECE8DD";
-
-const LEBAR = 495; // lebar isi A4 dengan margin 50 pt
 const KOLOM_KANAN = 250;
-
-/** Kalimat dengan istilah bahasa Inggris dimiringkan, seperti TeksIstilah: potongan bernomor ganjil adalah istilahnya. */
-const teks = (isi: string): (string | ContentText)[] =>
-  isi.split(polaIstilah).map((bagian, i) => (i % 2 === 1 ? { text: bagian, italics: true } : bagian)).filter((bagian) => bagian !== "");
-
-const label = (isi: string, warna = REDUP): ContentText => ({ text: isi.toUpperCase(), fontSize: 7, characterSpacing: 1.6, color: warna });
-const garis = (atas = 0, bawah = 0): Content => ({ canvas: [{ type: "line", x1: 0, y1: 0, x2: LEBAR, y2: 0, lineWidth: 0.7, lineColor: GARIS }], margin: [0, atas, 0, bawah] });
-
-function batang(judul: string, persen: number, lebar: number): Content {
-  return {
-    stack: [
-      { columns: [{ text: judul, fontSize: 9.5 }, { text: `${persen}%`, fontSize: 9.5, color: REDUP, alignment: "right", width: 34 }] },
-      {
-        canvas: [
-          { type: "rect", x: 0, y: 0, w: lebar, h: 4, r: 2, color: ALAS },
-          ...(persen > 0 ? [{ type: "rect" as const, x: 0, y: 0, w: (lebar * persen) / 100, h: 4, r: 2, color: HIJAU }] : []),
-        ],
-        margin: [0, 4, 0, 0],
-      },
-    ],
-    margin: [0, 0, 0, 10],
-  };
-}
 
 /** Tiga kotak kecil yang menunjukkan tingkat jawaban (0–3), seperti di halaman. */
 const titikSkor = (skor: number) => [1, 2, 3].map((i) => ({ type: "rect" as const, x: (i - 1) * 8, y: 2, w: 5, h: 5, color: i <= skor ? HIJAU : ALAS }));
@@ -103,53 +64,10 @@ function kelompokTemuan(kelompok: KelompokLaporan): Content[] {
   ];
 }
 
-async function keBase64(url: string): Promise<string> {
-  const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
-  let biner = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) biner += String.fromCharCode(...Array.from(bytes.subarray(i, i + 0x8000)));
-  return btoa(biner);
-}
-
-/** Foto WebP diubah ke JPEG karena PDF hanya menerima JPEG dan PNG. */
-async function fotoJpeg(url: string, lebar: number, tinggi: number): Promise<string> {
-  const gambar = new Image();
-  gambar.src = url;
-  await gambar.decode();
-  const kanvas = document.createElement("canvas");
-  kanvas.width = lebar;
-  kanvas.height = tinggi;
-  kanvas.getContext("2d")!.drawImage(gambar, 0, 0, lebar, tinggi);
-  return kanvas.toDataURL("image/jpeg", 0.85);
-}
-
 export async function unduhLaporanPdf(data: DataLaporan, namaBerkas: string): Promise<void> {
-  const [modul, logo, foto, ...huruf] = await Promise.all([
-    import("pdfmake/build/pdfmake"),
-    keBase64("/hmi-logo.png"),
-    fotoJpeg("/ahmad/profile-centered.webp", 480, 600),
-    ...[serif400, serif400i, serif600, serif600i, sans400, sans400i, sans600, sans600i].map(keBase64),
-  ]);
-  const pdfMake = ((modul as { default?: unknown }).default ?? modul) as typeof import("pdfmake/build/pdfmake");
-  const nama = ["s400", "s400i", "s600", "s600i", "d400", "d400i", "d600", "d600i"].map((kode) => `${kode}.woff`);
-  const vfs = Object.fromEntries(nama.map((berkas, i) => [berkas, huruf[i]]));
-  const fonts = {
-    Serif: { normal: nama[0], italics: nama[1], bold: nama[2], bolditalics: nama[3] },
-    Sans: { normal: nama[4], italics: nama[5], bold: nama[6], bolditalics: nama[7] },
-  };
+  const [pdf, foto] = await Promise.all([siapkanPdf(), fotoJpeg("/ahmad/profile-centered.webp", 480, 600)]);
 
-  const kop: Content = {
-    columns: [
-      { image: `data:image/png;base64,${logo}`, fit: [17, 46], width: 17 },
-      {
-        stack: [
-          label("HMI Evidence · Laporan Audit Komisariat", HIJAU),
-          { text: `Komisariat ${data.komisariat} · Cabang ${data.cabang}`, font: "Serif", fontSize: 17, margin: [0, 5, 0, 3] },
-          { text: `${data.tanggal} · ahmadzulfikar.com/kuis`, fontSize: 8.5, color: REDUP },
-        ],
-        margin: [14, 2, 0, 0],
-      },
-    ],
-  };
+  const kop = kopLaporan(pdf.logo, "HMI Evidence · Laporan Audit Komisariat", `Komisariat ${data.komisariat} · Cabang ${data.cabang}`, `${data.tanggal} · ahmadzulfikar.com/kuis`);
 
   const pengantar: Content[] = [
     label("Pengantar", HIJAU),
@@ -276,21 +194,9 @@ export async function unduhLaporanPdf(data: DataLaporan, namaBerkas: string): Pr
   ];
 
   const dokumen: TDocumentDefinitions = {
-    pageSize: "A4",
-    pageMargins: [50, 46, 50, 54],
-    info: { title: namaBerkas.replace(/\.pdf$/, ""), author: "HMI Evidence", subject: "Laporan Audit Komisariat" },
-    defaultStyle: { font: "Sans", fontSize: 10, color: TINTA },
-    footer: (halaman: number, jumlah: number) => ({
-      columns: [
-        { text: `HMI Evidence · Komisariat ${data.komisariat} · Cabang ${data.cabang}`, fontSize: 7.5, color: REDUP },
-        { text: `${halaman} / ${jumlah}`, fontSize: 7.5, color: REDUP, alignment: "right", width: 40 },
-      ],
-      margin: [50, 18, 50, 0],
-    }),
+    ...halamanDasar(namaBerkas.replace(/\.pdf$/, ""), "Laporan Audit Komisariat", `HMI Evidence · Komisariat ${data.komisariat} · Cabang ${data.cabang}`),
     content: [kop, garis(16, 22), ...pengantar, { text: "", pageBreak: "after" }, ...hasil, ...temuan, ...dukungan],
   };
 
-  await new Promise<void>((selesai) => {
-    pdfMake.createPdf(dokumen, undefined, fonts, vfs).download(namaBerkas, () => selesai());
-  });
+  await pdf.unduh(dokumen, namaBerkas);
 }

@@ -88,7 +88,7 @@ function EditorSeri({ seri }: { seri: SeriAdmin }) {
       </div>
       <div>
         <Label>Naskah</Label>
-        <p className="mb-2 text-xs text-muted-foreground">Pakai Judul 2 untuk membagi tulisan menjadi bagian pendek. Untuk menyisipkan kotak ajakan kuis, tulis satu paragraf berisi <code>[[ajakan-kuis]]</code>.</p>
+        <p className="mb-2 text-xs text-muted-foreground">Pakai Judul 2 untuk membagi tulisan menjadi bagian pendek. Untuk menyisipkan kotak ajakan kuis, tulis satu paragraf berisi <code>[[ajakan-kuis]]</code>; untuk Peta Suara Kader (mulai 28 Oktober), <code>[[peta-suara-kader]]</code>.</p>
         <RichTextEditor content={form.isi} onChange={(html) => setForm((lama) => ({ ...lama, isi: html }))} />
       </div>
       <div className="flex flex-wrap items-center gap-3">

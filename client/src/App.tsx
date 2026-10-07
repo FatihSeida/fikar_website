@@ -21,6 +21,9 @@ const KuisPage = lazy(() => import("@/pages/KuisPage"));
 const IkutPage = lazy(() => import("@/pages/IkutPage"));
 const SeriesPage = lazy(() => import("@/pages/SeriesPage"));
 const SeriDetailPage = lazy(() => import("@/pages/SeriDetailPage"));
+const KursiKetuaPage = lazy(() => import("@/pages/KursiKetuaPage"));
+const BangunHmiPage = lazy(() => import("@/pages/BangunHmiPage"));
+const MaturityCabangPage = lazy(() => import("@/pages/MaturityCabangPage"));
 const Admin = lazy(() => import("@/pages/Admin"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -55,6 +58,15 @@ function Router() {
           <Route path="/indikator" component={IndikatorPage} />
           <Route path="/kuis">{() => <GerbangAudit halaman={KuisPage} />}</Route>
           <Route path="/ikut">{() => <GerbangAudit halaman={IkutPage} />}</Route>
+          <Route path="/kursi-ketua">
+            {() => <GerbangRilis fitur="kursi-ketua" halaman={KursiKetuaPage} judul="Sehari di Kursi Ketua" uraian="Satu hari sebagai ketua dalam 15 situasi organisasi. Pilih tindakan yang paling mungkin kamu lakukan, lalu lihat potret cara memimpinmu dan tiga langkah untuk dicoba bersama pengurus." />}
+          </Route>
+          <Route path="/bangun-hmi">
+            {() => <GerbangRilis fitur="bangun-hmi" halaman={BangunHmiPage} judul="Bangun HMI Bersama" uraian="HMI digambarkan sebagai bangunan. Nilai kondisi setiap bagiannya, pilih tiga yang paling mendesak, lalu sampaikan masukanmu untuk PB." />}
+          </Route>
+          <Route path="/maturity-cabang">
+            {() => <GerbangRilis fitur="maturity-cabang" halaman={MaturityCabangPage} judul="Maturity Level Cabang" uraian="Komisariat sudah mengaudit dirinya. Sekarang giliran cabang: nilai enam dimensi kerja cabang, pilih yang ingin dinaikkan, dan unduh panduan serta templatnya." />}
+          </Route>
           <Route path="/series/:slug" component={SeriDetailPage} />
           <Route path="/series">
             {() => <GerbangRilis fitur="series-1" halaman={SeriesPage} judul="Series HMI Evidence" uraian="Empat seri tulisan Ahmad Zulfikar tentang arah kaderisasi HMI, terbit satu per satu setiap Rabu. Setiap seri bisa ditanggapi atas nama komisariat dan cabangmu." />}

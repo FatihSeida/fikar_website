@@ -5,9 +5,14 @@ import { storage } from "./storage";
 import { isProduction } from "./env";
 import { lookupGeo } from "./geo";
 import { namaKota, namaProvinsi } from "./wilayah";
-import { buatPenghitung, kunciIp } from "./perlindungan";
+import { buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan";
 import { RILIS, sudahRilis, type FiturRilis } from "@shared/rilis";
 import { insertTanggapanSchema, lengkapiKirimanSchema, statusTanggapanIds, ubahSeriSchema } from "@shared/schema";
+import { kontenKursiKetua, NAMA_POTRET } from "./konten/kursiKetua";
+import { ID_BAGIAN, kontenBangunHmi } from "./konten/bangunHmi";
+import { BERKAS_UNDUHAN, ID_DIMENSI_CABANG, ID_JAWABAN_TRADISI, ID_TRADISI, kontenMaturityCabang } from "./konten/maturityCabang";
+import fs from "fs";
+import path from "path";
 
 /**
  * Rute fitur kampanye Oktober–November: tab Series beserta tanggapan kader, dan
@@ -68,6 +73,76 @@ export interface FiturKiriman {
 export const fiturKiriman = new Map<string, FiturKiriman>();
 /** Isi fitur (situasi, bagian bangunan, kerangka) yang baru dikirim setelah rilis. */
 export const kontenFitur = new Map<FiturRilis, () => unknown>();
+
+const nilaiDimensi = z.number().int().min(0).max(100);
+
+/** Sehari di Kursi Ketua: hanya ringkasan hasil yang disimpan, bukan jawaban per situasi. */
+kontenFitur.set("kursi-ketua", kontenKursiKetua);
+fiturKiriman.set("kursi-ketua", {
+  fitur: "kursi-ketua",
+  skema: z.object({
+    kursi: z.enum(["komisariat", "cabang"]),
+    potret: z.enum(NAMA_POTRET as [string, ...string[]]),
+    nilai: z.object({ A: nilaiDimensi, P: nilaiDimensi, K: nilaiDimensi, D: nilaiDimensi, J: nilaiDimensi }),
+  }),
+});
+
+/** Bangun HMI Bersama: nilai sebelas bagian, tiga bagian paling mendesak, dan cara perbaikannya. */
+const idBagian = z.enum(ID_BAGIAN as [string, ...string[]]);
+kontenFitur.set("bangun-hmi", kontenBangunHmi);
+fiturKiriman.set("bangun-hmi", {
+  fitur: "bangun-hmi",
+  skema: z.object({
+    komisariat: z.string().trim().min(2).max(120),
+    cabang: z.string().trim().min(2).max(80),
+    // Kunci enum membuat semua bagian wajib dinilai.
+    nilai: z.record(idBagian, z.number().int().min(1).max(5)),
+    prioritas: z.array(z.object({
+      bagian: idBagian,
+      cara: z.number().int().min(0).max(2).nullable(),
+      usulan: z.string().trim().max(500).nullable(),
+    }).refine((p) => p.cara !== null || (p.usulan?.length ?? 0) >= 5, "Pilih cara perbaikan atau tulis usulanmu"))
+      .length(3, "Pilih tepat tiga bagian")
+      .refine((daftar) => new Set(daftar.map((p) => p.bagian)).size === 3, "Tiga bagian harus berbeda"),
+  }),
+  identitas: (data) => ({ komisariat: data.komisariat, cabang: data.cabang }),
+  simpan: (data) => ({ nilai: data.nilai, prioritas: data.prioritas }),
+});
+
+/** Maturity Level Cabang: penilaian diri enam dimensi, prioritas, dan jawaban tentang tradisi. */
+kontenFitur.set("maturity-cabang", kontenMaturityCabang);
+fiturKiriman.set("maturity-cabang", {
+  fitur: "maturity-cabang",
+  skema: z.object({
+    cabang: z.string().trim().min(2).max(80),
+    tingkat: z.record(z.enum(ID_DIMENSI_CABANG as [string, ...string[]]), z.number().int().min(1).max(4)),
+    prioritas: z.array(z.object({ dimensi: z.enum(ID_DIMENSI_CABANG as [string, ...string[]]), target: z.number().int().min(2).max(4) }))
+      .min(1, "Pilih minimal satu dimensi prioritas").max(2, "Pilih paling banyak dua dimensi prioritas"),
+    tradisi: z.record(z.enum(ID_TRADISI as [string, ...string[]]), z.enum(ID_JAWABAN_TRADISI as [string, ...string[]])),
+  }),
+  identitas: (data) => ({ cabang: data.cabang }),
+  simpan: (data) => ({ tingkat: data.tingkat, prioritas: data.prioritas, tradisi: data.tradisi }),
+});
+/** Tombol "Saya akan implementasikan di cabang". Kontak hanya untuk tindak lanjut tim. */
+fiturKiriman.set("maturity-komitmen", {
+  fitur: "maturity-cabang",
+  skema: z.object({
+    cabang: z.string().trim().min(2).max(80),
+    nama: z.string().trim().min(2).max(80),
+    jabatan: z.string().trim().min(2).max(80),
+    kontak: z.string().trim().min(5).max(120),
+  }),
+  identitas: (data) => ({ cabang: data.cabang, nama: data.nama, kontak: data.kontak }),
+  simpan: (data) => ({ jabatan: data.jabatan }),
+});
+
+/** Panduan dan templat Maturity Level Cabang: di dist/ saat produksi, server/data/ saat pengembangan. */
+function jalurUnduhan(berkas: string) {
+  const folder = [typeof __dirname !== "undefined" ? __dirname : null, path.join(process.cwd(), "server", "data"), path.join(process.cwd(), "dist")]
+    .filter((d): d is string => d !== null)
+    .map((d) => path.join(d, "unduhan", berkas));
+  return folder.find((jalur) => fs.existsSync(jalur));
+}
 
 export async function registerKampanyeRoutes(app: Express, { requireAdmin, sanitizeHtml }: Pembantu) {
   await storage.pastikanSeri(daftarSeri.map(({ slug, nomor, judul }) => ({ slug, nomor, judul })));
@@ -209,9 +284,81 @@ export async function registerKampanyeRoutes(app: Express, { requireAdmin, sanit
     res.json({ jumlah: await storage.hitungKiriman(req.params.fitur) });
   });
 
+  // Unduhan panduan dan templat dihitung per berkas, lalu berkasnya dikirim.
+  app.get("/api/unduhan/maturity/:berkas", async (req, res) => {
+    if (!bolehAkses(req, "maturity-cabang")) return tolakSebelumRilis(res, "maturity-cabang");
+    const berkas = String(req.params.berkas);
+    const jalur = BERKAS_UNDUHAN.includes(berkas) ? jalurUnduhan(berkas) : undefined;
+    if (!jalur) return res.status(404).json({ message: "Berkas tidak ditemukan" });
+    const cabang = typeof req.query.cabang === "string" ? req.query.cabang.trim().slice(0, 80) || null : null;
+    if (!kirimanDibatasi(req, kirimanPerIp)) {
+      await storage.createKiriman({ fitur: "maturity-unduhan", cabang, ...lokasiPengirim(req), data: { berkas } });
+    }
+    res.download(jalur, berkas);
+  });
+
+  // Peta Suara Kader: jumlah partisipasi per provinsi dan cabang, tanpa skor atau isi kiriman.
+  const cachePeta = buatCacheSingkat(60_000);
+  app.get("/api/peta-suara", async (req, res) => {
+    if (!bolehAkses(req, "peta-suara")) return tolakSebelumRilis(res, "peta-suara");
+    res.json(await cachePeta.ambil("peta", async () => {
+      const fiturDihitung = ["kursi-ketua", "bangun-hmi", "maturity-cabang"];
+      const [kuis, tanggapanSemua, masalah, ...fitur] = await Promise.all([
+        storage.getHasilKuis(100_000),
+        storage.getSemuaTanggapan(100_000),
+        storage.getMasalah(),
+        ...fiturDihitung.map((f) => storage.getKiriman(f, 100_000)),
+      ]);
+      const semua: { provinsi?: string | null; cabang?: string | null }[] = [...kuis, ...tanggapanSemua, ...masalah, ...fitur.flat()];
+      const hitung = (ambil: (item: (typeof semua)[number]) => string | null | undefined) => {
+        const peta = new Map<string, { nama: string; jumlah: number }>();
+        for (const item of semua) {
+          const nama = ambil(item)?.trim();
+          if (!nama) continue;
+          const kunci = nama.toLowerCase();
+          const isi = peta.get(kunci) ?? { nama, jumlah: 0 };
+          isi.jumlah += 1;
+          peta.set(kunci, isi);
+        }
+        return Array.from(peta.values()).sort((a, b) => b.jumlah - a.jumlah);
+      };
+      return {
+        ditarik: new Date().toISOString(),
+        total: semua.length,
+        provinsi: hitung((item) => item.provinsi),
+        cabang: hitung((item) => item.cabang).slice(0, 15),
+      };
+    }));
+  });
+
+  // Hasil gabungan Bangun HMI Bersama, dibuka di minggu keempat November.
+  app.get("/api/fitur/bangun-hmi/hasil", async (req, res) => {
+    if (!bolehAkses(req, "hasil-bangun-hmi")) return tolakSebelumRilis(res, "hasil-bangun-hmi");
+    const semua = await storage.getKiriman("bangun-hmi", 100_000);
+    type Isi = { nilai: Record<string, number>; prioritas: { bagian: string; cara: number | null; usulan: string | null }[] };
+    const bagian = ID_BAGIAN.map((id) => {
+      const nilai = semua.map((k) => (k.data as Isi).nilai[id]).filter((n) => typeof n === "number");
+      const pilihan = semua.flatMap((k) => (k.data as Isi).prioritas.filter((p) => p.bagian === id));
+      return {
+        id,
+        rataRata: nilai.length ? Math.round((nilai.reduce((a, b) => a + b, 0) / nilai.length) * 10) / 10 : null,
+        dipilihMendesak: pilihan.length,
+        cara: [0, 1, 2].map((i) => pilihan.filter((p) => p.cara === i).length),
+        usulan: pilihan.filter((p) => p.cara === null).length,
+      };
+    });
+    res.json({
+      jumlah: semua.length,
+      komisariat: new Set(semua.map((k) => `${k.komisariat}|${k.cabang}`.toLowerCase())).size,
+      cabang: new Set(semua.map((k) => (k.cabang ?? "").toLowerCase())).size,
+      ditarik: new Date().toISOString(),
+      bagian,
+    });
+  });
+
   app.get("/api/admin/fitur/:fitur", requireAdmin, async (req, res) => {
     const fitur = String(req.params.fitur);
-    if (!fiturKiriman.has(fitur)) return res.status(404).json({ message: "Fitur tidak ditemukan" });
+    if (!fiturKiriman.has(fitur) && fitur !== "maturity-unduhan") return res.status(404).json({ message: "Fitur tidak ditemukan" });
     res.json((await storage.getKiriman(fitur, 5000)).map(({ kunciUbah: _kunci, ...item }) => item));
   });
 }

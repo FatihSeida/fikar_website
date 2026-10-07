@@ -103,10 +103,11 @@ export function SegeraHadir({ isi = isiAudit }: { isi?: IsiSegeraHadir }) {
 /**
  * Membuka halaman hanya setelah jadwal peluncurannya. Sebelum itu pengunjung
  * melihat dialog "Segera hadir" dan kode halamannya tidak dimuat; admin yang
- * sedang masuk tetap bisa meninjaunya. Di pengembangan, tambahkan ?pratinjau.
+ * sedang masuk tetap bisa meninjaunya. Di localhost semua fitur langsung
+ * terbuka untuk ditinjau; tambahkan ?segera untuk melihat dialognya.
  */
 function Gerbang({ terbuka, isi, halaman: Halaman }: { terbuka: boolean; isi: IsiSegeraHadir; halaman: ComponentType }) {
-  const pratinjau = terbuka || (import.meta.env.DEV && /[?&]pratinjau/.test(window.location.search));
+  const pratinjau = terbuka || (import.meta.env.DEV && !/[?&]segera/.test(window.location.search));
   const { data } = useQuery<{ isAdmin: boolean }>({ queryKey: ["/api/admin/check"], enabled: !pratinjau, staleTime: 60_000 });
 
   if (pratinjau) return <Halaman />;

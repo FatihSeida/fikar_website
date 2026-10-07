@@ -1,10 +1,12 @@
 // DRAF: seluruh pesan di berkas ini masih menunggu tinjauan tim sebelum dipakai.
+import type { FiturRilis } from "@shared/rilis";
 
 export interface MasalahJawaban { masalah: string; jawaban: string; }
 export type AudiensId = "ketum-cabang" | "kader-komisariat" | "senior-kahmi" | "hmi-wati";
 export interface TautanLangkah { label: string; href: string; }
 export interface PesanAudiens { id: AudiensId; label: string; judul: string; pesan: string; langkah: readonly TautanLangkah[]; }
-export interface CaraIkut { judul: string; uraian: string; href: string; utama?: boolean; }
+/** `fitur`: kartu baru tampil setelah jadwal rilis fitur itu (shared/rilis.ts). */
+export interface CaraIkut { judul: string; uraian: string; href: string; utama?: boolean; fitur?: FiturRilis; }
 
 export const tigaMasalah: readonly MasalahJawaban[] = [
   {
@@ -79,6 +81,24 @@ export const caraIkut: readonly CaraIkut[] = [
     judul: "Kirim masalah komisariatmu",
     uraian: "Ceritakan satu masalah nyata yang sedang dihadapi komisariat atau cabangmu. Ceritamu membantu kami memahami keadaan HMI dari bawah.",
     href: "/ikut#kirim-masalah",
+  },
+  {
+    judul: "Sehari di Kursi Ketua",
+    uraian: "Jalani satu hari sebagai ketua dalam 15 situasi organisasi, lalu lihat potret cara memimpinmu dan tiga langkah yang bisa dicoba bersama pengurus.",
+    href: "/kursi-ketua",
+    fitur: "kursi-ketua",
+  },
+  {
+    judul: "Bangun HMI Bersama",
+    uraian: "Nilai sebelas bagian bangunan HMI, pilih tiga yang paling mendesak diperbaiki, lalu sampaikan masukanmu untuk PB.",
+    href: "/bangun-hmi",
+    fitur: "bangun-hmi",
+  },
+  {
+    judul: "Maturity Level Cabang",
+    uraian: "Untuk pengurus cabang: nilai enam dimensi kerja cabang, pilih yang ingin dinaikkan, lalu unduh panduan dan templatnya.",
+    href: "/maturity-cabang",
+    fitur: "maturity-cabang",
   },
   {
     judul: "Jelajahi dan bagikan 44 indikator",

@@ -19,7 +19,8 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const navLinks = semuaTautan.filter((link) => !link.fitur || sudahRilis(link.fitur));
+  // Di localhost menu fitur kampanye langsung tampil supaya bisa ditinjau sebelum rilis.
+  const navLinks = semuaTautan.filter((link) => !link.fitur || import.meta.env.DEV || sudahRilis(link.fitur));
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 32);

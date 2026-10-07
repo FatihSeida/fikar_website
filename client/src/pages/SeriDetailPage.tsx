@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
 import KolomTanggapan from "@/components/KolomTanggapan";
+import PetaSuaraKader from "@/components/PetaSuaraKader";
 import { SegeraHadir } from "@/components/SegeraHadir";
 import { proseKelas } from "@/pages/NoteDetail";
 import { labelTerbit } from "@/pages/SeriesPage";
@@ -30,20 +31,29 @@ function AjakanKuis() {
 }
 
 /** Komponen interaktif yang bisa disisipkan admin di naskah dengan paragraf [[nama-komponen]]. */
-const komponenSisipan: Record<string, () => JSX.Element> = {
+const komponenSisipan: Record<string, () => JSX.Element | null> = {
   "ajakan-kuis": AjakanKuis,
+  "peta-suara-kader": PetaSuaraKader,
 };
 
+// Potongan naskah sesudah komponen sisipan tidak memperbesar paragraf pertamanya lagi.
+const proseLanjutan = proseKelas.replace(/\[&_p:first-child\]:\S+\s?/g, "");
+
+/** Naskah dipotong di setiap [[komponen]]; komponennya dirender di luar gaya naskah. */
 function IsiSeri({ html }: { html: string }) {
   const bagian = html.split(/<p>\s*\[\[([a-z-]+)\]\]\s*<\/p>/g);
+  let pertama = true;
   return (
-    <div className={proseKelas}>
+    <div>
       {bagian.map((potongan, i) => {
         if (i % 2 === 1) {
           const Komponen = komponenSisipan[potongan];
           return Komponen ? <Komponen key={i} /> : null;
         }
-        return potongan.trim() ? <div key={i} dangerouslySetInnerHTML={{ __html: potongan }} /> : null;
+        if (!potongan.trim()) return null;
+        const kelas = pertama ? proseKelas : proseLanjutan;
+        pertama = false;
+        return <div key={i} className={kelas} dangerouslySetInnerHTML={{ __html: potongan }} />;
       })}
     </div>
   );

@@ -12,7 +12,7 @@ export const RILIS = {
   "series-2": rabu15("2026-10-21"),
   "series-3": rabu15("2026-10-28"),
   "peta-suara": rabu15("2026-10-28"),
-  "kursi-ketum": rabu15("2026-11-04"),
+  "kursi-ketua": rabu15("2026-11-04"),
   "series-4": rabu15("2026-11-11"),
   "bangun-hmi": rabu15("2026-11-11"),
   "maturity-cabang": rabu15("2026-11-18"),

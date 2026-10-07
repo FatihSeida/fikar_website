@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut, BarChart3, Inbox, ListChecks, Newspaper, MessageSquareText } from "lucide-react";
+import { Trash2, Plus, Image, FileText, BookOpen, ArrowLeft, Lock, LogOut, BarChart3, Inbox, ListChecks, Newspaper, MessageSquareText, Users } from "lucide-react";
 import { Link } from "wouter";
 import type { GalleryItem, Note, Page } from "@shared/schema";
 import { labelTataGaleri, tataGaleri, type TataGaleri } from "@shared/galeri";
@@ -18,6 +18,7 @@ import MasalahPanel from "@/components/admin/MasalahPanel";
 import KuisPanel from "@/components/admin/KuisPanel";
 import SeriPanel from "@/components/admin/SeriPanel";
 import TanggapanPanel from "@/components/admin/TanggapanPanel";
+import KampanyePanel from "@/components/admin/KampanyePanel";
 
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
@@ -598,6 +599,9 @@ export default function Admin() {
             <TabsTrigger value="tanggapan" className="gap-2">
               <MessageSquareText className="w-4 h-4" /> Tanggapan
             </TabsTrigger>
+            <TabsTrigger value="kampanye" className="gap-2">
+              <Users className="w-4 h-4" /> Fitur Kampanye
+            </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2" data-testid="tab-gallery">
               <Image className="w-4 h-4" /> Galeri
             </TabsTrigger>
@@ -620,6 +624,9 @@ export default function Admin() {
           </TabsContent>
           <TabsContent value="tanggapan">
             <TanggapanPanel />
+          </TabsContent>
+          <TabsContent value="kampanye">
+            <KampanyePanel />
           </TabsContent>
           <TabsContent value="gallery">
             <GalleryManager />

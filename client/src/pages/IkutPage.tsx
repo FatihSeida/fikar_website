@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import AjakDukung from "@/components/AjakDukung";
 import { caraIkut } from "@/lib/pesan";
+import { sudahRilis } from "@shared/rilis";
 import { kelompokIndikator } from "@/lib/indikator";
 
 const kosong = { cabang: "", komisariat: "", kelompok: "", masalah: "", nama: "", kontak: "", situs: "" };
@@ -165,7 +166,7 @@ export default function IkutPage() {
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">Satu paket untuk komisariatmu: ukur kebiasaannya lewat kuis audit, atau ceritakan masalah yang sedang dihadapi. Keduanya menjadi bukti untuk memperbaiki HMI, dan bisa dilakukan hari ini dari HP.</p>
 
           <ol className="mt-14 grid gap-px border border-border bg-border md:grid-cols-3">
-            {caraIkut.map((langkah, index) => (
+            {caraIkut.filter((langkah) => !langkah.fitur || import.meta.env.DEV || sudahRilis(langkah.fitur)).map((langkah, index) => (
               // Langkah utama (kuis) tampil di latar hijau tua dengan huruf emas berkilau, seperti tulisan HMI Evidence.
               <li key={langkah.href} className={langkah.utama ? "bg-[hsl(var(--evidence))]" : "bg-background"}>
                 <Link
