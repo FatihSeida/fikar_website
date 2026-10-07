@@ -83,9 +83,9 @@ export const caraIkut: readonly CaraIkut[] = [
     href: "/ikut#kirim-masalah",
   },
   {
-    judul: "Sehari di Kursi Ketua",
-    uraian: "Jalani satu hari sebagai ketua dalam 15 situasi organisasi, lalu lihat potret cara memimpinmu dan tiga langkah yang bisa dicoba bersama pengurus.",
-    href: "/kursi-ketua",
+    judul: "Sehari di Kursi Ketum",
+    uraian: "Jalani satu hari sebagai ketua umum dalam 15 situasi organisasi, lalu lihat potret cara memimpinmu dan tiga langkah yang bisa dicoba bersama pengurus.",
+    href: "/kursi-ketum",
     fitur: "kursi-ketua",
   },
   {

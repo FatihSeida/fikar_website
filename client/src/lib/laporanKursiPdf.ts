@@ -2,7 +2,7 @@ import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 import { HIJAU, REDUP, TINTA, batang, garis, halamanDasar, kop, label, siapkanPdf } from "@/lib/pdfDasar";
 import type { HasilKursi } from "@/lib/kursiKetua";
 
-/** Laporan pribadi "Sehari di Kursi Ketua" sebagai berkas PDF yang langsung terunduh. */
+/** Laporan pribadi "Sehari di Kursi Ketum" sebagai berkas PDF yang langsung terunduh. */
 export async function unduhLaporanKursi(hasil: HasilKursi, data: { kursi: string; komisariat: string; cabang: string; tanggal: string; komitmen: string }, namaBerkas: string) {
   const pdf = await siapkanPdf();
   const paragraf = (isi: string, atas = 0): Content => ({ text: isi, fontSize: 10.5, lineHeight: 1.5, margin: [0, atas, 0, 8] });
@@ -65,9 +65,9 @@ export async function unduhLaporanKursi(hasil: HasilKursi, data: { kursi: string
   ];
 
   const dokumen: TDocumentDefinitions = {
-    ...halamanDasar(namaBerkas.replace(/\.pdf$/, ""), "Sehari di Kursi Ketua", `HMI Evidence · Sehari di Kursi Ketua · Komisariat ${data.komisariat} · Cabang ${data.cabang}`),
+    ...halamanDasar(namaBerkas.replace(/\.pdf$/, ""), "Sehari di Kursi Ketum", `HMI Evidence · Sehari di Kursi Ketum · Komisariat ${data.komisariat} · Cabang ${data.cabang}`),
     content: [
-      kop(pdf.logo, "HMI Evidence · Sehari di Kursi Ketua", `Laporan pribadi · ${data.kursi}`, `Komisariat ${data.komisariat} · Cabang ${data.cabang} · ${data.tanggal}`),
+      kop(pdf.logo, "HMI Evidence · Sehari di Kursi Ketum", `Laporan pribadi · ${data.kursi}`, `Komisariat ${data.komisariat} · Cabang ${data.cabang} · ${data.tanggal}`),
       garis(16, 22),
       ...pembuka, ...caraMemimpin, ...dukungan, ...ditinjau, ...langkah, ...penutup,
     ],

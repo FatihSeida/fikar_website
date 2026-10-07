@@ -1,5 +1,5 @@
 /**
- * Isi "Sehari di Kursi Ketua": 15 situasi dalam lima babak, kunci nilai lima
+ * Isi "Sehari di Kursi Ketum": 15 situasi dalam lima babak, kunci nilai lima
  * dimensi, potret kepemimpinan, dan teks halaman hasil. Disimpan di server dan
  * baru dikirim ke pengunjung setelah jadwal rilis (shared/rilis.ts).
  *
@@ -319,12 +319,12 @@ const langkah: Record<string, { kebutuhan: string; langkah: string; komitmen: st
 
 export function kontenKursiKetua() {
   return {
-    judul: "Sehari di Kursi Ketua",
+    judul: "Sehari di Kursi Ketum",
     subjudul: "Bagaimana kamu memimpin ketika semua membutuhkanmu?",
     pengantar: [
       "Pukul 08.00. Ponselmu sudah dipenuhi pesan.",
       "Agenda organisasi mendekat. Pengurus menunggu keputusan. Seorang kader ingin bercerita. Di luar organisasi, ada pekerjaan pribadi yang belum selesai.",
-      "Hari ini, kamu duduk di kursi ketua.",
+      "Hari ini, kamu duduk di kursi ketum.",
       "Hadapi 15 situasi. Pilih tindakan yang paling mungkin kamu lakukan, termasuk ketika pilihan itu terasa kurang ideal. Tidak ada ketua yang selalu memiliki waktu, tenaga, dan informasi yang lengkap.",
     ],
     hasilDidapat: [

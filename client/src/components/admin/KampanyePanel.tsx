@@ -7,7 +7,7 @@ import type { HasilKuis, KirimanFitur, MasalahKomisariat, Tanggapan } from "@sha
 
 /**
  * Data fitur kampanye di panel admin: semua kiriman per cabang, lalu ringkasan
- * Sehari di Kursi Ketua, Bangun HMI Bersama, dan Maturity Level Cabang.
+ * Sehari di Kursi Ketum, Bangun HMI Bersama, dan Maturity Level Cabang.
  */
 
 const angka = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
@@ -59,7 +59,7 @@ function PerCabang() {
     { kunci: "audit", label: "Audit komisariat", data: kuis },
     { kunci: "masalah", label: "Masalah", data: masalah },
     { kunci: "tanggapan", label: "Tanggapan Series", data: tanggapan },
-    { kunci: "kursi", label: "Kursi Ketua", data: kursi },
+    { kunci: "kursi", label: "Kursi Ketum", data: kursi },
     { kunci: "bangun", label: "Bangun HMI", data: bangun },
     { kunci: "maturity", label: "Maturity", data: maturity },
     { kunci: "komitmen", label: "Komitmen cabang", data: komitmen },
@@ -142,7 +142,7 @@ function KursiKetua() {
         </CardContent></Card>
       </div>
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" disabled={!isi.length} onClick={() => unduhCsv("sehari-di-kursi-ketua", ["Waktu", "Kursi", "Potret", ...DIMENSI.map(([, n]) => n), "Komisariat", "Cabang", "Kota"], isi.map((k) => [waktu(k.createdAt), k.isi.kursi, k.isi.potret, ...DIMENSI.map(([kode]) => k.isi.nilai[kode]), k.komisariat, k.cabang, k.kota]))}>
+        <Button variant="outline" size="sm" disabled={!isi.length} onClick={() => unduhCsv("sehari-di-kursi-ketum", ["Waktu", "Kursi", "Potret", ...DIMENSI.map(([, n]) => n), "Komisariat", "Cabang", "Kota"], isi.map((k) => [waktu(k.createdAt), k.isi.kursi, k.isi.potret, ...DIMENSI.map(([kode]) => k.isi.nilai[kode]), k.komisariat, k.cabang, k.kota]))}>
           <Download className="mr-2 h-4 w-4" /> Unduh CSV
         </Button>
       </div>
@@ -268,12 +268,12 @@ export default function KampanyePanel() {
     <div className="grid gap-6">
       <div>
         <h2 className="font-serif text-2xl">Fitur Kampanye</h2>
-        <p className="text-sm text-muted-foreground">Data dari Sehari di Kursi Ketua, Bangun HMI Bersama, dan Maturity Level Cabang, serta seluruh kiriman per cabang.</p>
+        <p className="text-sm text-muted-foreground">Data dari Sehari di Kursi Ketum, Bangun HMI Bersama, dan Maturity Level Cabang, serta seluruh kiriman per cabang.</p>
       </div>
       <Tabs defaultValue="cabang">
         <TabsList className="mb-4 h-auto flex-wrap justify-start">
           <TabsTrigger value="cabang">Per cabang</TabsTrigger>
-          <TabsTrigger value="kursi">Kursi Ketua</TabsTrigger>
+          <TabsTrigger value="kursi">Kursi Ketum</TabsTrigger>
           <TabsTrigger value="bangun">Bangun HMI</TabsTrigger>
           <TabsTrigger value="maturity">Maturity Cabang</TabsTrigger>
         </TabsList>

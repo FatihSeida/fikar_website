@@ -76,7 +76,7 @@ export const kontenFitur = new Map<FiturRilis, () => unknown>();
 
 const nilaiDimensi = z.number().int().min(0).max(100);
 
-/** Sehari di Kursi Ketua: hanya ringkasan hasil yang disimpan, bukan jawaban per situasi. */
+/** Sehari di Kursi Ketum: hanya ringkasan hasil yang disimpan, bukan jawaban per situasi. */
 kontenFitur.set("kursi-ketua", kontenKursiKetua);
 fiturKiriman.set("kursi-ketua", {
   fitur: "kursi-ketua",

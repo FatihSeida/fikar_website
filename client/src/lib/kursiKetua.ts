@@ -1,7 +1,7 @@
 import type { KontenKursiKetua } from "../../../server/konten/kursiKetua";
 
 /**
- * Penilaian "Sehari di Kursi Ketua". Isinya diambil dari server setelah rilis;
+ * Penilaian "Sehari di Kursi Ketum". Isinya diambil dari server setelah rilis;
  * berkas ini hanya berisi cara membaca jawaban, bukan situasinya.
  */
 export type Konten = KontenKursiKetua;

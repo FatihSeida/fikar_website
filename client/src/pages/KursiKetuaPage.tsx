@@ -57,7 +57,7 @@ function Pembuka({ konten, mulai }: { konten: Konten; mulai: (kursi: Kursi) => v
         ))}
       </div>
       <button type="button" disabled={!kursi} onClick={() => kursi && mulai(kursi)} className="mt-8 inline-flex items-center gap-2 bg-primary px-7 py-4 text-xs font-medium uppercase tracking-[0.16em] text-primary-foreground disabled:opacity-50">
-        Duduk di Kursi Ketua <ArrowRight className="h-4 w-4" />
+        Duduk di Kursi Ketum <ArrowRight className="h-4 w-4" />
       </button>
     </header>
   );
@@ -168,7 +168,7 @@ function Hasil({ konten, kursi, jawaban, ulangi }: { konten: Konten; kursi: Kurs
       const { unduhLaporanKursi } = await import("@/lib/laporanKursiPdf");
       const tanggal = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
       await unduhLaporanKursi(hasil, { kursi: KURSI[kursi], komisariat: namaKomisariat, cabang, tanggal, komitmen: langkahDipilih.komitmen },
-        `Sehari di Kursi Ketua - Komisariat ${namaKomisariat} - Cabang ${cabang} - HMI Evidence.pdf`.replace(/[\\/:*?"<>|]+/g, "-"));
+        `Sehari di Kursi Ketum - Komisariat ${namaKomisariat} - Cabang ${cabang} - HMI Evidence.pdf`.replace(/[\\/:*?"<>|]+/g, "-"));
       setPdf("diam");
     } catch {
       setPdf("gagal");
@@ -176,7 +176,7 @@ function Hasil({ konten, kursi, jawaban, ulangi }: { konten: Konten; kursi: Kurs
   };
 
   const bawaKeRapat = async () => {
-    const pesan = `Langkah pekan ini dari Sehari di Kursi Ketua: ${langkahDipilih.langkah} Coba juga simulasinya di ahmadzulfikar.com/kursi-ketua`;
+    const pesan = `Langkah pekan ini dari Sehari di Kursi Ketum: ${langkahDipilih.langkah} Coba juga simulasinya di ahmadzulfikar.com/kursi-ketum`;
     if (navigator.share) {
       try { await navigator.share({ text: pesan }); return; } catch { return; }
     }
@@ -288,8 +288,8 @@ function Hasil({ konten, kursi, jawaban, ulangi }: { konten: Konten; kursi: Kurs
         <p className="mt-3 text-sm text-muted-foreground">Kartu hanya memuat potret dan komitmen yang kamu pilih, tanpa jawaban tentang kelelahan, konflik, atau orang tempat meminta bantuan.</p>
         <div className="mt-6 flex flex-wrap items-start gap-3">
           <TombolStory
-            namaFile="story-sehari-di-kursi-ketua.png"
-            isi={{ label: "Sehari di Kursi Ketua", judul: `Potretku: ${hasil.potret.nama}`, labelIsi: "Komitmen pekan ini", isi: langkahDipilih.komitmen, catatan: "Refleksi kepemimpinan dari pilihan dalam simulasi.", tautan: "ahmadzulfikar.com/kursi-ketua" }}
+            namaFile="story-sehari-di-kursi-ketum.png"
+            isi={{ label: "Sehari di Kursi Ketum", judul: `Potretku: ${hasil.potret.nama}`, labelIsi: "Komitmen pekan ini", isi: langkahDipilih.komitmen, catatan: "Refleksi kepemimpinan dari pilihan dalam simulasi.", tautan: "ahmadzulfikar.com/kursi-ketum" }}
           />
           <button type="button" onClick={() => (identitasLengkap ? unduhPdf() : setMintaIdentitas(true))} disabled={pdf === "menyiapkan"}
             className="inline-flex items-center gap-2 border border-primary px-5 py-3 text-xs font-medium uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-60">

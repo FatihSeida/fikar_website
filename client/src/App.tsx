@@ -58,8 +58,8 @@ function Router() {
           <Route path="/indikator" component={IndikatorPage} />
           <Route path="/kuis">{() => <GerbangAudit halaman={KuisPage} />}</Route>
           <Route path="/ikut">{() => <GerbangAudit halaman={IkutPage} />}</Route>
-          <Route path="/kursi-ketua">
-            {() => <GerbangRilis fitur="kursi-ketua" halaman={KursiKetuaPage} judul="Sehari di Kursi Ketua" uraian="Satu hari sebagai ketua dalam 15 situasi organisasi. Pilih tindakan yang paling mungkin kamu lakukan, lalu lihat potret cara memimpinmu dan tiga langkah untuk dicoba bersama pengurus." />}
+          <Route path="/kursi-ketum">
+            {() => <GerbangRilis fitur="kursi-ketua" halaman={KursiKetuaPage} judul="Sehari di Kursi Ketum" uraian="Satu hari sebagai ketua umum dalam 15 situasi organisasi. Pilih tindakan yang paling mungkin kamu lakukan, lalu lihat potret cara memimpinmu dan tiga langkah untuk dicoba bersama pengurus." />}
           </Route>
           <Route path="/bangun-hmi">
             {() => <GerbangRilis fitur="bangun-hmi" halaman={BangunHmiPage} judul="Bangun HMI Bersama" uraian="HMI digambarkan sebagai bangunan. Nilai kondisi setiap bagiannya, pilih tiga yang paling mendesak, lalu sampaikan masukanmu untuk PB." />}
