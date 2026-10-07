@@ -4,7 +4,7 @@ export interface MasalahJawaban { masalah: string; jawaban: string; }
 export type AudiensId = "ketum-cabang" | "kader-komisariat" | "senior-kahmi" | "hmi-wati";
 export interface TautanLangkah { label: string; href: string; }
 export interface PesanAudiens { id: AudiensId; label: string; judul: string; pesan: string; langkah: readonly TautanLangkah[]; }
-export interface CaraIkut { judul: string; uraian: string; href: string; }
+export interface CaraIkut { judul: string; uraian: string; href: string; utama?: boolean; }
 
 export const tigaMasalah: readonly MasalahJawaban[] = [
   {
@@ -70,14 +70,15 @@ export const pesanAudiens: readonly PesanAudiens[] = [
 
 export const caraIkut: readonly CaraIkut[] = [
   {
-    judul: "Kirim masalah komisariatmu",
-    uraian: "Ceritakan satu masalah nyata yang sedang dihadapi komisariat atau cabangmu. Ceritamu membantu kami memahami keadaan HMI dari bawah.",
-    href: "/ikut#kirim-masalah",
-  },
-  {
     judul: "Ukur komisariatmu lewat kuis",
     uraian: "Jawab 20 pertanyaan singkat tentang kebiasaan komisariatmu, perdalam dengan 10 soal tentang kader pasca-LK 2 dan LK 3, lalu lihat apa yang paling perlu diperkuat dan praktik apa yang bisa dicoba.",
     href: "/kuis",
+    utama: true,
+  },
+  {
+    judul: "Kirim masalah komisariatmu",
+    uraian: "Ceritakan satu masalah nyata yang sedang dihadapi komisariat atau cabangmu. Ceritamu membantu kami memahami keadaan HMI dari bawah.",
+    href: "/ikut#kirim-masalah",
   },
   {
     judul: "Jelajahi dan bagikan 44 indikator",
