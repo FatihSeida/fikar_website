@@ -4,7 +4,6 @@ import PaperGrain from "@/components/PaperGrain";
 import Hero from "@/components/sections/Hero";
 import EvidenceTeaser from "@/components/sections/EvidenceTeaser";
 import About from "@/components/sections/About";
-import TigaMasalah from "@/components/sections/TigaMasalah";
 import GalleryPreview from "@/components/sections/GalleryPreview";
 import Notes from "@/components/sections/Notes";
 import SiteFooter from "@/components/sections/SiteFooter";
@@ -19,7 +18,6 @@ export default function Home() {
       <main>
         <Hero />
         <EvidenceTeaser />
-        <TigaMasalah />
         <About />
         <GalleryPreview />
         <Notes />

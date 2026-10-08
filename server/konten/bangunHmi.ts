@@ -9,7 +9,6 @@ const fondasi = [
   { nama: "Nilai Dasar Perjuangan", uraian: "Landasan nilai yang menjadi arah gerak setiap kader." },
   { nama: "Tujuan HMI", uraian: "Pasal 4 Anggaran Dasar: terbinanya insan akademis, pencipta, pengabdi yang bernafaskan Islam." },
   { nama: "Independensi", uraian: "Sikap organisasi yang tidak bergantung pada kekuatan mana pun." },
-  { nama: "Sejarah sejak 5 Februari 1947", uraian: "Perjalanan panjang yang diwarisi setiap generasi kader." },
 ];
 
 const bagian = [
@@ -40,7 +39,7 @@ const bagian = [
 export function kontenBangunHmi() {
   return {
     judul: "Bangun HMI Bersama",
-    pengantar: "HMI adalah bangunan yang diwariskan dan terus dibangun bersama. Fondasinya sudah diletakkan para pendahulu. Sekarang giliranmu menilai bagian-bagiannya: mana yang masih kokoh, mana yang mulai rapuh, dan apa yang paling perlu diperbaiki.",
+    pengantar: "Mari ikut berkontribusi dalam menyamakan persepsi tentang mau dibawa ke arah mana HMI dan apa yang paling pertama kali harus diperbaiki. Mari persiapkan HMI untuk Indonesia Emas 2045.",
     waktu: "sekitar tiga menit",
     skala: ["Rapuh", "Retak", "Cukup", "Kuat", "Kokoh"],
     fondasi,

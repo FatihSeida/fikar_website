@@ -69,10 +69,10 @@ export default function BangunanHmi({ nilai, nama, sorot = [], onPilih, classNam
 
       {/* Fondasi: tidak dinilai. Digambar sebelum teras supaya anak tangga berdiri di atasnya. */}
       <g>
-        <title>Fondasi: Nilai Dasar Perjuangan, Tujuan HMI, Independensi, Sejarah sejak 1947 (tidak dinilai)</title>
+        <title>Fondasi: Nilai Dasar Perjuangan, Tujuan HMI, Independensi (tidak dinilai)</title>
         <rect x="20" y="308" width="360" height="44" fill="#0B2A1E" />
-        {["NDP", "Tujuan HMI", "Independensi", "Sejak 1947"].map((teks, i) => (
-          <text key={teks} x={20 + 45 + i * 90} y="343" textAnchor="middle" fontSize="10" letterSpacing="1" fill="#DCC38A" fontFamily="DM Sans, sans-serif">{teks.toUpperCase()}</text>
+        {["NDP", "Tujuan HMI", "Independensi"].map((teks, i) => (
+          <text key={teks} x={20 + 60 + i * 120} y="343" textAnchor="middle" fontSize="10" letterSpacing="1" fill="#DCC38A" fontFamily="DM Sans, sans-serif">{teks.toUpperCase()}</text>
         ))}
       </g>
 
