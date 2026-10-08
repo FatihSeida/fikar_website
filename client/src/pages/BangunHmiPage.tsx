@@ -43,11 +43,14 @@ function adaWebgl() {
   }
 }
 
-/** "Masukanku untuk PB: perbaiki Lantai dengan pendampingan 90 hari setelah LK 1" */
+/**
+ * "Perbaiki perkaderan dan pedomannya melalui pendampingan 90 hari setelah LK 1."
+ * Memakai uraian bagian, bukan nama bangunannya, supaya masukan untuk PB jelas maknanya.
+ */
 function kalimatMasukan(bagian: Bagian, perbaikan: Perbaikan) {
   return perbaikan.cara !== null
-    ? `Perbaiki ${bagian.nama.toLowerCase()} dengan ${bagian.pilihan[perbaikan.cara]}.`
-    : `Perbaiki ${bagian.nama.toLowerCase()}: ${perbaikan.usulan.trim()}`;
+    ? `Perbaiki ${bagian.sasaran} melalui ${bagian.pilihan[perbaikan.cara]}.`
+    : `Perbaiki ${bagian.sasaran}: ${perbaikan.usulan.trim()}`;
 }
 
 function Langkah({ nomor, judul }: { nomor: number; judul: string }) {
@@ -430,7 +433,7 @@ export default function BangunHmiPage() {
                 <TombolStory
                   className="mt-8"
                   namaFile="story-bangun-hmi-bersama.png"
-                  isi={{ label: "Bangun HMI Bersama", judul: "Masukanku untuk PB", labelIsi: utama.nama, isi: kalimatMasukan(utama, perbaikan[utama.id]), tautan: "ahmadzulfikar.com/bangun-hmi", gambar: gambarBangunan }}
+                  isi={{ label: "Bangun HMI Bersama", judul: "Masukanku untuk PB", labelIsi: "Prioritas pertama", isi: kalimatMasukan(utama, perbaikan[utama.id]), tautan: "ahmadzulfikar.com/bangun-hmi", gambar: gambarBangunan }}
                 />
                 <p className="mt-6 text-sm text-muted-foreground">
                   {hasilTerbuka ? "Hasil pilihan seluruh kader sudah dibuka di bawah." : `Hasil pilihan seluruh kader dibuka ${labelRilis("hasil-bangun-hmi")}. Sampai saat itu, halaman ini hanya menampilkan jumlah peserta.`}
