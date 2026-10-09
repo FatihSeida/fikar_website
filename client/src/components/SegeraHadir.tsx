@@ -5,7 +5,7 @@ import { ArrowRight, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import { auditSudahDibuka, PELUNCURAN_AUDIT } from "@shared/audit";
-import { RILIS, sudahRilis, type FiturRilis } from "@shared/rilis";
+import { RILIS, segeraTampil, sudahRilis, type FiturRilis } from "@shared/rilis";
 
 function pecahWaktu(ms: number) {
   const detikTotal = Math.max(0, Math.floor(ms / 1000));
@@ -128,8 +128,11 @@ export function GerbangAudit({ halaman }: { halaman: ComponentType }) {
   return <Gerbang terbuka={auditSudahDibuka()} isi={isiAudit} halaman={halaman} />;
 }
 
-/** Fitur kampanye dengan jadwal di shared/rilis.ts. */
-export function GerbangRilis({ fitur, halaman, judul, uraian }: { fitur: FiturRilis; halaman: ComponentType; judul: string; uraian: string }) {
+/**
+ * Fitur kampanye dengan jadwal di shared/rilis.ts. `sejakH2` membuka halaman
+ * dua hari lebih awal (dipakai daftar Series, yang memperkenalkan seri sejak H-2).
+ */
+export function GerbangRilis({ fitur, halaman, judul, uraian, sejakH2 = false }: { fitur: FiturRilis; halaman: ComponentType; judul: string; uraian: string; sejakH2?: boolean }) {
   const tanggal = tanggalRilis(RILIS[fitur]);
   const isi: IsiSegeraHadir = {
     eyebrow: `Segera hadir · ${tanggal}`,
@@ -138,5 +141,5 @@ export function GerbangRilis({ fitur, halaman, judul, uraian }: { fitur: FiturRi
     peluncuran: RILIS[fitur],
     catatanAdmin: `dibuka untuk umum ${tanggal}`,
   };
-  return <Gerbang terbuka={sudahRilis(fitur)} isi={isi} halaman={halaman} />;
+  return <Gerbang terbuka={sudahRilis(fitur) || (sejakH2 && segeraTampil(fitur))} isi={isi} halaman={halaman} />;
 }

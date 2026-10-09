@@ -69,7 +69,7 @@ function Router() {
           </Route>
           <Route path="/series/:slug" component={SeriDetailPage} />
           <Route path="/series">
-            {() => <GerbangRilis fitur="series-1" halaman={SeriesPage} judul="Series HMI Evidence" uraian="Empat seri tulisan Ahmad Zulfikar tentang arah kaderisasi HMI, terbit satu per satu setiap Rabu. Setiap seri bisa ditanggapi atas nama komisariat dan cabangmu." />}
+            {() => <GerbangRilis fitur="series-1" sejakH2 halaman={SeriesPage} judul="Series HMI Evidence" uraian="Empat cerita tentang arah HMI: dari kader yang melangkah ke dunia, ingatan organisasi, suara pemuda, sampai bersama membangun HMI." />}
           </Route>
           <Route path="/admin" component={Admin} />
           <Route component={NotFound} />

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 import { Link, useRoute } from "wouter";
@@ -10,8 +11,15 @@ import { SegeraHadir } from "@/components/SegeraHadir";
 import { proseKelas } from "@/pages/NoteDetail";
 import { labelTerbit } from "@/pages/SeriesPage";
 import type { Seri } from "@shared/schema";
+import type { CeritaSeri } from "@shared/cerita";
+import type { InfoSeri } from "@/components/seri/tipe";
 
-type SeriLengkap = Seri & { rilis: number };
+// Tampilan khusus dimuat terpisah: cerita interaktif membawa three.js, kerangka membawa grafik.
+const CeritaInteraktif = lazy(() => import("@/components/cerita/CeritaInteraktif"));
+const SeriPemuda = lazy(() => import("@/components/seri/SeriPemuda"));
+const SeriPahlawan = lazy(() => import("@/components/seri/SeriPahlawan"));
+
+type SeriLengkap = Seri & { rilis: number; tampilan?: "cerita" | "pemuda" | "pahlawan" | "naskah"; cerita?: CeritaSeri };
 
 /**
  * Ajakan di tengah atau akhir tulisan, disisipkan admin dengan [[ajakan-kuis]].
@@ -104,6 +112,18 @@ export default function SeriDetailPage() {
       </div>
     );
   }
+
+  const info: InfoSeri = {
+    slug: seri.slug, nomor: seri.nomor, judul: seri.judul, subjudul: seri.subjudul, rilis: seri.rilis,
+    penulis: seri.penulis, tautanMedia: seri.tautanMedia, namaMedia: seri.namaMedia,
+  };
+  const memuat = <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--evidence))] text-white/70">Memuat seri…</div>;
+  const tanggapan = <KolomTanggapan slug={seri.slug} />;
+  if (seri.tampilan === "cerita" && seri.cerita) {
+    return <Suspense fallback={memuat}><CeritaInteraktif seri={info} cerita={seri.cerita} naskah={seri.isi} tanggapan={tanggapan} /></Suspense>;
+  }
+  if (seri.tampilan === "pemuda") return <Suspense fallback={memuat}><SeriPemuda seri={info} naskah={seri.isi} tanggapan={tanggapan} /></Suspense>;
+  if (seri.tampilan === "pahlawan") return <Suspense fallback={memuat}><SeriPahlawan seri={info} naskah={seri.isi} tanggapan={tanggapan} /></Suspense>;
 
   const nomor = String(seri.nomor).padStart(2, "0");
   return (
