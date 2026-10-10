@@ -5,6 +5,7 @@ import { ArrowRight, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import { auditSudahDibuka, PELUNCURAN_AUDIT } from "@shared/audit";
+import { RILIS, segeraTampil, sudahRilis, type FiturRilis } from "@shared/rilis";
 
 function pecahWaktu(ms: number) {
   const detikTotal = Math.max(0, Math.floor(ms / 1000));
@@ -16,19 +17,36 @@ function pecahWaktu(ms: number) {
   ];
 }
 
-/** Dialog "Segera hadir" untuk kuis audit komisariat sebelum 7 Oktober 2026. */
-export function SegeraHadir() {
+export type IsiSegeraHadir = { eyebrow: string; judul: string; uraian: string; peluncuran: number; catatanAdmin: string };
+
+const isiAudit: IsiSegeraHadir = {
+  eyebrow: "Segera hadir · 7 Oktober 2026",
+  judul: "Seberapa Evidence Komisariatmu?",
+  uraian: "Kuis audit komisariat sedang kami siapkan: 20 pertanyaan inti, audit lanjutan untuk kader pasca-LK 2 dan LK 3, serta laporan PDF untuk dibawa ke rapat pengurus. Dibuka serentak untuk seluruh komisariat pada 7 Oktober 2026.",
+  peluncuran: PELUNCURAN_AUDIT,
+  catatanAdmin: "dibuka untuk umum 7 Oktober 2026",
+};
+
+/** "4 November 2026, 15.00 WIB" */
+function tanggalRilis(peluncuran: number) {
+  const tanggal = new Date(peluncuran).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
+  const jam = new Date(peluncuran).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" });
+  return `${tanggal}, ${jam} WIB`;
+}
+
+/** Dialog "Segera hadir" untuk fitur yang belum dibuka, lengkap dengan hitung mundur. */
+export function SegeraHadir({ isi = isiAudit }: { isi?: IsiSegeraHadir }) {
   const [, navigate] = useLocation();
-  const [sisa, setSisa] = useState(() => PELUNCURAN_AUDIT - Date.now());
+  const [sisa, setSisa] = useState(() => isi.peluncuran - Date.now());
 
   useEffect(() => {
     const jam = window.setInterval(() => {
-      const baru = PELUNCURAN_AUDIT - Date.now();
+      const baru = isi.peluncuran - Date.now();
       setSisa(baru);
       if (baru <= 0) window.location.reload();
     }, 1000);
     return () => window.clearInterval(jam);
-  }, []);
+  }, [isi.peluncuran]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--evidence))]">
@@ -46,17 +64,17 @@ export function SegeraHadir() {
                 <X size={16} />
               </DialogPrimitive.Close>
               <p className="flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.24em] text-[#dcc38a]">
-                Segera hadir · 7 Oktober 2026
+                {isi.eyebrow}
                 <span className="h-px w-14 bg-gradient-to-r from-[#dcc38a] to-transparent" aria-hidden="true" />
               </p>
               <DialogPrimitive.Title className="mt-5 font-serif text-4xl font-normal leading-tight tracking-tight sm:text-5xl">
-                Seberapa Evidence Komisariatmu?
+                {isi.judul}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="mt-5 text-[15px] leading-relaxed text-[#e9eee3]/75">
-                Kuis audit komisariat sedang kami siapkan: 20 pertanyaan inti, audit lanjutan untuk kader pasca-LK 2 dan LK 3, serta laporan PDF untuk dibawa ke rapat pengurus. Dibuka serentak untuk seluruh komisariat pada 7 Oktober 2026.
+                {isi.uraian}
               </DialogPrimitive.Description>
 
-              <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-3" role="timer" aria-label="Hitung mundur pembukaan kuis">
+              <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-3" role="timer" aria-label="Hitung mundur pembukaan">
                 {pecahWaktu(sisa).map((bagian) => (
                   <div key={bagian.label} className="rounded-[4px_14px_4px_4px] border border-[#dcc38a]/28 bg-black/25 px-2 py-3 text-center">
                     <p className="font-serif text-3xl tabular-nums text-[#e8d19b] sm:text-4xl">{String(bagian.nilai).padStart(2, "0")}</p>
@@ -69,8 +87,8 @@ export function SegeraHadir() {
                 <Link href="/hmi-evidence" className="inline-flex items-center justify-between gap-2 bg-gradient-to-br from-[#e5cf95] to-[#c9a95e] px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#0a1f16]">
                   Baca HMI Evidence <ArrowRight size={16} />
                 </Link>
-                <Link href="/indikator" className="inline-flex items-center justify-between gap-2 border border-white/25 px-5 py-3.5 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-[#dcc38a]">
-                  Lihat 44 indikator <ArrowRight size={16} className="text-[#dcc38a]" />
+                <Link href="/kuis" className="inline-flex items-center justify-between gap-2 border border-white/25 px-5 py-3.5 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-[#dcc38a]">
+                  Ikuti kuis audit <ArrowRight size={16} className="text-[#dcc38a]" />
                 </Link>
               </div>
               <Link href="/" className="mt-5 inline-block text-xs text-[#e9eee3]/55 underline-offset-4 hover:text-white hover:underline">Kembali ke beranda</Link>
@@ -83,23 +101,45 @@ export function SegeraHadir() {
 }
 
 /**
- * Membuka halaman kuis dan Audit Komisariat hanya setelah jadwal peluncuran.
- * Sebelum itu pengunjung melihat dialog "Segera hadir" dan kode halamannya
- * tidak dimuat; admin yang sedang masuk tetap bisa meninjaunya.
+ * Membuka halaman hanya setelah jadwal peluncurannya. Sebelum itu pengunjung
+ * melihat dialog "Segera hadir" dan kode halamannya tidak dimuat; admin yang
+ * sedang masuk tetap bisa meninjaunya. Di localhost semua fitur langsung
+ * terbuka untuk ditinjau; tambahkan ?segera untuk melihat dialognya.
  */
-export function GerbangAudit({ halaman: Halaman }: { halaman: ComponentType }) {
-  const terbuka = auditSudahDibuka() || (import.meta.env.DEV && new URLSearchParams(window.location.search).has("pratinjau-audit"));
-  const { data } = useQuery<{ isAdmin: boolean }>({ queryKey: ["/api/admin/check"], enabled: !terbuka, staleTime: 60_000 });
+function Gerbang({ terbuka, isi, halaman: Halaman }: { terbuka: boolean; isi: IsiSegeraHadir; halaman: ComponentType }) {
+  const pratinjau = terbuka || (import.meta.env.DEV && !/[?&]segera/.test(window.location.search));
+  const { data } = useQuery<{ isAdmin: boolean }>({ queryKey: ["/api/admin/check"], enabled: !pratinjau, staleTime: 60_000 });
 
-  if (terbuka) return <Halaman />;
+  if (pratinjau) return <Halaman />;
   if (!data) return <div className="min-h-screen bg-background" />;
-  if (!data.isAdmin) return <SegeraHadir />;
+  if (!data.isAdmin) return <SegeraHadir isi={isi} />;
   return (
     <>
       <Halaman />
       <p className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] left-1/2 z-[80] -translate-x-1/2 whitespace-nowrap rounded-full border border-[#dcc38a]/50 bg-[hsl(var(--evidence))] px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-[#e8d19b] shadow-lg md:bottom-5 print:hidden">
-        Pratinjau admin · dibuka untuk umum 7 Oktober 2026
+        Pratinjau admin · {isi.catatanAdmin}
       </p>
     </>
   );
+}
+
+/** Kuis audit dan halaman Audit Komisariat, dibuka 7 Oktober 2026. */
+export function GerbangAudit({ halaman }: { halaman: ComponentType }) {
+  return <Gerbang terbuka={auditSudahDibuka()} isi={isiAudit} halaman={halaman} />;
+}
+
+/**
+ * Fitur kampanye dengan jadwal di shared/rilis.ts. `sejakH2` membuka halaman
+ * dua hari lebih awal (dipakai daftar Series, yang memperkenalkan seri sejak H-2).
+ */
+export function GerbangRilis({ fitur, halaman, judul, uraian, sejakH2 = false }: { fitur: FiturRilis; halaman: ComponentType; judul: string; uraian: string; sejakH2?: boolean }) {
+  const tanggal = tanggalRilis(RILIS[fitur]);
+  const isi: IsiSegeraHadir = {
+    eyebrow: `Segera hadir · ${tanggal}`,
+    judul,
+    uraian,
+    peluncuran: RILIS[fitur],
+    catatanAdmin: `dibuka untuk umum ${tanggal}`,
+  };
+  return <Gerbang terbuka={sudahRilis(fitur) || (sejakH2 && segeraTampil(fitur))} isi={isi} halaman={halaman} />;
 }

@@ -24,6 +24,8 @@ export interface IsiStory {
   skor?: { nilai: number; maksimal: number; tingkat: string };
   tautan: string;
   gambarSiap?: string;
+  /** Gambar (data URL) yang ditaruh di bawah label, misalnya bangunan dari Bangun HMI Bersama. */
+  gambar?: string;
 }
 
 function muatGambar(src: string): Promise<HTMLImageElement | null> {
@@ -132,12 +134,27 @@ export async function buatStory(isi: IsiStory): Promise<Blob> {
   ctx.fillText("HMI EVIDENCE", kiriMerek, 318);
   ctx.fillRect(kiriMerek, 346, 180, 2);
 
-  const atasLabel = 560;
+  const atasLabel = isi.gambar ? 430 : 560;
   ctx.font = `500 30px ${SANS}`;
   spasiHuruf(ctx, "6px");
   ctx.fillStyle = EMAS;
   ctx.fillText(isi.label.toUpperCase(), kiri, atasLabel);
   spasiHuruf(ctx, "0px");
+
+  // Gambar pendukung (misalnya bangunan buatan pengunjung) di antara label dan judul.
+  let awalJudul = atasLabel + 60;
+  const gambar = isi.gambar ? await muatGambar(isi.gambar) : null;
+  if (gambar) {
+    const sisi = 600;
+    const tengahY = atasLabel + 30 + sisi / 2;
+    const sinar = ctx.createRadialGradient(L / 2, tengahY, 0, L / 2, tengahY, sisi * 0.62);
+    sinar.addColorStop(0, "rgba(220,195,138,0.2)");
+    sinar.addColorStop(1, "rgba(220,195,138,0)");
+    ctx.fillStyle = sinar;
+    ctx.fillRect(0, tengahY - sisi, L, sisi * 2);
+    ctx.drawImage(gambar, (L - sisi) / 2, atasLabel + 30, sisi, sisi);
+    awalJudul = atasLabel + 30 + sisi + 10;
+  }
 
   // Cari skala huruf terbesar yang membuat judul, isi, dan catatan muat
   // dengan jarak lega sebelum baris penutup (isi berakhir paling bawah y=1400).
@@ -150,7 +167,7 @@ export async function buatStory(isi: IsiStory): Promise<Blob> {
     const barisJudul = bungkus(ctx, isi.judul, lebar);
     ctx.font = fontIsi(ukuranIsi);
     const barisIsi = isi.isi ? bungkus(ctx, isi.isi, lebar) : [];
-    let bawah = atasLabel + 60 + ukuranJudul * 0.2 + barisJudul.length * ukuranJudul * 1.14;
+    let bawah = awalJudul + ukuranJudul * 0.2 + barisJudul.length * ukuranJudul * 1.14;
     const ukuranSkor = Math.round(190 * skala);
     if (isi.skor) bawah += 120 + 40 + ukuranSkor * 0.9 + 70;
     if (barisIsi.length) bawah += 90 + (isi.labelIsi ? 26 : 0) + barisIsi.length * ukuranIsi * 1.5;
@@ -160,7 +177,7 @@ export async function buatStory(isi: IsiStory): Promise<Blob> {
   let tata = susun(1);
   for (let skala = 0.95; tata.bawah > 1400 && skala >= 0.55; skala -= 0.05) tata = susun(skala);
 
-  let y = atasLabel + 60 + tata.ukuranJudul * 0.2;
+  let y = awalJudul + tata.ukuranJudul * 0.2;
   ctx.font = fontJudul(tata.ukuranJudul);
   ctx.fillStyle = GADING;
   for (const baris of tata.barisJudul) {

@@ -1,21 +1,112 @@
 import { Link, useLocation } from "wouter";
-import { useEffect, useState } from "react";
-import { FileText, Home as HomeIcon, Images, Menu, UserRound, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { BookOpen, FileText, Home as HomeIcon, Images, Menu, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
+import { labelWaktu, segeraTampil } from "@shared/rilis";
+import type { RingkasSeri } from "@/pages/SeriesPage";
 
-const navLinks = [
+const semuaTautan = [
   { name: "Beranda", href: "/", icon: HomeIcon },
   { name: "HMI Evidence", shortName: "Evidence", href: "/hmi-evidence", icon: null },
+  // Tab Series baru tampil dua hari sebelum seri pertama terbit.
+  { name: "Series", href: "/series", icon: BookOpen, fitur: "series-1" as const },
   { name: "Tentang", href: "/tentang", icon: UserRound },
   { name: "Galeri", href: "/galeri", icon: Images },
   { name: "Catatan", href: "/catatan", icon: FileText },
 ];
 
-export default function Navbar({ dark = false }: { dark?: boolean }) {
+/**
+ * Tautan Series di navigasi desktop. Saat diarahkan tetikus atau difokus papan ketik,
+ * muncul daftar seri. Daftarnya baru diminta ke server setelah dibuka pertama kali,
+ * jadi memuat halaman biasa tidak memanggil API.
+ */
+function TautanSeries({ href, name, aktif, lightInk, kelas }: { href: string; name: string; aktif: boolean; lightInk: boolean; kelas: string }) {
+  const [buka, setBuka] = useState(false);
+  const [pernahBuka, setPernahBuka] = useState(false);
+  const tautanRef = useRef<HTMLAnchorElement>(null);
+  const abaikanFokus = useRef(false);
+  const idMenu = useId();
+  const { data, isLoading, isError } = useQuery<RingkasSeri[]>({ queryKey: ["/api/seri"], enabled: pernahBuka, staleTime: 60_000 });
+  const daftar = (data ?? []).filter((item) => item.judul).sort((a, b) => a.rilis - b.rilis || a.nomor - b.nomor);
+
+  const tampilkan = () => { setPernahBuka(true); setBuka(true); };
+  const tutupDenganEsc = () => {
+    // Fokus yang kembali ke tautan tidak boleh membuka menu lagi.
+    abaikanFokus.current = document.activeElement !== tautanRef.current;
+    setBuka(false);
+    tautanRef.current?.focus();
+  };
+
+  const panel = lightInk
+    ? { kotak: "border-white/15 bg-[#071610]/95 text-white", nomor: "text-[hsl(var(--gold))]", status: "text-white/60", sorot: "hover:bg-white/10 focus-visible:bg-white/10", pesan: "text-white/60" }
+    : { kotak: "border-border bg-background/95 text-foreground", nomor: "text-primary", status: "text-muted-foreground", sorot: "hover:bg-primary/5 focus-visible:bg-primary/5", pesan: "text-muted-foreground" };
+
+  return (
+    <div
+      className="relative flex"
+      onMouseEnter={tampilkan}
+      onMouseLeave={() => setBuka(false)}
+      onFocus={() => { if (abaikanFokus.current) { abaikanFokus.current = false; return; } tampilkan(); }}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setBuka(false); }}
+      onKeyDown={(event) => { if (event.key === "Escape" && buka) tutupDenganEsc(); }}
+    >
+      <Link ref={tautanRef} href={href} aria-current={aktif ? "page" : undefined} aria-expanded={buka} aria-controls={buka ? idMenu : undefined} className={kelas}>
+        {name}
+      </Link>
+      <AnimatePresence>
+        {buka && (
+          // Bagian atas (pt-5) menyambung tautan dan kotak supaya tetikus tidak keluar dari area saat turun.
+          <div className="absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-5">
+            <motion.div id={idMenu} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }} className={`border p-2 shadow-2xl backdrop-blur-xl ${panel.kotak}`}>
+              {daftar.length > 0 ? (
+                <ul>
+                  {daftar.map((item) => {
+                    const nomor = String(item.nomor).padStart(2, "0");
+                    const bisaDibuka = item.terbit || !item.segera;
+                    const status = item.terbit ? "Sudah terbit" : item.segera ? `Segera terbit · ${labelWaktu(item.rilis)}` : "Pratinjau admin";
+                    const isi = (
+                      <>
+                        <span className={`pt-0.5 font-serif text-xl leading-none ${panel.nomor}`}>{nomor}</span>
+                        <span className="block min-w-0">
+                          <span className="block font-serif text-[15px] leading-snug">{item.judul}</span>
+                          <span className={`mt-1 block text-[11px] leading-snug ${panel.status}`}>{status}</span>
+                        </span>
+                      </>
+                    );
+                    return (
+                      <li key={item.slug}>
+                        {bisaDibuka ? (
+                          <Link href={`/series/${item.slug}`} className={`flex gap-4 px-3 py-3 outline-none transition-colors ${panel.sorot}`}>{isi}</Link>
+                        ) : (
+                          <div className="flex cursor-default gap-4 px-3 py-3 opacity-75">{isi}</div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className={`px-3 py-3 text-sm ${panel.pesan}`}>{isError ? "Daftar seri belum bisa dimuat." : isLoading ? "Memuat daftar seri…" : "Belum ada seri yang bisa dilihat."}</p>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/**
+ * `dark`: tulisan terang selama di atas sampul gelap, lalu kembali terang-latar saat digulir.
+ * `gelap`: tetap bergaya gelap sepanjang halaman (halaman HMI Evidence dan cerita interaktif Series).
+ */
+export default function Navbar({ dark = false, gelap = false }: { dark?: boolean; gelap?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  // Di localhost menu fitur kampanye langsung tampil supaya bisa ditinjau sebelum rilis.
+  const navLinks = semuaTautan.filter((link) => !link.fitur || import.meta.env.DEV || segeraTampil(link.fitur));
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 32);
@@ -24,7 +115,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const cinematic = location === "/hmi-evidence";
+  const cinematic = gelap || location === "/hmi-evidence";
   const lightInk = cinematic || (dark && !isScrolled);
   const ink = lightInk ? "text-white" : "text-foreground";
   const muted = lightInk ? "text-white/70" : "text-muted-foreground";
@@ -47,11 +138,16 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
             <span>{site.namaDepan} <span className={muted}>{site.namaBelakang}</span></span>
           </Link>
           <div className="hidden items-center gap-6 lg:flex">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} aria-current={location === link.href ? "page" : undefined} className={`text-xs uppercase tracking-[0.14em] transition-colors ${link.href === "/hmi-evidence" ? `evidence-shimmer ${lightInk ? "" : "evidence-shimmer-light"}` : `hover:opacity-70 ${location === link.href ? ink : muted}`}`}>
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const kelas = `text-xs uppercase tracking-[0.14em] transition-colors ${link.href === "/hmi-evidence" ? `evidence-shimmer ${lightInk ? "" : "evidence-shimmer-light"}` : `hover:opacity-70 ${location === link.href ? ink : muted}`}`;
+              return link.fitur === "series-1" ? (
+                <TautanSeries key={link.href} href={link.href} name={link.name} aktif={location === link.href} lightInk={lightInk} kelas={kelas} />
+              ) : (
+                <Link key={link.href} href={link.href} aria-current={location === link.href ? "page" : undefined} className={kelas}>
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
           <button type="button" className={`hidden p-2 md:block lg:hidden ${ink}`} onClick={() => setMobileMenuOpen(true)} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-label="Buka menu navigasi">
             <Menu className="h-6 w-6" />

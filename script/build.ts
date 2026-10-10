@@ -1,6 +1,6 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile, copyFile, readdir, writeFile } from "fs/promises";
+import { rm, readFile, copyFile, cp, readdir, writeFile } from "fs/promises";
 import path from "path";
 import { brotliCompressSync, gzipSync, constants as zlibConstants } from "zlib";
 
@@ -68,6 +68,9 @@ async function buildAll() {
   // connect-pg-simple ikut dibundel, tetapi membaca table.sql dari __dirname
   // (dist/) untuk membuat tabel session. Tanpa berkas ini login admin gagal.
   await copyFile("node_modules/connect-pg-simple/table.sql", "dist/table.sql");
+
+  // Panduan dan templat Maturity Level Cabang, dikirim server hanya setelah rilis.
+  await cp("server/data/unduhan", "dist/unduhan", { recursive: true });
 
   await kompresAset("dist/public/assets");
 }

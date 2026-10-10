@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import AjakDukung from "@/components/AjakDukung";
+import DaftarLangkah from "@/components/DaftarLangkah";
 import { caraIkut } from "@/lib/pesan";
 import { kelompokIndikator } from "@/lib/indikator";
 
@@ -164,24 +165,7 @@ export default function IkutPage() {
           <h1 className="max-w-4xl font-serif text-4xl leading-tight md:text-6xl">Seberapa Evidence Komisariatmu?</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">Satu paket untuk komisariatmu: ukur kebiasaannya lewat kuis audit, atau ceritakan masalah yang sedang dihadapi. Keduanya menjadi bukti untuk memperbaiki HMI, dan bisa dilakukan hari ini dari HP.</p>
 
-          <ol className="mt-14 grid gap-px border border-border bg-border md:grid-cols-3">
-            {caraIkut.map((langkah, index) => (
-              // Langkah utama (kuis) tampil di latar hijau tua dengan huruf emas berkilau, seperti tulisan HMI Evidence.
-              <li key={langkah.href} className={langkah.utama ? "bg-[hsl(var(--evidence))]" : "bg-background"}>
-                <Link
-                  href={langkah.href}
-                  className={`group flex h-full flex-col p-7 transition-colors ${langkah.utama
-                    ? "bg-[radial-gradient(circle_at_88%_8%,rgb(220_195_138/.2),transparent_48%)] text-white hover:bg-white/[0.04]"
-                    : "hover:bg-primary/5"}`}
-                >
-                  <span className={`font-serif text-3xl ${langkah.utama ? "evidence-shimmer" : "text-primary"}`}>0{index + 1}</span>
-                  <h2 className={`mt-4 font-serif text-2xl ${langkah.utama ? "evidence-shimmer" : ""}`}>{langkah.judul}</h2>
-                  <p className={`mt-3 flex-1 text-sm leading-relaxed ${langkah.utama ? "text-white/75" : "text-muted-foreground"}`}>{langkah.uraian}</p>
-                  <span className={`mt-6 inline-flex items-center gap-2 text-sm font-medium ${langkah.utama ? "text-[hsl(var(--gold))]" : "text-primary"}`}>Mulai <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
-                </Link>
-              </li>
-            ))}
-          </ol>
+          <DaftarLangkah langkah={caraIkut} />
         </section>
 
         <section id="kirim-masalah" className="scroll-mt-24 border-t border-border py-24 md:py-32">
