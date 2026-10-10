@@ -156,6 +156,12 @@ function Adegan({ pin, putar = false, onSiap, ...gedung }: Omit<PropsPanggung, "
   const kontrol = useRef<OrbitControlsImpl | null>(null);
   const tujuan = useRef<Tujuan>(null);
   const alas = useRef<THREE.Group | null>(null);
+  // OrbitControls mematikan semua gestur sentuh bawaan; di ponsel geser tegak tetap menggulir halaman,
+  // geser mendatar memutar bangunan, dan dua jari memperbesar.
+  useEffect(() => {
+    const el = kontrol.current?.domElement as HTMLElement | undefined;
+    if (el) el.style.touchAction = "pan-y";
+  });
   return (
     <>
       <hemisphereLight args={["#FFFFFF", "#B9B2A0", 1.6]} />
@@ -195,7 +201,7 @@ export default function Panggung({ className = "", ...isi }: PropsPanggung) {
     return () => { hidup = false; };
   }, []);
   return (
-    <div className={`relative touch-none select-none ${className}`}>
+    <div className={`relative touch-pan-y select-none ${className}`}>
       {siap && <Canvas
         flat
         frameloop="demand"

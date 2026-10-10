@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import Hero from "@/components/sections/Hero";
 import EvidenceTeaser from "@/components/sections/EvidenceTeaser";
+import BicaraZulfikar from "@/components/sections/BicaraZulfikar";
 import About from "@/components/sections/About";
 import GalleryPreview from "@/components/sections/GalleryPreview";
 import Notes from "@/components/sections/Notes";
@@ -18,6 +19,7 @@ export default function Home() {
       <main>
         <Hero />
         <EvidenceTeaser />
+        <BicaraZulfikar />
         <About />
         <GalleryPreview />
         <Notes />

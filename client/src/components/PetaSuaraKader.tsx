@@ -35,7 +35,14 @@ export default function PetaSuaraKader() {
   const jumlah = new Map(data.provinsi.map((p) => [p.nama.toLowerCase(), p.jumlah]));
   const maks = Math.max(1, ...data.provinsi.map((p) => p.jumlah));
   const tingkat = (n: number) => (n === 0 ? -1 : Math.min(4, Math.floor((n / maks) * 5 - 1e-9)));
-  const batas = RAMPA.map((_, i) => Math.ceil((maks * i) / 5) + (i === 0 ? 1 : 0));
+  // Keterangan hanya memuat rentang yang benar-benar terpakai, supaya tidak muncul "1–1" berulang saat datanya sedikit.
+  const rentang: { t: number; dari: number; sampai: number }[] = [];
+  for (let n = 1; n <= maks; n++) {
+    const t = tingkat(n);
+    const akhir = rentang[rentang.length - 1];
+    if (akhir?.t === t) akhir.sampai = n;
+    else rentang.push({ t, dari: n, sampai: n });
+  }
   const tanggal = new Date(data.ditarik).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   const terbanyak = data.provinsi.slice(0, 8);
 
@@ -65,8 +72,8 @@ export default function PetaSuaraKader() {
 
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground" aria-label="Keterangan warna">
         <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={KOSONG} /> Belum ada</span>
-        {RAMPA.map((warna, i) => (
-          <span key={warna} className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={{ background: warna }} />{i === 4 ? `${batas[i]}+` : `${batas[i]}–${Math.max(batas[i], batas[i + 1] - 1)}`}</span>
+        {rentang.map(({ t, dari, sampai }) => (
+          <span key={t} className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={{ background: RAMPA[t] }} />{dari === sampai ? dari : `${dari}–${sampai}`}</span>
         ))}
       </div>
 

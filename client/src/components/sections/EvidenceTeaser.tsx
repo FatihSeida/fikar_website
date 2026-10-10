@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import TeksIstilah from "@/components/TeksIstilah";
 import VisiMisiDialog from "@/components/VisiMisiDialog";
 import { tigaMasalah } from "@/lib/pesan";
-import { RILIS, sudahRilis, type FiturRilis } from "@shared/rilis";
+import { RILIS, segeraTampil, sudahRilis, type FiturRilis } from "@shared/rilis";
 
 /** Pintu masuk di slide pertama. Kartu fitur kampanye baru tampil di situs publik sesudah jadwal rilisnya. */
 const pintu: { judul: string; uraian: string; href: string; fitur?: FiturRilis }[] = [
@@ -101,19 +101,22 @@ function SlideMulai() {
 }
 
 function SlideSeries() {
+  // Kotak seri hanya muncul bila sudah terbit atau tinggal dua hari lagi. Di localhost semuanya tampil untuk ditinjau.
+  const tampil = seri.map((fitur, index) => ({ fitur, nomor: index + 1 })).filter(({ fitur }) => import.meta.env.DEV || segeraTampil(fitur));
   return (
     <>
       <span className="evidence-kicker block">Series HMI Evidence</span>
       <h2 className="text-shadow-cinematic mt-5 max-w-3xl font-serif text-3xl leading-tight md:text-6xl">Empat seri tentang arah kaderisasi HMI.</h2>
-      <p className="mt-4 max-w-xl leading-relaxed text-white/70 max-md:[@media(max-height:700px)]:hidden md:mt-5 md:text-lg">
-        Tulisan Ahmad Zulfikar yang berangkat dari keadaan komisariat dan cabang. Terbit setiap Rabu pukul 15.00 WIB dan bisa ditanggapi atas nama komisariat dan cabangmu.
+      <p className="mt-4 max-w-2xl leading-relaxed text-white/70 max-md:[@media(max-height:700px)]:hidden md:mt-5 md:text-lg">
+        Empat cerita tentang arah HMI: kader yang melangkah ke dunia, ingatan organisasi yang bisa dibaca bersama, suara pemuda dari seluruh Indonesia, dan ajakan membangun HMI bersama.
       </p>
       <ol className="mt-6 grid max-w-5xl grid-cols-2 gap-2 md:mt-8 md:grid-cols-4 md:gap-3">
-        {seri.map((fitur, index) => (
+        {tampil.map(({ fitur, nomor }) => (
           <li key={fitur}>
             <Link href="/series" className="group block h-full border border-white/15 bg-black/35 p-4 backdrop-blur-sm transition-colors hover:border-[hsl(var(--gold))] md:p-5">
-              <span className="font-serif text-2xl text-[hsl(var(--gold))]">0{index + 1}</span>
-              <span className="mt-2 block text-xs uppercase tracking-[0.14em] text-white/65">{sudahRilis(fitur) ? "Sudah terbit" : tanggalPendek(RILIS[fitur])}</span>
+              <span className="font-serif text-2xl text-[hsl(var(--gold))]">0{nomor}</span>
+              <span className="mt-2 block text-xs uppercase tracking-[0.14em] text-white/65">{sudahRilis(fitur) ? "Sudah terbit" : "Segera terbit"}</span>
+              {!sudahRilis(fitur) && <span className="mt-1 block text-xs text-white/50">{tanggalPendek(RILIS[fitur])}</span>}
             </Link>
           </li>
         ))}
