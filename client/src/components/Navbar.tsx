@@ -97,7 +97,11 @@ function TautanSeries({ href, name, aktif, lightInk, kelas }: { href: string; na
   );
 }
 
-export default function Navbar({ dark = false }: { dark?: boolean }) {
+/**
+ * `dark`: tulisan terang selama di atas sampul gelap, lalu kembali terang-latar saat digulir.
+ * `gelap`: tetap bergaya gelap sepanjang halaman (halaman HMI Evidence dan cerita interaktif Series).
+ */
+export default function Navbar({ dark = false, gelap = false }: { dark?: boolean; gelap?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
@@ -111,7 +115,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const cinematic = location === "/hmi-evidence";
+  const cinematic = gelap || location === "/hmi-evidence";
   const lightInk = cinematic || (dark && !isScrolled);
   const ink = lightInk ? "text-white" : "text-foreground";
   const muted = lightInk ? "text-white/70" : "text-muted-foreground";
