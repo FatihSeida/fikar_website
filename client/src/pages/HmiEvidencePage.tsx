@@ -514,7 +514,7 @@ function CinematicStory() {
 
   return (
     <div ref={track} className="story-track" id="cerita" style={{ "--story-height": `${totalBeats * 200}svh` } as CSSProperties}>
-      <div ref={stage} className="story-stage" onPointerMove={handlePointerMove} onPointerLeave={() => { pointerX.set(72); pointerY.set(42); }}>
+      <div ref={stage} className="story-stage" data-bab={activeChapter} onPointerMove={handlePointerMove} onPointerLeave={() => { pointerX.set(72); pointerY.set(42); }}>
         <DesktopHistoryLayer phase={phase} activeBeat={activeBeat} />
         {evidenceStory.slice(1).map((scene, storyIndex) => {
           const sceneIndex = storyIndex + 1;
