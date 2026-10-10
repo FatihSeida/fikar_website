@@ -7,7 +7,10 @@ import VisiMisiDialog from "@/components/VisiMisiDialog";
 import { tigaMasalah } from "@/lib/pesan";
 import { RILIS, segeraTampil, sudahRilis, type FiturRilis } from "@shared/rilis";
 
-/** Pintu masuk di slide pertama. Kartu fitur kampanye baru tampil di situs publik sesudah jadwal rilisnya. */
+/**
+ * Pintu masuk di slide pertama, satu kotak per halaman. Kartu fitur kampanye baru
+ * tampil di situs publik sesudah jadwal rilisnya.
+ */
 const pintu: { judul: string; uraian: string; href: string; fitur?: FiturRilis }[] = [
   {
     judul: "Apa itu HMI Evidence",
@@ -25,9 +28,9 @@ const pintu: { judul: string; uraian: string; href: string; fitur?: FiturRilis }
     href: "/ikut",
   },
   {
-    judul: "Sehari di Kursi Ketum",
-    uraian: "Jalani satu hari sebagai ketua umum dalam 15 situasi, lalu lihat potret cara memimpinmu.",
-    href: "/kursi-ketum",
+    judul: "Ruang Kepemimpinan",
+    uraian: "Sehari di Kursi Ketum dan Maturity Level Cabang: latihan memimpin untuk ketum dan pengurus.",
+    href: "/kepemimpinan",
     fitur: "kursi-ketua",
   },
   {
@@ -37,10 +40,9 @@ const pintu: { judul: string; uraian: string; href: string; fitur?: FiturRilis }
     fitur: "bangun-hmi",
   },
   {
-    judul: "Framework Maturity Cabang",
-    uraian: "Untuk pengurus cabang: nilai enam dimensi kerja cabang, lalu unduh panduan dan templatnya.",
-    href: "/maturity-cabang",
-    fitur: "maturity-cabang",
+    judul: "44 Indikator Kemunduran HMI",
+    uraian: "Baca 44 indikator yang dihimpun Agussalim Sitompul, lengkap dengan pertanyaan refleksi dan praktik kecil.",
+    href: "/indikator",
   },
 ];
 
@@ -82,7 +84,8 @@ function SlideMulai() {
       <h2 className="text-shadow-cinematic max-w-3xl font-serif text-3xl leading-tight md:text-6xl">Transformasi Gerakan Organisasi Berbasis Bukti.</h2>
       <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/70 max-md:[@media(max-height:760px)]:hidden md:mt-5">Komitmen HMI Evidence menghadirkan ekosistem perkaderan berkelanjutan.</p>
       <span className="evidence-kicker mt-6 block text-white/60 max-md:[@media(max-height:700px)]:hidden md:mt-8">Mulai di sini</span>
-      <ol className="mt-3 grid max-w-5xl gap-1.5 md:mt-4 md:auto-rows-fr md:grid-cols-3 md:gap-3">
+      {/* Sebelum fitur kampanye terbit hanya ada empat kotak: satu baris berisi empat di layar lebar. */}
+      <ol className={`mt-3 grid max-w-5xl gap-1.5 md:mt-4 md:auto-rows-fr md:gap-3 ${tampil.length === 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
         {tampil.map((item, index) => (
           <li key={item.href}>
             <Link href={item.href} className="group flex h-full items-center gap-4 border border-white/15 bg-black/35 px-4 py-2.5 backdrop-blur-sm transition-colors hover:border-[hsl(var(--gold))] md:flex-col md:items-start md:gap-0 md:p-5">

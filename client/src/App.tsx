@@ -22,6 +22,7 @@ const IkutPage = lazy(() => import("@/pages/IkutPage"));
 const SeriesPage = lazy(() => import("@/pages/SeriesPage"));
 const SeriDetailPage = lazy(() => import("@/pages/SeriDetailPage"));
 const KursiKetuaPage = lazy(() => import("@/pages/KursiKetuaPage"));
+const KepemimpinanPage = lazy(() => import("@/pages/KepemimpinanPage"));
 const BangunHmiPage = lazy(() => import("@/pages/BangunHmiPage"));
 const MaturityCabangPage = lazy(() => import("@/pages/MaturityCabangPage"));
 const Admin = lazy(() => import("@/pages/Admin"));
@@ -58,6 +59,9 @@ function Router() {
           <Route path="/indikator" component={IndikatorPage} />
           <Route path="/kuis">{() => <GerbangAudit halaman={KuisPage} />}</Route>
           <Route path="/ikut">{() => <GerbangAudit halaman={IkutPage} />}</Route>
+          <Route path="/kepemimpinan">
+            {() => <GerbangRilis fitur="kursi-ketua" halaman={KepemimpinanPage} judul="Ruang Kepemimpinan" uraian="Latihan memimpin untuk ketum dan pengurus komisariat serta cabang. Jalani satu hari dari kursi ketua umum, lalu ukur seberapa matang cabangmu bekerja." />}
+          </Route>
           <Route path="/kursi-ketum">
             {() => <GerbangRilis fitur="kursi-ketua" halaman={KursiKetuaPage} judul="Sehari di Kursi Ketum" uraian="Satu hari sebagai ketua umum dalam 15 situasi organisasi. Pilih tindakan yang paling mungkin kamu lakukan, lalu lihat potret cara memimpinmu dan tiga langkah untuk dicoba bersama pengurus." />}
           </Route>

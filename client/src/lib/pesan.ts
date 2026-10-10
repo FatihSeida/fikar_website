@@ -82,27 +82,21 @@ export const caraIkut: readonly CaraIkut[] = [
     uraian: "Ceritakan satu masalah nyata yang sedang dihadapi komisariat atau cabangmu. Ceritamu membantu kami memahami keadaan HMI dari bawah.",
     href: "/ikut#kirim-masalah",
   },
+];
+
+/** Halaman Ruang Kepemimpinan: latihan untuk ketum dan pengurus. Kartu tampil sesudah jadwal rilisnya. */
+export const caraKepemimpinan: readonly CaraIkut[] = [
   {
     judul: "Sehari di Kursi Ketum",
     uraian: "Jalani satu hari sebagai ketua umum dalam 15 situasi organisasi, lalu lihat potret cara memimpinmu dan tiga langkah yang bisa dicoba bersama pengurus.",
     href: "/kursi-ketum",
     fitur: "kursi-ketua",
-  },
-  {
-    judul: "Bangun HMI Bersama",
-    uraian: "Nilai sebelas bagian bangunan HMI, pilih tiga yang paling mendesak diperbaiki, lalu sampaikan masukanmu untuk PB.",
-    href: "/bangun-hmi",
-    fitur: "bangun-hmi",
+    utama: true,
   },
   {
     judul: "Maturity Level Cabang",
     uraian: "Untuk pengurus cabang: nilai enam dimensi kerja cabang, pilih yang ingin dinaikkan, lalu unduh panduan dan templatnya.",
     href: "/maturity-cabang",
     fitur: "maturity-cabang",
-  },
-  {
-    judul: "Jelajahi dan bagikan 44 indikator",
-    uraian: "Baca 44 indikator kemunduran HMI yang dihimpun Agussalim Sitompul, lengkap dengan pertanyaan refleksi dan praktik kecil. Bagikan kepada pengurus sebagai bahan rapat.",
-    href: "/indikator",
   },
 ];
