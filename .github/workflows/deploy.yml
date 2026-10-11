@@ -7,6 +7,11 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+    # Perubahan yang hanya menyentuh bahan animasi, dokumen, atau pengaturan agen tidak perlu deploy situs.
+    paths-ignore:
+      - 'animasi/**'
+      - 'docs/**'
+      - '.claude/**'
   workflow_dispatch: {}
 
 # Satu deploy pada satu waktu, dan jangan batalkan deploy yang sedang jalan

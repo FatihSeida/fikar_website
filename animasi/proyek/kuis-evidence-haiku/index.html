@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1080, initial-scale=1" />
+  <title>Seberapa Evidence Komisariatmu?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --evidence: hsl(153 50% 7%);
+      --petak-kosong: hsl(153 34% 13%);
+      --petak-terjawab: hsl(153 62% 36%);
+      --emas: hsl(42 52% 58%);
+      --teks: hsl(40 30% 94%);
+      --teks-redup: hsl(153 18% 66%);
+    }
+    html, body {
+      margin: 0;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: var(--evidence);
+    }
+    #adegan {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+    }
+    .lapis {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      pointer-events: none;
+    }
+    .judul {
+      position: absolute;
+      left: 60px;
+      top: 220px;
+      width: 880px;
+      font-family: "Noto Serif", Georgia, serif;
+      font-weight: 700;
+      font-size: 72px;
+      line-height: 1.12;
+      color: var(--teks);
+      margin: 0;
+    }
+    .alur {
+      position: absolute;
+      left: 60px;
+      top: 430px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 30px;
+      color: var(--teks-redup);
+      white-space: nowrap;
+    }
+    .alur span { opacity: 0.45; }
+    .alur span.aktif { color: var(--emas); opacity: 1; font-weight: 600; }
+    .keterangan {
+      position: absolute;
+      left: 60px;
+      top: 520px;
+      width: 820px;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 44px;
+      line-height: 1.3;
+      color: var(--teks);
+    }
+    .panel {
+      position: absolute;
+      left: 60px;
+      top: 1190px;
+      width: 840px;
+      height: 272px;
+      box-sizing: border-box;
+      padding: 26px 30px;
+      border-radius: 20px;
+      border: 1px solid hsl(153 30% 22%);
+      background: hsl(153 40% 10% / 0.94);
+    }
+    .tag-contoh {
+      position: absolute;
+      right: 24px;
+      top: -15px;
+      padding: 0 12px;
+      background: var(--evidence);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--emas);
+    }
+    .blok { position: absolute; left: 30px; right: 30px; top: 24px; bottom: 16px; }
+    .baris-atas {
+      display: flex;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 28px;
+      color: var(--teks);
+      margin-bottom: 8px;
+    }
+    .batang {
+      display: flex;
+      align-items: center;
+      height: 26px;
+      margin-bottom: 2px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 23px;
+      color: var(--teks-redup);
+    }
+    .batang .nama { width: 250px; }
+    .batang .lintasan {
+      flex: 1;
+      height: 12px;
+      border-radius: 6px;
+      background: hsl(153 30% 17%);
+      overflow: hidden;
+      margin: 0 16px;
+    }
+    .batang .isi { display: block; height: 100%; width: 0; background: var(--petak-terjawab); }
+    .batang .angka {
+      width: 110px;
+      text-align: right;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px;
+      color: var(--teks);
+    }
+    .besar {
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 600;
+      font-size: 84px;
+      line-height: 1;
+      color: var(--teks);
+    }
+    .kecil {
+      margin-top: 10px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 28px;
+      color: var(--teks-redup);
+    }
+    .duo { display: flex; gap: 40px; }
+    .tingkat {
+      margin-top: 14px;
+      font-family: "Noto Serif", Georgia, serif;
+      font-weight: 600;
+      font-size: 44px;
+      color: var(--emas);
+    }
+    .etiket {
+      position: absolute;
+      left: 0;
+      top: 0;
+      white-space: nowrap;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 24px;
+      color: var(--teks-redup);
+      transform: translate(-50%, -50%);
+    }
+    .etiket.kanan { transform: translate(-100%, -50%); }
+    .etiket.grup {
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 34px;
+      color: var(--teks);
+      text-shadow: 0 0 14px var(--evidence), 0 0 6px var(--evidence);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="adegan"></canvas>
+  <h1 class="judul">Seberapa Evidence Komisariatmu?</h1>
+  <div class="alur" id="alur">
+    <span data-langkah="buka">buka</span> → <span data-langkah="jawab">jawab</span> → <span data-langkah="perdalam">perdalam</span> → <span data-langkah="angka">angka</span> → <span data-langkah="hasil">hasil</span>
+  </div>
+  <div class="keterangan" id="keterangan"></div>
+  <div class="panel" id="panel">
+    <div class="tag-contoh">contoh</div>
+    <div class="blok" id="blok-jawab">
+      <div class="baris-atas"><span id="pertanyaan-n">Pertanyaan 0/20</span><span id="skor-n">Skor 0/60</span></div>
+      <div id="batang"></div>
+    </div>
+    <div class="blok" id="blok-lanjut">
+      <div class="besar" id="lanjut-n">Lanjutan 0/10</div>
+      <div class="kecil">10 soal lanjutan: 5 pasca-LK 2 dan 5 pasca-LK 3</div>
+    </div>
+    <div class="blok" id="blok-angka">
+      <div class="duo">
+        <div><div class="besar" id="retensi">0%</div><div class="kecil">retensi kader<br>26 dari 40 masih aktif</div></div>
+        <div><div class="besar" id="keterlaksanaan">0%</div><div class="kecil">keterlaksanaan program<br>9 dari 12 terlaksana</div></div>
+      </div>
+    </div>
+    <div class="blok" id="blok-hasil">
+      <div class="besar" id="skor-hasil">Skor 0/60</div>
+      <div class="tingkat" id="tingkat"></div>
+      <div class="kecil">temuan per pertanyaan dan laporan PDF</div>
+    </div>
+  </div>
+  <div id="etiket-wadah"></div>
+  <script type="module" src="./adegan.js"></script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Seberapa Evidence Komisariatmu? · Reels + pembuka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,700;1,600;1,700&display=block">
+<style>
+  :root {
+    --latar: hsl(153 50% 7%);
+    --latar-0: hsl(153 50% 7% / 0);
+    --emas: hsl(42 52% 58%);
+    --emas-terang: hsl(42 70% 68%);
+    --krem: hsl(42 33% 96%);
+    --krem-redup: hsl(42 20% 86% / 0.62);
+    --krem-samar: hsl(42 20% 86% / 0.34);
+    --zamrud: hsl(153 62% 22%);
+    --zamrud-terang: hsl(153 52% 52%);
+    --garis: hsl(153 40% 40% / 0.28);
+    --serif: "Noto Serif", Georgia, serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--latar); color: var(--krem); }
+  body { position: relative; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  #kanvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+
+  /* Kabut atas/bawah: teks kepala dan panel tidak bertabrakan dengan adegan 3D. */
+  #kabut-atas { position: absolute; left: 0; top: 0; width: 1080px; height: 720px;
+    background: linear-gradient(to bottom, var(--latar) 0%, var(--latar) 77%, var(--latar-0) 100%); }
+  #kabut-intro { position: absolute; left: 0; top: 0; width: 1080px; height: 830px; opacity: 0;
+    background: linear-gradient(to bottom, var(--latar) 0%, var(--latar) 76%, var(--latar-0) 100%); }
+  #kabut-bawah { position: absolute; left: 0; top: 1400px; width: 1080px; height: 520px;
+    background: linear-gradient(to bottom, var(--latar-0) 0%, var(--latar) 32%, var(--latar) 100%); }
+
+  /* Label yang menempel pada benda 3D (posisinya diproyeksikan dari kamera tiap frame). */
+  #label3d { position: absolute; inset: 0; pointer-events: none; }
+  .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform, opacity; opacity: 0; }
+  .lbl-kelompok { font: 600 28px/1 var(--sans); color: var(--krem); padding: 11px 16px 11px 14px;
+    background: hsl(153 48% 8% / 0.86); border: 1.5px solid hsl(42 52% 58% / 0.55); border-radius: 14px;
+    display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 30px hsl(153 60% 3% / 0.6); }
+  .lbl-kelompok .no { font: 700 20px/1 var(--mono); color: var(--latar); background: var(--emas); border-radius: 7px; padding: 5px 7px 4px; }
+  .lbl-kelompok .jml { font: 500 20px/1 var(--mono); color: var(--krem-redup); }
+  .lbl-poin { font: 700 40px/1 var(--mono); color: var(--emas-terang);
+    text-shadow: 0 0 18px hsl(42 80% 55% / 0.85), 0 2px 0 hsl(153 60% 4%); }
+  .lbl-gerbang { font: 700 34px/1 var(--mono); color: var(--latar); background: var(--emas); padding: 10px 16px 9px; border-radius: 10px;
+    box-shadow: 0 0 34px hsl(42 70% 55% / 0.55); }
+  .lbl-tag { font: 600 22px/1 var(--mono); color: var(--emas-terang); letter-spacing: 0.02em; display: flex; align-items: center; gap: 10px; }
+  .lbl-tag::after { content: ""; width: 46px; height: 2px; background: var(--emas); box-shadow: 0 0 8px var(--emas); }
+  .lbl-cabang { font: 700 26px/1 var(--mono); color: var(--krem); padding: 9px 14px 8px; border-radius: 10px;
+    border: 1.5px dashed hsl(153 52% 52% / 0.8); background: hsl(153 48% 8% / 0.88); }
+  .lbl-cabang small { font: 500 18px/1 var(--sans); color: var(--krem-redup); margin-left: 8px; }
+  .lbl-pilar { text-align: center; transform-origin: 50% 100%; }
+  .lbl-pilar b { display: block; font: 700 40px/1 var(--mono); color: var(--krem); text-shadow: 0 2px 12px hsl(153 60% 3%); }
+  .lbl-pilar span { display: block; margin-top: 6px; font: 600 19px/1.1 var(--sans); color: hsl(42 20% 88% / 0.78); text-shadow: 0 1px 8px hsl(153 60% 3%), 0 0 3px hsl(153 60% 3%); }
+  .lbl-pilar.nyata b { color: var(--zamrud-terang); }
+  .lbl-tingkat { display: flex; align-items: baseline; gap: 12px; font: 600 26px/1 var(--sans); color: var(--krem-samar); }
+  .lbl-tingkat i { font: 500 19px/1 var(--mono); font-style: normal; }
+  .lbl-tingkat::before { content: ""; width: 26px; height: 2px; background: currentColor; align-self: center; opacity: 0.7; }
+
+  /* Kepala: merek, judul, alur langkah, keterangan. Lebar konten 880 px (x 60–940). */
+  #kepala { position: absolute; left: 60px; top: 226px; width: 880px; text-align: center; }
+  .merek { font: 700 20px/1 var(--mono); letter-spacing: 0.32em; color: var(--emas); }
+  .merek::before, .merek::after { content: ""; display: inline-block; width: 36px; height: 2px; background: hsl(42 52% 58% / 0.5); vertical-align: middle; margin: 0 16px 4px; }
+  h1 { margin-top: 22px; font: 700 76px/1.02 var(--serif); letter-spacing: -0.015em; color: var(--krem); }
+  h1 em { font-style: italic; color: var(--emas); }
+  #alur { margin-top: 30px; display: flex; justify-content: center; align-items: center; gap: 14px; font: 500 28px/1 var(--mono); }
+  .langkah { position: relative; padding-bottom: 10px; color: var(--krem-samar); }
+  .langkah .isi { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; border-radius: 2px; background: var(--emas); }
+  .panah { color: hsl(42 20% 86% / 0.28); padding-bottom: 10px; }
+  #keterangan { position: relative; margin-top: 22px; height: 104px; }
+  .ket { position: absolute; left: 0; top: 0; width: 880px; opacity: 0; font: 600 37px/1.32 var(--sans); color: var(--krem); text-wrap: balance; }
+  .ket .e { color: var(--emas); }
+  .ket .lemah { color: var(--krem-redup); font-weight: 500; }
+  .ket.penutup { font: italic 700 46px/1.15 var(--serif); }
+  .ket-intro { position: absolute; left: 0; top: 0; width: 880px; opacity: 0; text-wrap: balance; }
+  .ket-intro b { display: block; font: 700 42px/1.12 var(--sans); color: var(--emas); letter-spacing: -0.01em; }
+  .ket-intro span { display: block; margin-top: 10px; font: 600 34px/1.28 var(--sans); color: var(--krem); text-wrap: balance; }
+
+  /* Panel bawah, seperti "LIVE TRAFFIC" di contoh. y 1160–1470. */
+  #panel { position: absolute; left: 60px; top: 1158px; width: 880px; height: 312px; border-radius: 26px; opacity: 0;
+    background: linear-gradient(180deg, hsl(153 45% 10% / 0.92), hsl(153 50% 7.5% / 0.94));
+    border: 1.5px solid hsl(153 45% 38% / 0.38); box-shadow: 0 -10px 60px hsl(153 60% 3% / 0.55), inset 0 1px 0 hsl(153 50% 50% / 0.12); }
+  .panel-kepala { position: absolute; left: 30px; right: 30px; top: 0; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1.5px solid var(--garis); }
+  .panel-judul { position: relative; height: 24px; flex: 1; }
+  .pj { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 12px; font: 700 20px/24px var(--mono); letter-spacing: 0.14em; color: var(--krem-redup); opacity: 0; }
+  .pj::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--emas); box-shadow: 0 0 12px var(--emas); opacity: var(--denyut, 1); }
+  .contoh { font: 600 19px/1 var(--mono); letter-spacing: 0.08em; color: var(--emas); border: 1.5px solid hsl(42 52% 58% / 0.6); border-radius: 999px; padding: 7px 14px 6px; }
+  .hal { position: absolute; left: 30px; right: 30px; top: 64px; bottom: 0; opacity: 0; display: flex; }
+  .label { font: 600 18px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--krem-redup); }
+  .nilai { font: 700 60px/1 var(--mono); color: var(--krem); letter-spacing: -0.02em; margin-top: 10px; }
+  .nilai i { font-style: normal; font-weight: 500; font-size: 32px; color: var(--krem-samar); margin-left: 4px; }
+  .nilai.emas b { color: var(--emas-terang); text-shadow: 0 0 22px hsl(42 70% 55% / 0.45); }
+
+  .hal-inti .kiri { width: 262px; padding-top: 26px; display: flex; flex-direction: column; gap: 26px; border-right: 1.5px solid var(--garis); }
+  .hal-inti .kanan { flex: 1; padding: 22px 0 0 30px; display: flex; flex-direction: column; gap: 9px; }
+  .bt { display: flex; align-items: center; height: 28px; }
+  .bt .nm { width: 236px; font: 500 22px/1 var(--sans); color: var(--krem-redup); }
+  .bt .jalur { position: relative; flex: 1; height: 12px; border-radius: 6px; background: hsl(153 35% 16%); overflow: hidden; }
+  .bt .jalur i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 6px; background: linear-gradient(90deg, hsl(153 62% 30%), hsl(153 58% 48%)); box-shadow: 0 0 14px hsl(153 70% 45% / 0.6); }
+  .bt .pct { width: 72px; text-align: right; font: 600 22px/1 var(--mono); color: var(--krem-samar); }
+  .bt.aktif .nm { color: var(--emas-terang); }
+  .bt.aktif .jalur i { background: linear-gradient(90deg, hsl(42 52% 44%), hsl(42 62% 62%)); box-shadow: 0 0 14px hsl(42 70% 55% / 0.7); }
+  .bt.selesai .pct, .bt.aktif .pct { color: var(--krem); }
+
+  .hal-lanjut .kiri { width: 262px; padding-top: 26px; display: flex; flex-direction: column; gap: 26px; border-right: 1.5px solid var(--garis); }
+  .hal-lanjut .kanan { flex: 1; padding: 34px 0 0 30px; display: flex; flex-direction: column; gap: 30px; }
+  .bp .nm { font: 600 24px/1 var(--sans); color: var(--krem); display: flex; justify-content: space-between; align-items: baseline; }
+  .bp .nm i { font: 500 20px/1 var(--mono); font-style: normal; color: var(--krem-redup); }
+  .bp .pips { margin-top: 14px; display: flex; gap: 10px; }
+  .bp .pips u { flex: 1; height: 22px; border-radius: 6px; border: 2px dashed hsl(153 50% 45% / 0.55); text-decoration: none; }
+  .bp .pips u.on { border: 2px solid hsl(153 60% 52%); background: linear-gradient(180deg, hsl(153 58% 46%), hsl(153 62% 32%)); box-shadow: 0 0 14px hsl(153 70% 45% / 0.55); }
+  .kecil .nilai { font-size: 40px; }
+  .kecil .nilai i { font-size: 24px; }
+
+  .hal-angka { gap: 30px; padding-top: 24px; }
+  .blok { flex: 1; }
+  .blok .besar { margin-top: 10px; display: flex; align-items: baseline; gap: 4px; }
+  .blok .besar b { font: 700 64px/1 var(--mono); color: var(--zamrud-terang); text-shadow: 0 0 22px hsl(153 70% 45% / 0.45); letter-spacing: -0.03em; }
+  .blok .besar span { font: 700 34px/1 var(--mono); color: var(--zamrud-terang); }
+  .meter { position: relative; margin-top: 16px; height: 12px; border-radius: 6px; background: hsl(153 35% 16%); overflow: hidden; }
+  .meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 6px; background: linear-gradient(90deg, hsl(153 62% 30%), hsl(153 58% 50%)); }
+  .rinci { margin-top: 16px; font: 500 22px/1.3 var(--sans); color: var(--krem-redup); }
+  .rinci b { font: 700 22px/1 var(--mono); color: var(--krem); }
+  .blok + .blok { border-left: 1.5px solid var(--garis); padding-left: 30px; }
+
+  .hal-hasil .kiri { width: 380px; padding-top: 24px; border-right: 1.5px solid var(--garis); }
+  .hal-hasil .nilai { font-size: 84px; margin-top: 12px; }
+  .hal-hasil .nilai i { font-size: 40px; }
+  .tingkat { margin-top: 14px; font: 700 30px/1 var(--sans); color: var(--emas-terang); }
+  .hal-hasil .kanan { flex: 1; padding: 24px 0 0 30px; }
+  .dapat { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .dapat div { display: flex; align-items: center; gap: 14px; font: 600 25px/1 var(--sans); color: var(--krem); opacity: 0; }
+  .dapat div u { width: 30px; height: 30px; border-radius: 8px; background: var(--zamrud); border: 1.5px solid hsl(153 55% 45%); display: grid; place-items: center; text-decoration: none; }
+  .dapat div u::after { content: ""; width: 12px; height: 7px; border-left: 3px solid var(--krem); border-bottom: 3px solid var(--krem); transform: translateY(-2px) rotate(-45deg); }
+
+  /* Kartu browser saat langkah "buka". */
+  #kartu { position: absolute; left: 0; top: 0; width: 430px; opacity: 0; border-radius: 22px; overflow: hidden;
+    background: hsl(153 40% 11% / 0.96); border: 1.5px solid hsl(153 45% 40% / 0.45); box-shadow: 0 24px 60px hsl(153 60% 3% / 0.7); }
+  #kartu .bilah { height: 64px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: hsl(153 40% 15%); }
+  #kartu .bilah s { width: 12px; height: 12px; border-radius: 50%; background: hsl(42 20% 86% / 0.25); text-decoration: none; }
+  #kartu .url { margin-left: 10px; flex: 1; height: 38px; border-radius: 19px; background: hsl(153 50% 7%); display: flex; align-items: center; padding: 0 16px;
+    font: 500 21px/1 var(--mono); color: var(--krem); white-space: nowrap; overflow: hidden; }
+  #kartu .url .kursor { display: inline-block; width: 2px; height: 24px; background: var(--emas); margin-left: 2px; }
+  #kartu .isi-kartu { padding: 24px 24px 26px; }
+  #kartu .judul-kartu { font: 700 28px/1.15 var(--serif); color: var(--krem); }
+  #kartu .sub { margin-top: 8px; font: 500 19px/1.3 var(--sans); color: var(--krem-redup); }
+  #tombol { position: relative; margin-top: 20px; display: inline-flex; align-items: center; gap: 12px; height: 60px; padding: 0 28px; border-radius: 16px; overflow: hidden;
+    background: var(--emas); color: var(--latar); font: 700 26px/1 var(--sans); }
+  #tombol b { position: relative; font: inherit; }
+  #tombol::after { content: "→"; position: relative; font-family: var(--mono); font-weight: 700; }
+  #riak { position: absolute; left: 0; top: 0; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; background: radial-gradient(circle, hsl(42 90% 92% / 0.9), hsl(42 90% 80% / 0) 70%); opacity: 0; }
+  #penunjuk { position: absolute; left: 0; top: 0; width: 44px; height: 52px; opacity: 0; filter: drop-shadow(0 4px 8px hsl(153 60% 3% / 0.8)); }
+
+  /* Penutup bawah. */
+  #ajakan { position: absolute; left: 60px; top: 1236px; width: 880px; display: flex; justify-content: center; opacity: 0; }
+  #ajakan div { display: inline-flex; align-items: center; gap: 18px; height: 96px; padding: 0 40px; border-radius: 48px; background: var(--emas); color: var(--latar);
+    font: 700 42px/1 var(--mono); letter-spacing: -0.01em; box-shadow: 0 0 60px hsl(42 70% 55% / 0.45); }
+  #ajakan div::after { content: "→"; }
+</style>
+</head>
+<body>
+<canvas id="kanvas" width="1080" height="1920"></canvas>
+<div id="kabut-atas"></div>
+<div id="kabut-intro"></div>
+<div id="kabut-bawah"></div>
+<div id="label3d"></div>
+
+<div id="kartu">
+  <div class="bilah"><s></s><s></s><s></s><div class="url"><span id="ketik"></span><span class="kursor" id="kursor"></span></div></div>
+  <div class="isi-kartu">
+    <div class="judul-kartu">Seberapa Evidence Komisariatmu?</div>
+    <div class="sub">7–10 menit · tanpa daftar</div>
+    <div id="tombol"><span id="riak"></span><b>Mulai kuis</b></div>
+  </div>
+</div>
+<svg id="penunjuk" viewBox="0 0 22 26" xmlns="http://www.w3.org/2000/svg"><path d="M2 1.5 L2 20.5 L7 15.8 L10.6 24 L14 22.5 L10.5 14.6 L17.5 14.6 Z" fill="#f7f3ea" stroke="#0b1d15" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<header id="kepala">
+  <div class="merek">HMI EVIDENCE</div>
+  <h1>Seberapa <em>Evidence</em><br>Komisariatmu?</h1>
+  <div id="alur">
+    <span class="langkah">buka<i class="isi"></i></span><span class="panah">→</span>
+    <span class="langkah">jawab<i class="isi"></i></span><span class="panah">→</span>
+    <span class="langkah">perdalam<i class="isi"></i></span><span class="panah">→</span>
+    <span class="langkah">angka<i class="isi"></i></span><span class="panah">→</span>
+    <span class="langkah">hasil<i class="isi"></i></span>
+  </div>
+  <div id="keterangan">
+    <p class="ket-intro"><b>Kenapa perlu kuis ini?</b><span>Untuk mengetahui kondisi tata kelola organisasi di tiap komisariat.</span></p>
+    <p class="ket-intro"><b>Komitmen HMI Evidence</b><span>memperbaiki masalah tata kelola organisasi di tingkat komisariat.</span></p>
+    <p class="ket">Cara mengisi kuis audit komisariat<br><span class="e">7–10 menit, tanpa daftar</span></p>
+    <p class="ket">Buka <span class="e">ahmadzulfikar.com/kuis</span>, tekan <span class="e">Mulai kuis</span></p>
+    <p class="ket">Jawab 20 pertanyaan sesuai keadaan <span class="e">sekarang</span>, bukan harapan</p>
+    <p class="ket"><span class="e">Opsional:</span> 10 soal lanjutan tentang kader pasca-LK 2 dan LK 3</p>
+    <p class="ket"><span class="e">Opsional:</span> 4 angka, retensi kader dan keterlaksanaan program</p>
+    <p class="ket">Dapat skor, tingkat, temuan, dan laporan PDF</p>
+    <p class="ket penutup">Jangan bicara HMI tanpa bukti.</p>
+  </div>
+</header>
+
+<section id="panel">
+  <div class="panel-kepala">
+    <div class="panel-judul">
+      <span class="pj">JAWABAN INTI</span>
+      <span class="pj">SOAL LANJUTAN · OPSIONAL</span>
+      <span class="pj">4 ANGKA · OPSIONAL</span>
+      <span class="pj">HASIL AUDIT</span>
+    </div>
+    <span class="contoh">contoh</span>
+  </div>
+
+  <div class="hal hal-inti">
+    <div class="kiri">
+      <div><div class="label">Pertanyaan</div><div class="nilai"><b id="nTanya">0</b><i>/20</i></div></div>
+      <div><div class="label">Skor</div><div class="nilai emas"><b id="nSkor">0</b><i>/60</i></div></div>
+    </div>
+    <div class="kanan" id="batang"></div>
+  </div>
+
+  <div class="hal hal-lanjut">
+    <div class="kiri">
+      <div><div class="label">Lanjutan</div><div class="nilai"><b id="nLanjut">0</b><i>/10</i></div></div>
+      <div class="kecil"><div class="label">Pertanyaan inti</div><div class="nilai">20<i>/20</i></div></div>
+    </div>
+    <div class="kanan">
+      <div class="bp"><div class="nm">Kader pasca-LK 2<i id="nLK2">0/5</i></div><div class="pips" id="pipLK2"><u></u><u></u><u></u><u></u><u></u></div></div>
+      <div class="bp"><div class="nm">Kader pasca-LK 3<i id="nLK3">0/5</i></div><div class="pips" id="pipLK3"><u></u><u></u><u></u><u></u><u></u></div></div>
+    </div>
+  </div>
+
+  <div class="hal hal-angka">
+    <div class="blok">
+      <div class="label">Retensi kader</div>
+      <div class="besar"><b id="pRet">0</b><span>%</span></div>
+      <div class="meter"><i id="mRet"></i></div>
+      <div class="rinci"><b id="nAktif">0</b> dari <b id="nLK1">0</b> peserta LK 1 masih aktif</div>
+    </div>
+    <div class="blok">
+      <div class="label">Keterlaksanaan program</div>
+      <div class="besar"><b id="pProg">0</b><span>%</span></div>
+      <div class="meter"><i id="mProg"></i></div>
+      <div class="rinci"><b id="nTerl">0</b> dari <b id="nRenc">0</b> program terlaksana</div>
+    </div>
+  </div>
+
+  <div class="hal hal-hasil">
+    <div class="kiri">
+      <div class="label">Skor</div>
+      <div class="nilai emas"><b id="nAkhir">0</b><i>/60</i></div>
+      <div class="tingkat" id="nmTingkat">Titik Berangkat</div>
+    </div>
+    <div class="kanan">
+      <div class="label">Yang kamu dapat</div>
+      <div class="dapat" id="dapat">
+        <div><u></u>Temuan per jawaban</div>
+        <div><u></u>Laporan PDF</div>
+        <div><u></u>Bagikan ke Story Instagram</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="ajakan"><div>ahmadzulfikar.com/kuis</div></div>
+
+<script type="module" src="./adegan.js"></script>
+</body>
+</html>

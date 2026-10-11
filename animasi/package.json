@@ -1,0 +1,16 @@
+{
+  "name": "animasi",
+  "private": true,
+  "type": "module",
+  "description": "Animasi three.js untuk konten Instagram, direkam menjadi MP4.",
+  "scripts": {
+    "pratinjau": "node rekam.mjs --pratinjau",
+    "rekam": "node rekam.mjs",
+    "buat": "node kit/alat/buat.mjs",
+    "baru": "node kit/alat/baru.mjs",
+    "rapikan": "node rapikan.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.48.2"
+  }
+}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Uji alat</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow: hidden; background: hsl(153 50% 7%); color: hsl(42 33% 96%); }
+  body { position: relative; font-family: ui-monospace, Consolas, monospace; }
+  #kanvas { position: absolute; left: 0; top: 0; display: block; }
+  /* Kode biner 12 bit nomor frame: kotak 60 px, putih = 1, hitam = 0. Dibaca periksa-urutan.mjs. */
+  #kode { position: absolute; left: 180px; top: 40px; display: flex; }
+  #kode div { width: 60px; height: 60px; background: #000; }
+  #kode div.satu { background: #fff; }
+  #waktu { position: absolute; left: 0; top: 130px; width: 100%; text-align: center; font: 700 64px/1 ui-monospace, Consolas, monospace; }
+  #judul { position: absolute; left: 0; top: 220px; width: 100%; text-align: center; font: 600 34px/1 ui-monospace, Consolas, monospace; color: hsl(42 52% 58%); letter-spacing: 0.2em; }
+  /* Bercak merah yang sengaja melanggar palet. */
+  #merah { position: absolute; left: 860px; top: 760px; width: 120px; height: 120px; background: hsl(0 75% 50%); display: none; }
+</style>
+</head>
+<body>
+<canvas id="kanvas"></canvas>
+<div id="kode"></div>
+<div id="waktu"></div>
+<div id="judul">UJI ALAT</div>
+<div id="merah"></div>
+<script type="module" src="./adegan.js"></script>
+</body>
+</html>

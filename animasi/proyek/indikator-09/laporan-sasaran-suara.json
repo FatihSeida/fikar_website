@@ -1,0 +1,24 @@
+[
+  {
+    "jenis": "klik-emas",
+    "sumber": "tema kajian 1",
+    "t": 15,
+    "frame": 450,
+    "pita": "tinggi",
+    "kontrasDb": 12.067120665400285,
+    "terukur": 15.000749999999917,
+    "selisihMs": 0.7499999999165397,
+    "lulus": true
+  },
+  {
+    "jenis": "kertas",
+    "sumber": "pemateri",
+    "t": 15.8,
+    "frame": 474,
+    "pita": "tinggi",
+    "kontrasDb": 12.389479570016688,
+    "terukur": 15.826499999999857,
+    "selisihMs": 26.499999999856527,
+    "lulus": true
+  }
+]

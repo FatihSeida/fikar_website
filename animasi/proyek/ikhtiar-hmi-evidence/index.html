@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Ikhtiar HMI Evidence · animasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,700;1,600;1,700&display=block">
+<style>
+  :root {
+    --latar: hsl(153 50% 7%);
+    --latar-0: hsl(153 50% 7% / 0);
+    --emas: hsl(42 52% 58%);
+    --emas-terang: hsl(42 70% 68%);
+    --krem: hsl(42 33% 96%);
+    --krem-redup: hsl(42 20% 86% / 0.62);
+    --abu: hsl(150 4% 62%);
+    --zamrud-terang: hsl(153 52% 52%);
+    --serif: "Noto Serif", Georgia, serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--latar); color: var(--krem); }
+  body { position: relative; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  #kanvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+
+  /* Kabut atas dan bawah: kepala dan keterangan tidak bertabrakan dengan adegan 3D. */
+  #kabut-atas { position: absolute; left: 0; top: 0; width: 1080px; height: 430px;
+    background: linear-gradient(to bottom, var(--latar) 0%, var(--latar) 70%, var(--latar-0) 100%); }
+  #kabut-bawah { position: absolute; left: 0; top: 1190px; width: 1080px; height: 730px;
+    background: linear-gradient(to bottom, var(--latar-0) 0%, hsl(153 50% 7% / 0.9) 22%, var(--latar) 40%, var(--latar) 100%); }
+
+  /* Label yang menempel pada benda 3D. */
+  #label3d { position: absolute; inset: 0; pointer-events: none; }
+  .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform, opacity; opacity: 0; transform-origin: 0 50%; }
+  .lbl-tempat { display: flex; align-items: center; gap: 14px; font: 600 27px/1 var(--mono); color: var(--emas-terang); letter-spacing: 0.01em;
+    padding: 12px 18px 11px; border-radius: 12px; background: hsl(153 48% 8% / 0.86); border: 1.5px solid hsl(42 52% 58% / 0.55);
+    box-shadow: 0 8px 30px hsl(153 60% 3% / 0.6), 0 0 26px hsl(42 70% 55% / 0.18); }
+  .lbl-tempat::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--emas); box-shadow: 0 0 12px var(--emas); }
+  .lbl-lapis { display: flex; align-items: center; gap: 12px; font: 600 26px/1 var(--sans); color: var(--krem); text-shadow: 0 2px 10px hsl(153 60% 3%); }
+  .lbl-lapis::before { content: ""; width: 34px; height: 2px; background: currentColor; opacity: 0.7; }
+  .lbl-lapis i { font: 600 18px/1 var(--mono); font-style: normal; color: var(--krem-redup); }
+
+  /* Kepala kecil tetap. */
+  #kepala { position: absolute; left: 60px; top: 228px; width: 880px; text-align: center; }
+  .merek { font: 700 20px/1 var(--mono); letter-spacing: 0.32em; color: var(--emas); }
+  .merek::before, .merek::after { content: ""; display: inline-block; width: 36px; height: 2px; background: hsl(42 52% 58% / 0.5); vertical-align: middle; margin: 0 16px 4px; }
+  h1 { margin-top: 16px; font: 700 54px/1.05 var(--serif); letter-spacing: -0.01em; color: var(--krem); }
+  h1 em { font-style: italic; color: var(--emas); }
+
+  /* Keterangan di bagian bawah zona aman (y 1290–1470). */
+  #keterangan { position: absolute; left: 60px; top: 1290px; width: 880px; height: 180px; }
+  .ket { position: absolute; left: 0; bottom: 0; width: 880px; opacity: 0; text-align: center; text-wrap: balance;
+    font: italic 600 46px/1.22 var(--serif); color: var(--krem); text-shadow: 0 2px 18px hsl(153 60% 3%); }
+  .ket .e { color: var(--emas-terang); font-weight: 700; }
+  .ket .a { color: var(--abu); }
+</style>
+</head>
+<body>
+<canvas id="kanvas" width="1080" height="1920"></canvas>
+<div id="kabut-atas"></div>
+<div id="kabut-bawah"></div>
+<div id="label3d"></div>
+
+<header id="kepala">
+  <div class="merek">HMI EVIDENCE</div>
+  <h1>Ikhtiar <em>HMI Evidence</em></h1>
+</header>
+
+<div id="keterangan">
+  <p class="ket">Isi tanpa <span class="e">jalan</span> tidak bisa dipercaya.</p>
+  <p class="ket">79 tahun, berbeda generasi, tetap <span class="e">satu nada</span>.</p>
+  <p class="ket">Yang diikuti adalah <span class="e">nilainya</span>, bukan sosoknya.</p>
+  <p class="ket">Yang tersisa kadang hanya <span class="a">bentuknya</span>.</p>
+  <p class="ket">Selama <span class="e">sanadnya</span> tidak terputus, HMI akan tetap satu nada.</p>
+</div>
+
+<script type="module" src="./adegan.js"></script>
+</body>
+</html>

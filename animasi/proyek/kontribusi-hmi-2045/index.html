@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Kontribusi HMI Menyongsong Indonesia Emas 2045 · Reels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,700;1,600;1,700&display=block">
+<style>
+  :root {
+    --latar: hsl(153 50% 7%);
+    --latar-0: hsl(153 50% 7% / 0);
+    --emas: hsl(42 52% 58%);
+    --emas-terang: hsl(42 70% 68%);
+    --krem: hsl(42 33% 96%);
+    --krem-redup: hsl(42 20% 86% / 0.62);
+    --krem-samar: hsl(42 20% 86% / 0.34);
+    --zamrud: hsl(153 62% 22%);
+    --zamrud-terang: hsl(153 52% 52%);
+    --abu: hsl(150 6% 62%);
+    --serif: "Noto Serif", Georgia, serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--latar); color: var(--krem); }
+  body { position: relative; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  #kanvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+
+  /* Kabut atas/bawah: kepala dan keterangan tidak bertabrakan dengan adegan 3D. */
+  #kabut-atas { position: absolute; left: 0; top: 0; width: 1080px; height: 700px;
+    background: linear-gradient(to bottom, var(--latar) 0%, var(--latar) 66%, var(--latar-0) 100%); }
+  #kabut-penutup { position: absolute; left: 0; top: 0; width: 1080px; height: 690px; opacity: 0;
+    background: linear-gradient(to bottom, var(--latar) 0%, var(--latar) 86%, var(--latar-0) 100%); }
+  #kabut-bawah { position: absolute; left: 0; top: 1390px; width: 1080px; height: 530px;
+    background: linear-gradient(to bottom, var(--latar-0) 0%, var(--latar) 30%, var(--latar) 100%); }
+
+  /* Label yang menempel pada benda 3D (posisinya diproyeksikan dari kamera tiap frame). */
+  #label3d { position: absolute; inset: 0; pointer-events: none; }
+  .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform, opacity; opacity: 0; }
+  .lbl-tahun { font: 700 30px/1 var(--mono); color: var(--latar); background: var(--emas); padding: 9px 14px 8px; border-radius: 10px;
+    box-shadow: 0 0 30px hsl(42 70% 55% / 0.5); }
+  .lbl-era { display: flex; align-items: center; gap: 12px; font: 600 27px/1 var(--mono); color: var(--krem); letter-spacing: 0.01em;
+    padding: 10px 16px 9px; border-radius: 12px; background: hsl(153 48% 8% / 0.88); border: 1.5px solid hsl(153 52% 52% / 0.65);
+    box-shadow: 0 8px 26px hsl(153 60% 3% / 0.6); }
+  .lbl-era i { width: 10px; height: 10px; border-radius: 50%; background: var(--zamrud-terang); box-shadow: 0 0 10px var(--zamrud-terang); }
+  .lbl-era.emas { border-color: hsl(42 52% 58% / 0.8); }
+  .lbl-era.emas i { background: var(--emas); box-shadow: 0 0 12px var(--emas); }
+  .lbl-umur { font: 700 34px/1 var(--mono); color: var(--krem); text-align: center; text-shadow: 0 2px 12px hsl(153 60% 3%); }
+  .lbl-umur small { display: block; margin-top: 5px; font: 500 17px/1 var(--mono); color: var(--krem-redup); letter-spacing: 0.08em; }
+  .lbl-dunia { display: flex; align-items: center; gap: 10px; font: 600 22px/1 var(--mono); color: var(--emas-terang);
+    text-shadow: 0 1px 8px hsl(153 60% 3%), 0 0 3px hsl(153 60% 3%); }
+  .lbl-dunia::before { content: ""; width: 34px; height: 2px; background: var(--emas); box-shadow: 0 0 8px var(--emas); }
+  .lbl-dunia.kiri { flex-direction: row-reverse; }
+
+  /* Kepala kecil tetap. Lebar konten 880 px (x 60–940). */
+  #kepala { position: absolute; left: 60px; top: 226px; width: 880px; text-align: center; }
+  .merek { font: 700 20px/1 var(--mono); letter-spacing: 0.32em; color: var(--emas); }
+  .merek::before, .merek::after { content: ""; display: inline-block; width: 36px; height: 2px; background: hsl(42 52% 58% / 0.5); vertical-align: middle; margin: 0 16px 4px; }
+  h1 { margin-top: 16px; font: 700 34px/1.18 var(--serif); letter-spacing: -0.01em; color: var(--krem); text-wrap: balance; }
+  h1 em { font-style: italic; color: var(--emas); }
+  .garis-kepala { width: 120px; height: 2px; margin: 22px auto 0; background: hsl(153 52% 52% / 0.35); }
+
+  /* Keterangan: teks dan label dari skenario, kata per kata. */
+  #keterangan { position: absolute; left: 60px; top: 372px; width: 880px; height: 260px; }
+  .ket { position: absolute; left: 0; top: 0; width: 880px; text-align: center; opacity: 0; font: 600 42px/1.28 var(--sans); color: var(--krem); text-wrap: balance; }
+  .ket.label { font: 600 36px/1.3 var(--sans); }
+  .ket.label b { font: 700 36px/1 var(--mono); color: var(--emas); letter-spacing: -0.01em; }
+  .ket.label .baris { display: block; }
+  .ket.penutup { font: italic 700 45px/1.22 var(--serif); }
+</style>
+</head>
+<body>
+<canvas id="kanvas" width="1080" height="1920"></canvas>
+<div id="kabut-atas"></div>
+<div id="kabut-penutup"></div>
+<div id="kabut-bawah"></div>
+<div id="label3d"></div>
+
+<header id="kepala">
+  <div class="merek">HMI EVIDENCE</div>
+  <h1>Kontribusi HMI Menyongsong <em>Indonesia Emas 2045</em></h1>
+  <div class="garis-kepala"></div>
+</header>
+
+<div id="keterangan">
+  <p class="ket label" id="k-pembuka"><span class="baris" id="k-1947"><b>1947</b>, HMI berdiri.</span><span class="baris" id="k-1948"><b>1948</b>, bebas aktif dirumuskan.</span></p>
+  <p class="ket" id="k-karang">Mendayung di antara dua karang.</p>
+  <p class="ket" id="k-retak">Perahu yang awaknya berebut dayung tidak perlu menunggu karang untuk karam.</p>
+  <p class="ket" id="k-hariini">Karang hari ini tidak lagi dua.</p>
+  <p class="ket label" id="k-umur"><b>19</b> tahun hari ini, <b>38</b> tahun pada <b>2045</b>.</p>
+  <p class="ket penutup" id="k-penutup">Seratus tahun HMI tidak dikenang dari seberapa keras kita berebut kemudi, melainkan dari seberapa jauh perahu ini sampai.</p>
+</div>
+
+<script type="module" src="./adegan.js"></script>
+</body>
+</html>

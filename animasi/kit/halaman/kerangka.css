@@ -1,0 +1,104 @@
+/* Kerangka halaman video kit. Warna diisi tema lewat variabel CSS (pakaiTema); nilai di sini hanya cadangan.
+   Ukuran halaman bawaan 1080×1920; buatVideo() menimpanya bila window.UKURAN berbeda.
+   Dilarang transisi dan animasi CSS: semua gerak dihitung dari t. */
+:root {
+  --latar: hsl(153, 50%, 7%);
+  --pelat: hsl(153, 36%, 10%);
+  --zamrud: hsl(153, 62%, 36%);
+  --zamrud-pijar: hsl(153, 72%, 42%);
+  --zamrud-terang: hsl(153, 52%, 52%);
+  --emas: hsl(42, 52%, 58%);
+  --emas-pijar: hsl(42, 80%, 52%);
+  --krem: hsl(42, 33%, 96%);
+  --kertas: hsl(42, 28%, 86%);
+  --abu: hsl(150, 5%, 52%);
+  --serif: "Noto Serif", Georgia, serif;
+  --sans: "DM Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; transition: none !important; animation: none !important; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--latar); color: var(--krem); }
+body { position: relative; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+#kanvas { position: absolute; left: 0; top: 0; display: block; }
+.kit-kabut { position: absolute; left: 0; width: 100%; pointer-events: none; }
+#label3d, #halaman { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* ---------------------------------------------------------------- label yang menempel pada benda 3D (label3D) */
+.lbl { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; transform-origin: 50% 50%; }
+/* benda: teks mono kecil dengan titik di kiri */
+.lbl-benda { font: 600 22px/1 var(--mono); letter-spacing: 0.06em; color: color-mix(in srgb, var(--kertas) 72%, transparent);
+  display: flex; align-items: center; gap: 10px; }
+.lbl-benda::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--zamrud-terang); }
+.lbl-benda.emas::before { background: var(--emas); }
+.lbl-benda.zamrud { color: var(--zamrud-terang); }
+.lbl-benda.abu { color: var(--abu); }
+.lbl-benda.abu::before { background: var(--abu); }
+/* kotak: tanda berbingkai, misalnya tahun di atas gerbang. Varian status: emas (penuh), zamrud dan abu (teks dan bingkai) */
+.lbl-kotak { font: 600 26px/1 var(--mono); letter-spacing: 0.08em; color: var(--krem); padding: 9px 15px 8px; border-radius: 10px;
+  background: color-mix(in srgb, var(--latar) 90%, transparent); border: 1.5px solid color-mix(in srgb, var(--abu) 80%, transparent); }
+.lbl-kotak.emas { color: var(--latar); background: var(--emas); border-color: var(--emas); }
+.lbl-kotak.zamrud { color: var(--zamrud-terang); border-color: var(--zamrud-terang); }
+.lbl-kotak.abu { color: var(--abu); border-color: var(--abu); }
+/* baris: teks gelap kecil di atas kertas atau papan */
+.lbl-baris { font: 700 21px/1 var(--mono); color: var(--latar); letter-spacing: 0.02em; }
+/* mikro: teks mono 15 px untuk benda kecil (tag, sel tabel, keterangan alat); .gelap di atas kertas, .emas untuk hasil */
+.lbl-mikro { font: 600 15px/1 var(--mono); letter-spacing: 0.04em; color: color-mix(in srgb, var(--kertas) 80%, transparent); }
+.lbl-mikro.gelap { font-weight: 700; color: var(--latar); }
+.lbl-mikro.emas { color: var(--emas); }
+.lbl-mikro.zamrud { color: var(--zamrud-terang); }
+.lbl-mikro.abu { color: var(--abu); }
+
+/* ---------------------------------------------------------------- kepala: merek, nomor, judul */
+.kit-kepala { position: absolute; left: 100px; top: 226px; width: 880px; text-align: center; opacity: 0; }
+.kit-merek { font: 700 20px/1 var(--mono); letter-spacing: 0.32em; padding-left: 0.32em; color: var(--emas); }
+.kit-merek::before, .kit-merek::after { content: ""; display: inline-block; width: 36px; height: 2px;
+  background: color-mix(in srgb, var(--emas) 50%, transparent); vertical-align: middle; margin: 0 16px 4px; }
+.kit-nomor { margin-top: 14px; font: 600 22px/1.2 var(--mono); color: color-mix(in srgb, var(--krem) 62%, transparent); }
+.kit-judul { margin-top: 18px; font: 700 50px/1.1 var(--serif); color: var(--krem); text-wrap: balance; }
+.kit-judul.miring { font: italic 700 52px/1.1 var(--serif); }
+
+/* ---------------------------------------------------------------- keterangan bawah */
+.kit-ket { position: absolute; left: 100px; top: 1490px; width: 880px; text-align: center; opacity: 0; --warna-label: var(--krem); }
+.kit-ket-label { font: 700 22px/1 var(--mono); letter-spacing: 0.24em; padding-left: 0.24em; color: var(--warna-label); }
+.kit-ket-teks { margin-top: 16px; font: 600 40px/1.3 var(--sans); color: var(--krem); text-wrap: balance; }
+.kit-ket-teks b, .kit-sorot { font-weight: inherit; color: var(--warna-label); }
+
+/* ---------------------------------------------------------------- kartu akhir: pil ajakan dan sumber */
+.kit-ajakan { position: absolute; left: 100px; top: 1500px; width: 880px; display: flex; justify-content: center; opacity: 0; }
+.kit-ajakan > div { display: inline-flex; align-items: center; gap: 16px; height: 92px; padding: 0 40px; border-radius: 46px;
+  background: var(--emas); color: var(--latar); font: 700 38px/1 var(--mono);
+  box-shadow: 0 0 60px color-mix(in srgb, var(--emas-pijar) 40%, transparent); }
+.kit-ajakan.panah > div::after { content: "→"; }
+.kit-sumber { position: absolute; left: 100px; top: 1640px; width: 880px; text-align: center; opacity: 0;
+  font: 500 19px/1.4 var(--mono); color: color-mix(in srgb, var(--krem) 45%, transparent); }
+
+/* ---------------------------------------------------------------- alur langkah */
+.kit-alur { position: absolute; left: 100px; width: 880px; display: flex; justify-content: center; align-items: center; gap: 14px;
+  font: 500 28px/1 var(--mono); opacity: 0; }
+.kit-langkah { position: relative; padding-bottom: 10px; color: color-mix(in srgb, var(--krem) 34%, transparent); }
+.kit-langkah i { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; border-radius: 2px; background: var(--emas); }
+.kit-panah { color: color-mix(in srgb, var(--krem) 28%, transparent); padding-bottom: 10px; }
+
+/* ---------------------------------------------------------------- panel HUD */
+.kit-panel { position: absolute; left: 100px; width: 880px; border-radius: 26px; opacity: 0; overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pelat) 92%, transparent), color-mix(in srgb, var(--latar) 94%, transparent));
+  border: 1.5px solid color-mix(in srgb, var(--zamrud) 38%, transparent); }
+.kit-panel-kepala { height: 64px; margin: 0 30px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--zamrud) 22%, transparent);
+  font: 700 20px/1 var(--mono); letter-spacing: 0.14em; color: color-mix(in srgb, var(--kertas) 62%, transparent); }
+.kit-panel-kepala::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--emas); }
+.kit-panel-isi { padding: 24px 30px; font: 500 26px/1.35 var(--sans); color: var(--krem); }
+
+/* ---------------------------------------------------------------- tambahan format evidence (hanya dipakai bila komponen diberi opsi baru) */
+/* baris program di bawah kalimat keterangan; baris baca di kartu akhir */
+.kit-ket-program { margin-top: 14px; font: 500 20px/1.3 var(--mono); color: color-mix(in srgb, var(--krem) 55%, transparent); }
+.kit-baca { position: absolute; left: 100px; top: 1600px; width: 880px; text-align: center; opacity: 0;
+  font: 500 20px/1.4 var(--mono); color: color-mix(in srgb, var(--krem) 60%, transparent); }
+/* kartu pertanyaan kuis: panel({ kelas: "kartu-kuis" }) */
+.kit-panel.kartu-kuis { border: 2px solid var(--zamrud-pijar); border-radius: 18px; text-align: center; --warna-label: var(--emas);
+  background: color-mix(in srgb, var(--latar) 85%, transparent); }
+.kit-panel.kartu-kuis .kit-panel-kepala { display: block; height: auto; margin: 0; padding: 22px 30px 0 calc(30px + 0.24em); border-bottom: 0;
+  font: 700 20px/1 var(--mono); letter-spacing: 0.24em; color: var(--emas); }
+.kit-panel.kartu-kuis .kit-panel-kepala::before { display: none; }
+.kit-panel.kartu-kuis .kit-panel-isi { padding: 14px 36px 24px; font: 600 38px/1.3 var(--sans); color: var(--krem); }
+.kit-panel.kartu-kuis .kit-panel-isi p { text-wrap: balance; }

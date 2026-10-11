@@ -1,0 +1,16 @@
+Suara indikator-09
+  suara.js    indikator-09\suara.js · sesuaikan()
+  peristiwa   87 masuk → 48 dibunyikan (0 digabung, 0 dipangkas, 39 kuat 0, 0 jenis tak dikenal)
+  WAV         D:\Dev Activities\Fikar Website\animasi\hasil\indikator-09.wav  21.000 s, 48 kHz stereo 16-bit
+  kenyaringan -18.00 LUFS, puncak sejati -2.00 dBTP (internal); penguatan +8.0 dB, pembatas maks 1.7 dB (di 18.28 s), aktif pada 1.98% sampel
+  ebur128     WAV -18.0 LUFS, -2.0 dBTP; MP4 (AAC) -18.0 LUFS, -2.0 dBTP
+  video       D:\Dev Activities\Fikar Website\animasi\hasil\indikator-09-suara.mp4
+  gelombang   D:\Dev Activities\Fikar Website\animasi\hasil\indikator-09-gelombang.png
+  sinkron (audio MP4 didekode):
+    jenis         sumber       peristiwa   frame      bunyi   selisih
+    muncul        lantai          0.600s    18.0     0.601s   +0.7 ms ok
+    muncul        kotak pertan    1.200s    36.0     1.202s   +2.0 ms ok
+    lempar        kertas tanya   12.400s   372.0    12.400s   -0.3 ms ok
+    kertas        pemateri       15.800s   474.0    15.826s   +26.5 ms ok
+    kartu-akhir   format         18.200s   546.0    18.202s   +1.8 ms ok
+    pil           format         18.600s   558.0    18.600s   +0.0 ms ok

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<title>Cara mengisi kuis Evidence Komisariat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="css-font" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=JetBrains+Mono:wght@500;700&family=Noto+Serif:wght@600;700&display=block">
+<style>
+  :root {
+    --bg: hsl(153 50% 7%);
+    --bg-rgb: 9, 27, 19;
+    --krem: hsl(42 33% 96%);
+    --emas: hsl(42 52% 58%);
+    --emas-terang: hsl(42 75% 72%);
+    --zamrud: hsl(152 62% 22%);
+    --zamrud-terang: hsl(152 60% 52%);
+    --zamrud-teks: hsl(152 55% 62%);
+    --teal: hsl(176 58% 56%);
+    --redup: hsl(150 14% 52%);
+    --garis: hsl(153 40% 24%);
+    --serif: "Noto Serif", Georgia, serif;
+    --sans: "DM Sans", "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); color: var(--krem); font-family: var(--sans); }
+  canvas { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; display: block; }
+  .abs { position: absolute; }
+
+  /* Selimut gradasi: menjaga teks terbaca dan mengosongkan area di bawah y 1480 */
+  #selimut-atas { left: 0; top: 0; width: 1080px; height: 740px;
+    background: linear-gradient(to bottom, rgba(var(--bg-rgb), 1) 0, rgba(var(--bg-rgb), 1) 590px, rgba(var(--bg-rgb), 0) 690px); }
+  #selimut-bawah { left: 0; top: 1440px; width: 1080px; height: 480px;
+    background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0) 0, rgba(var(--bg-rgb), 0.94) 90px, rgba(var(--bg-rgb), 1) 200px); }
+  #gelap { left: 0; top: 0; width: 1080px; height: 1920px; background: var(--bg); }
+
+  /* Kepala: judul, alur langkah, keterangan */
+  #kepala { left: 60px; top: 224px; width: 880px; text-align: center; }
+  #eyebrow { font: 500 21px/1 var(--mono); letter-spacing: 0.34em; color: var(--emas); text-transform: uppercase; padding-left: 0.34em; }
+  #judul { margin-top: 14px; font: 700 68px/1.06 var(--serif); letter-spacing: -0.01em; color: var(--krem); }
+  #judul em { font-style: normal; color: var(--emas); }
+  #alur { margin-top: 22px; font: 500 29px/1 var(--mono); display: flex; justify-content: center; gap: 14px; align-items: center; }
+  #alur i { font-style: normal; font-size: 32px; color: hsl(150 14% 38%); }
+  #alur span { padding: 4px 2px; }
+  #ket { position: relative; height: 128px; margin-top: 22px; }
+  .ket { position: absolute; left: 0; top: 0; width: 880px; font: 700 41px/1.2 var(--sans); letter-spacing: -0.005em; text-wrap: balance; }
+  .ket .kecil { display: block; margin-top: 12px; font: 500 26px/1.3 var(--mono); letter-spacing: 0.02em; }
+  .ket .mono { font-family: var(--mono); font-weight: 700; font-size: 0.86em; letter-spacing: -0.01em; }
+  .ket .tag { display: inline-block; vertical-align: 3px; margin-right: 10px; padding: 5px 12px 4px; border: 2px solid currentColor; border-radius: 10px;
+    font: 700 21px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+  .ket .tombol { display: inline-block; padding: 1px 14px 3px; border-radius: 12px; background: var(--emas); color: hsl(153 50% 9%); }
+  .ket .redam { opacity: 0.62; }
+  #ket-penutup { position: absolute; left: 0; top: 0; width: 880px; font: 700 62px/1.1 var(--serif); letter-spacing: -0.01em; color: var(--krem); text-wrap: balance; }
+  #ket-penutup em { font-style: normal; color: var(--emas); }
+
+  /* Panel bawah */
+  #panel { left: 60px; top: 1140px; width: 880px; height: 330px; border-radius: 26px; overflow: hidden;
+    background: linear-gradient(to bottom, rgba(10, 36, 25, 0.93), rgba(7, 24, 17, 0.95)); border: 2px solid hsl(153 42% 21%); }
+  .p-kepala { position: absolute; left: 0; top: 0; width: 100%; height: 66px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid hsl(153 40% 17%); }
+  .p-kiri { display: flex; align-items: center; gap: 14px; }
+  #p-titik { width: 14px; height: 14px; border-radius: 50%; background: hsl(152 70% 55%); box-shadow: 0 0 14px hsl(152 70% 55%); }
+  #p-tajuk { font: 700 21px/1 var(--mono); letter-spacing: 0.2em; color: var(--redup); }
+  .contoh { font: 700 19px/1 var(--mono); letter-spacing: 0.06em; color: var(--emas); border: 2px solid hsl(42 52% 58% / 0.7); border-radius: 999px; padding: 5px 14px 6px; }
+  #p-status { font: 700 24px/1 var(--mono); color: var(--krem); }
+  .p-badan { position: absolute; left: 0; top: 66px; width: 100%; height: 264px; }
+  .mode { position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0 30px; }
+
+  .skor-blok { position: absolute; left: 30px; top: 0; width: 250px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .skor-besar { font: 700 104px/1 var(--mono); color: var(--emas); letter-spacing: -0.04em; white-space: nowrap; }
+  .skor-besar small { font: 700 42px/1 var(--mono); color: var(--redup); letter-spacing: 0; margin-left: 4px; }
+  .skor-ket { margin-top: 10px; font: 500 22px/1.2 var(--sans); color: var(--redup); }
+
+  #m-inti .daftar { position: absolute; left: 310px; top: 20px; width: 540px; }
+  .baris { display: grid; grid-template-columns: 196px 1fr 62px; align-items: center; column-gap: 14px; height: 37px; }
+  .baris .nama { font: 500 21px/1 var(--sans); color: hsl(42 20% 82%); white-space: nowrap; }
+  .baris .lajur { height: 14px; border-radius: 7px; background: hsl(153 30% 16%); overflow: hidden; position: relative; }
+  .baris .isi { position: absolute; left: 0; top: 0; height: 100%; border-radius: 7px; background: linear-gradient(to right, hsl(152 65% 32%), hsl(152 70% 50%)); box-shadow: 0 0 12px hsl(152 70% 45% / 0.7); }
+  .baris .persen { font: 700 22px/1 var(--mono); color: var(--krem); text-align: right; }
+
+  #m-lanjut .daftar { position: absolute; left: 310px; top: 38px; width: 540px; }
+  .lk { margin-bottom: 30px; }
+  .lk .judul-lk { display: flex; justify-content: space-between; font: 500 23px/1 var(--sans); color: hsl(42 20% 82%); margin-bottom: 14px; }
+  .lk .judul-lk b { font: 700 22px/1 var(--mono); color: var(--krem); }
+  .lk .kotak { display: flex; gap: 10px; }
+  .lk .kotak i { flex: 1; height: 22px; border-radius: 7px; background: hsl(153 30% 16%); position: relative; }
+
+  #m-angka .daftar { position: absolute; left: 30px; top: 24px; width: 820px; }
+  .angka-baris { height: 108px; display: grid; grid-template-columns: 1fr 250px 120px; align-items: center; column-gap: 20px; }
+  .angka-baris .nama { font: 700 29px/1.15 var(--sans); color: var(--krem); }
+  .angka-baris .rinci { margin-top: 8px; font: 500 21px/1.2 var(--mono); color: var(--redup); }
+  .angka-baris .rinci b { color: hsl(42 30% 88%); font-weight: 700; }
+  .angka-baris .lajur { height: 18px; border-radius: 9px; background: hsl(153 30% 16%); position: relative; overflow: hidden; }
+  .angka-baris .isi { position: absolute; left: 0; top: 0; height: 100%; border-radius: 9px; background: linear-gradient(to right, hsl(42 52% 40%), hsl(42 60% 62%)); box-shadow: 0 0 14px hsl(42 60% 55% / 0.7); }
+  .angka-baris .besar { font: 700 58px/1 var(--mono); color: var(--emas); text-align: right; letter-spacing: -0.04em; }
+
+  #m-hasil .kanan { position: absolute; left: 310px; top: 26px; width: 540px; }
+  #h-tingkat { font: 700 38px/1.1 var(--sans); color: var(--emas); }
+  #h-rentang { margin-top: 8px; font: 500 21px/1.2 var(--mono); color: var(--redup); }
+  #h-chip { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip { font: 700 22px/1 var(--sans); padding: 12px 18px 13px; border-radius: 14px; border: 2px solid hsl(152 55% 40% / 0.8); background: hsl(152 60% 20% / 0.6); color: hsl(152 55% 78%); white-space: nowrap; }
+
+  /* Etiket yang menempel pada titik di adegan 3D */
+  .etiket { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform, opacity; pointer-events: none; }
+  .pil { padding: 10px 20px 11px; border-radius: 16px; background: rgba(var(--bg-rgb), 0.84); border: 2px solid hsl(152 55% 40% / 0.7); text-align: center; }
+  .pil b { display: block; font: 700 27px/1.05 var(--sans); color: var(--krem); }
+  .pil small { display: block; margin-top: 5px; font: 500 17px/1 var(--mono); color: var(--zamrud-teks); letter-spacing: 0.03em; }
+  .pil-emas { border-color: hsl(42 52% 58% / 0.9); }
+  .pil-emas small { color: var(--emas); }
+  .jalur { font: 700 30px/1 var(--mono); color: hsl(153 50% 8%); background: var(--emas); padding: 10px 18px 11px; border-radius: 12px; letter-spacing: -0.02em; box-shadow: 0 0 26px hsl(42 60% 58% / 0.65); }
+  .lencana { font: 700 22px/1 var(--mono); color: var(--emas); background: rgba(var(--bg-rgb), 0.78); border: 2px solid hsl(42 52% 58% / 0.75); border-radius: 999px; padding: 8px 16px 9px; letter-spacing: 0.04em; }
+  .mulai { font: 700 24px/1 var(--sans); color: hsl(153 50% 8%); background: var(--emas); padding: 11px 20px 12px; border-radius: 14px; box-shadow: 0 0 24px hsl(42 60% 58% / 0.6); }
+  .tambah { font: 700 34px/1 var(--mono); color: var(--emas-terang); text-shadow: 0 0 14px hsl(42 70% 55% / 0.8), 0 2px 0 rgba(0,0,0,0.4); }
+  .nilai { font: 700 32px/1 var(--mono); color: var(--emas-terang); text-shadow: 0 0 14px hsl(42 70% 55% / 0.8), 0 2px 0 rgba(0,0,0,0.4); }
+  .lk-label { font: 700 30px/1 var(--mono); color: var(--teal); text-shadow: 0 0 16px hsl(176 60% 45% / 0.6); }
+  .lk-label small { display: block; margin-top: 7px; font: 500 18px/1 var(--mono); color: var(--redup); text-align: center; }
+  .persen-tag { font: 700 24px/1 var(--mono); color: hsl(153 50% 8%); background: var(--emas); padding: 9px 16px 10px; border-radius: 12px; box-shadow: 0 0 22px hsl(42 60% 58% / 0.55); }
+  .tingkat { width: 330px; text-align: left; padding: 11px 18px 12px; border-radius: 14px; background: rgba(var(--bg-rgb), 0.82); border: 2px solid hsl(152 45% 30% / 0.7); }
+  .tingkat b { display: block; font: 700 24px/1.1 var(--sans); }
+  .tingkat small { display: block; margin-top: 5px; font: 500 17px/1 var(--mono); }
+
+  /* Penutup */
+  #url { left: 60px; top: 1262px; width: 880px; text-align: center; }
+  #url span { display: inline-block; font: 700 42px/1 var(--mono); letter-spacing: -0.01em; color: var(--emas-terang);
+    padding: 24px 40px 26px; border-radius: 22px; border: 2px solid hsl(42 52% 58% / 0.8); background: rgba(var(--bg-rgb), 0.7);
+    box-shadow: 0 0 40px hsl(42 60% 55% / 0.35), inset 0 0 30px hsl(42 60% 55% / 0.12); }
+  #url small { display: block; margin-top: 26px; font: 500 25px/1.2 var(--sans); color: var(--redup); }
+</style>
+</head>
+<body>
+  <div id="selimut-atas" class="abs"></div>
+  <div id="selimut-bawah" class="abs"></div>
+
+  <div id="kepala" class="abs">
+    <div id="eyebrow">HMI Evidence</div>
+    <h1 id="judul">Seberapa <em>Evidence</em><br>Komisariatmu?</h1>
+    <div id="alur">
+      <span>buka</span><i>→</i><span>jawab</span><i>→</i><span>perdalam</span><i>→</i><span>angka</span><i>→</i><span>hasil</span>
+    </div>
+    <div id="ket">
+      <p class="ket">Cara mengisi kuis audit komisariat<span class="kecil">7–10 menit, tanpa daftar</span></p>
+      <p class="ket">Buka <span class="mono">ahmadzulfikar.com/kuis</span>, tekan <span class="tombol">Mulai kuis</span></p>
+      <p class="ket">Jawab 20 pertanyaan sesuai <span class="isi-krem">keadaan sekarang</span>, <span class="redam">bukan harapan</span></p>
+      <p class="ket"><span class="tag">Opsional</span>10 soal lanjutan tentang kader pasca-LK 2 dan LK 3</p>
+      <p class="ket"><span class="tag">Opsional</span>4 angka, retensi kader dan keterlaksanaan program</p>
+      <p class="ket">Dapat skor, tingkat, temuan, dan laporan PDF</p>
+      <p id="ket-penutup">Jangan bicara HMI <em>tanpa bukti.</em></p>
+    </div>
+  </div>
+
+  <section id="panel" class="abs">
+    <header class="p-kepala">
+      <div class="p-kiri"><i id="p-titik"></i><b id="p-tajuk">SKOR LANGSUNG</b><span class="contoh">contoh</span></div>
+      <div id="p-status">Pertanyaan 0/20</div>
+    </header>
+    <div class="p-badan">
+      <div class="mode" id="m-inti">
+        <div class="skor-blok"><div class="skor-besar"><span id="s-nilai">0</span><small>/60</small></div><div class="skor-ket">skor sementara</div></div>
+        <div class="daftar" id="daftar-inti"></div>
+      </div>
+      <div class="mode" id="m-lanjut">
+        <div class="skor-blok"><div class="skor-besar"><span id="l-nilai">0</span><small>/10</small></div><div class="skor-ket">soal lanjutan</div></div>
+        <div class="daftar" id="daftar-lanjut"></div>
+      </div>
+      <div class="mode" id="m-angka"><div class="daftar" id="daftar-angka"></div></div>
+      <div class="mode" id="m-hasil">
+        <div class="skor-blok"><div class="skor-besar"><span id="h-nilai">0</span><small>/60</small></div><div class="skor-ket">skor kuis</div></div>
+        <div class="kanan">
+          <div id="h-tingkat">Titik Berangkat</div>
+          <div id="h-rentang">tingkat 1 dari 4 · skor 0–15</div>
+          <div id="h-chip"><span class="chip">Temuan per jawaban</span><span class="chip">Laporan PDF</span><span class="chip">Bagikan ke Story</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="url" class="abs"><span>ahmadzulfikar.com/kuis</span></div>
+  <div id="lapisan-etiket"></div>
+  <div id="gelap" class="abs"></div>
+
+  <script type="module" src="./adegan.js"></script>
+</body>
+</html>
