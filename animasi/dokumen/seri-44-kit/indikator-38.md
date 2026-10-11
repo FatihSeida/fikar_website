@@ -64,7 +64,7 @@ Label 3D tambahan:
 Label SEMESTER 1 sampai 3 adalah label bawaan garisWaktu, ikut muncul dan pudar bersama garis waktu.
 Label mikro “KURIKULUM” di atas buku (pada: buku, geser [0, 0.7, 0], gaya mikro), masuk 14.0 sampai 14.4. Label berjangkar buku, jadi ikut terbang dan pudar bersama buku pada 20.2 sampai 21.4.
 F. Dunia dan Posisi
-Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-38.md bagian F, dipadatkan supaya muat di kamera format evidence (ban 12 unit menjadi 6 unit).
+Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt seri versi pertama (format 21 detik) bagian F, dipadatkan supaya muat di kamera format evidence (ban 12 unit menjadi 6 unit).
 Ban: pusat di titik(-0.9, -0.6), rotasi 0, sehingga ban memanjang dari kiri atas ke kanan bawah layar. Ujung awal (kiri atas) di titik(-3.02, -2.72), ujung akhir (kanan bawah) di titik(1.22, 1.52).
 Jalur benda zaman: dari A = titik(-2.88, -2.58, 0.3) lurus ke B = titik(1.08, 1.38, 0.3) di garis tengah permukaan ban. Panjang 5.6 unit.
 Komisariat: titik(2.3, -1.2), di sisi kanan atas ban, rotasi 0. Muka pintunya menghadap ban, berjarak sekitar 1.1 unit dari tepi ban. Pintu di titik(1.73, -0.63). Titik depan pintu titikDepanPintu = titik(1.41, -0.31, 0.5).

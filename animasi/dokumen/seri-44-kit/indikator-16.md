@@ -84,7 +84,7 @@ Komisariat: userData.penting = (t) => t < 6.0 || t >= 23.0.
 Kader yang tidak disebut di muat (K2, T1, K3, T2): userData.penting = (t) => t < 6.0.
 G. Adegan per Bagian
 Bagian 1, Gejala (0.6 sampai 6.0)
-Acuan: animasi/dokumen/seri-44-prompt/indikator-16.md bagian F dan G Bagian 1, dipindah ke dunia Pustaka kit di bagian F.
+Acuan: prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1, dipindah ke dunia Pustaka kit di bagian F.
 0.6 sampai 1.2: lantai, kedua rak, dan komisariat muncul (muncul([...d.urutan, komisariat], { t: 0.6, selesai: 1.2 })). Rak dan komisariat abu penuh.
 1.0 sampai 2.0: sembilan kader muncul tersebar (muncul(kader, { t: 1.0, selesai: 2.0 })), ikon ikut muncul sebagai anak kader. Ikon abu penuh.
 2.0 sampai 5.9: setiap kader berjalan pelan di tempatnya sendiri, satu putaran lingkaran kecil (jalan, durasi: 3.9). Mulai kader ke-i digeser 0.08i detik supaya langkahnya tidak serempak: jalan(kader[i], { t: 2.0 + 0.08 * i, durasi: 3.9, beku: false, ... }). Ikon tetap berputar mulai 2.0 durasi 3.9.

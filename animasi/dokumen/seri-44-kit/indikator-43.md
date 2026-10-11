@@ -60,7 +60,7 @@ Label 3D tambahan:
 Label PERIODE 1 sampai 4 adalah label bawaan garisWaktu, ikut bergeser lewat geserPenanda.
 Label mikro “LANGKAH KERJA” di atas map (pada: map, geser [0, 0.35, 0], gaya mikro), masuk 13.2 sampai 13.6. Label berjangkar map, jadi ikut berpindah bersama map.
 F. Dunia dan Posisi
-Dunia dasar duniaArsip(v, { tanpa: ["folder"], opsi: { lemari: { kaca: true }, garisWaktu: { panjang: 5.4, jarak: 1.35 } }, posisi: { garisWaktu: titik(0.2, 2.6) } }). Ini resep 43 di docs dunia. Folder ditiadakan supaya ada ruang untuk komisariat. Garis waktu dipendekkan dari 7.2 ke 5.4 (tetap empat periode) supaya muat di kamera format evidence. Sumber Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-43.md bagian F dan G Bagian 1.
+Dunia dasar duniaArsip(v, { tanpa: ["folder"], opsi: { lemari: { kaca: true }, garisWaktu: { panjang: 5.4, jarak: 1.35 } }, posisi: { garisWaktu: titik(0.2, 2.6) } }). Ini resep 43 di docs dunia. Folder ditiadakan supaya ada ruang untuk komisariat. Garis waktu dipendekkan dari 7.2 ke 5.4 (tetap empat periode) supaya muat di kamera format evidence. Sumber Gejala adalah prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1.
 Lemari kaca di titik(-2.6, -1.4), rotasi y 20° (bawaan dunia). Piala: d.benda.lemari.userData.bagian.piala[i], alasnya di d.titik.piala[i], debu lewat piala.userData.aturDebu(k). Pintu lewat d.benda.lemari.userData.aturPintu(kKiri, kKanan).
 Garis waktu di titik(0.2, 2.6), memanjang ke kanan layar. Geser lewat d.benda.garisWaktu.userData.geserPenanda(s).
 Komisariat: titik(2.6, -1.4), rotasi 0. Pintu di titik(2.03, -0.83). titikDepanPintu = titik(1.71, -0.51).

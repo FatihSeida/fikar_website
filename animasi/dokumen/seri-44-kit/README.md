@@ -2,8 +2,7 @@
 
 Prompt video format evidence: 31 detik, lima bagian (Gejala, Kenapa, Ikhtiar atau Pandangan, Kuis, Kartu akhir). Satu berkas berisi satu video.
 
-- **`indikator-NN.md`** adalah prompt final yang dipakai. Isinya sudah diperiksa terhadap kit 1.3.2. Perbaikannya mencakup titik periksa, opsi benda, waktu yang mustahil, dan kunci kamera. Teks di layar, warna, dan larangan tetap sama dengan aslinya.
-- **`asli/`** adalah teks apa adanya dari `Prompt_Animasi_Seri_44_Indikator_Kit.docx` (11 Oktober 2026). Folder ini hanya untuk acuan; jangan dipakai untuk membuat video.
+`indikator-NN.md` adalah satu-satunya versi yang dipakai. Isinya diambil dari `Prompt_Animasi_Seri_44_Indikator_Kit.docx` (11 Oktober 2026), lalu diperiksa terhadap kit 1.3.2. Perbaikannya mencakup titik periksa, opsi benda, waktu yang mustahil, dan kunci kamera. Teks di layar, warna, dan larangan tetap sama dengan dokumen.
 
 Cara pakai: "Buat video dari `animasi/dokumen/seri-44-kit/indikator-15.md`." Agen cukup membaca `animasi/README.md`, `animasi/kit/PANDUAN-EVIDENCE.md`, dan prompt itu.
 

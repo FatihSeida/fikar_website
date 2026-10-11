@@ -90,7 +90,7 @@ Menara dan figur atas: userData.penting = (t) => t < 13.0.
 Panah lingkar dan balon gagasan Bagian 2: userData.penting = (t) => t < 13.2.
 G. Adegan per Bagian
 Bagian 1, Gejala (0.6 sampai 6.0)
-Acuan: animasi/dokumen/seri-44-prompt/indikator-15.md bagian F dan G Bagian 1, dipindah ke posisi kit di bagian F.
+Acuan: prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1, dipindah ke posisi kit di bagian F.
 0.6 sampai 1.6: menara kampus naik dari tanah (tumbuh(menara, { t: 0.6, durasi: 1.0, sumbu: "y" })).
 1.6 sampai 2.24: tiga figur atas muncul di atap (jeda 0.12, durasi 0.4).
 2.0 sampai 3.0: kelima rumah warga, genangan, dan komisariat muncul (muncul([...rumahWarga, genangan, komisariat], { t: 2.0, selesai: 3.0 })). Rumah warga dan komisariat abu penuh sejak awal.

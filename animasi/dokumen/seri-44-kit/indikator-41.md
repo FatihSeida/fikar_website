@@ -59,7 +59,7 @@ kuis: { pertanyaan: "Apakah pembagian tugas dan kewenangan setiap pengurus di ko
 ajakan, baca, dan sumber memakai bawaan format.
 Label 3D tambahan: tidak ada.
 F. Dunia dan Posisi
-Dunia dasar duniaRencana(v, { rapat: { pengurus: 0, kursi: 6 }, posisi: { meja: titik(0.4, 0.8) }, tanpa: ["papan"] }). Ini resep 41 di docs dunia, tanpa papan aturan (papan aturan prompt lama tidak dipakai lagi; ruangnya dipakai komisariat). Sumber Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-41.md bagian F dan G Bagian 1.
+Dunia dasar duniaRencana(v, { rapat: { pengurus: 0, kursi: 6 }, posisi: { meja: titik(0.4, 0.8) }, tanpa: ["papan"] }). Ini resep 41 di docs dunia, tanpa papan aturan (papan aturan prompt lama tidak dipakai lagi; ruangnya dipakai komisariat). Sumber Gejala adalah prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1.
 Meja di titik(0.4, 0.8). Enam kursi pada radius 1.75, kursi ke-0 paling dekat ke penonton, lalu searah jarum jam di layar. Kira-kira:
 kursi 0 di 90° (bawah), kursi 1 di 150° (kiri bawah), kursi 2 di 210° (kiri atas);
 kursi 3 di 270° (belakang meja), kursi 4 di 330° (kanan atas), kursi 5 di 30° (kanan bawah).

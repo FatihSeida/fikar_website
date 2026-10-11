@@ -61,7 +61,7 @@ kuis: { pertanyaan: "Saat berdiskusi tentang suatu isu, apakah kader komisariatm
 ajakan, baca, dan sumber memakai bawaan format.
 Label 3D tambahan: tidak ada.
 F. Dunia dan Posisi
-Dunia dasar duniaPustaka(v, { tanpa: ["rakKanan", "lentera"], bangku: false, posisi: { rakKiri: titik(-2.2, -2.9, 0.1) }, opsi: { rakKiri: { lebar: 2.0, buku: 40 } } }). Ini resep 42 di docs dunia (bangku: false supaya celah antara figur dan lantai terlihat saat figur diangkat), dengan rak kanan dan lentera ditiadakan supaya ada ruang untuk komisariat dan bola dunia tidak tertutup lentera. Sumber Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-42.md bagian F dan G Bagian 1.
+Dunia dasar duniaPustaka(v, { tanpa: ["rakKanan", "lentera"], bangku: false, posisi: { rakKiri: titik(-2.2, -2.9, 0.1) }, opsi: { rakKiri: { lebar: 2.0, buku: 40 } } }). Ini resep 42 di docs dunia (bangku: false supaya celah antara figur dan lantai terlihat saat figur diangkat), dengan rak kanan dan lentera ditiadakan supaya ada ruang untuk komisariat dan bola dunia tidak tertutup lentera. Sumber Gejala adalah prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1.
 Semua benda tambahan yang berdiri di lantai memakai y 0.1.
 Komisariat: titik(2.3, -2.5, 0.1), di tempat rak kanan, rotasi 0.
 Bola dunia besar: titik asalnya (bawah bola) di d.titik.meja. Pusat bola G = d.titik.meja + y 1.1.

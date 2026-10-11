@@ -57,7 +57,7 @@ kuis: { pertanyaan: null, kalimat: "Ukur komisariatmu, dapatkan laporannya." }
 ajakan, baca, dan sumber memakai bawaan format.
 Label 3D tambahan: tidak ada. Judul “ATURAN” di lembar aturan adalah label HTML bawaan panelKertas.
 F. Dunia dan Posisi
-Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-40.md bagian F. Kotak suara dan alasnya sekarang benda kit kotakSuara.
+Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt seri versi pertama (format 21 detik) bagian F. Kotak suara dan alasnya sekarang benda kit kotakSuara.
 Ruang: pusat di titik(-0.4, 0.4), rotation.y = Math.PI / 4 supaya sejajar layar. Lebar 4.4 ke kanan layar (r −2.6 sampai 1.8), dalam 3.6 ke bawah layar (d −1.4 sampai 2.2).
 Kotak suara: titik(-0.4, 0.4, 0.1), di tengah ruang. Titik celah dunia C = titik(-0.4, 0.4, 1.3) (lantai 0.1 + alas 0.2 + kotak 1.0), sama dengan kotak.userData.celah di koordinat dunia.
 Tirai gelap: pusat di titik(-2.0, 0.4, 0.105), rotation.y = Math.PI / 4, menutupi lajur kiri ruang dari r −2.6 sampai −1.4. Kotak suara tetap di sisi terang.

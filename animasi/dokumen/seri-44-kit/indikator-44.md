@@ -58,7 +58,7 @@ kuis: { pertanyaan: null, kalimat: "Ukur komisariatmu, dapatkan laporannya." }
 ajakan, baca, dan sumber memakai bawaan format.
 Label 3D tambahan: tidak ada. Fondasi, garis waktu, dan buku dasar sengaja tanpa label.
 F. Dunia dan Posisi
-Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-44.md bagian F dan G Bagian 1. Fondasi di prompt lama ada di titik(0, 0.6); di sini digeser ke titik(0, -1.0) supaya garis waktu dan buku dasar muat di bawahnya.
+Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt seri versi pertama (format 21 detik) bagian F dan G Bagian 1. Fondasi di prompt lama ada di titik(0, 0.6); di sini digeser ke titik(0, -1.0) supaya garis waktu dan buku dasar muat di bawahnya.
 Fondasi: titik(0, -1.0), rotasi 0. Label lempeng prompt lama (“NDP”, “MISSION”, dan seterusnya) tidak dipasang.
 Komisariat: titik(0, -1.0, 0.9) (y = fondasi.userData.atas), di tengah lempeng teratas, rotasi 0.
 Tumpukan kartu di Bagian 1: di atas lempeng teratas, di sisi kanan depan komisariat (sisi +x), titik(0.88, -0.12, 0.92 + 0.025k) untuk kartu ke-k (k = 0 sampai 4).

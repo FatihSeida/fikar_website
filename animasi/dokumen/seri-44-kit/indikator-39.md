@@ -55,7 +55,7 @@ kuis: { pertanyaan: "Jika terjadi pelanggaran etika atau aturan organisasi, baga
 ajakan, baca, dan sumber memakai bawaan format.
 Label 3D tambahan: tidak ada.
 F. Dunia dan Posisi
-Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt lama animasi/dokumen/seri-44-prompt/indikator-39.md bagian F. Lantai 7 x 7 di prompt lama dikecilkan menjadi 5 x 5 dan diputar sejajar layar, karena belah ketupat 7 x 7 selebar 9.9 unit tidak muat di kamera format evidence.
+Video ini tidak memakai dunia dasar kit. Tanah bergrid bawaan, lalu benda di bawah ini ditaruh sendiri. Sumber tata letak Gejala adalah prompt seri versi pertama (format 21 detik) bagian F. Lantai 7 x 7 di prompt lama dikecilkan menjadi 5 x 5 dan diputar sejajar layar, karena belah ketupat 7 x 7 selebar 9.9 unit tidak muat di kamera format evidence.
 Lantai: pusat di titik(0, 0.4), rotation.y = Math.PI / 4. Dengan rotasi ini kolom i bertambah ke kanan layar dan baris j bertambah ke bawah layar. Lantai menempati r −2.5 sampai 2.5 dan d −2.1 sampai 2.9. Panggil lantai.updateMatrixWorld(true) sesudah menaruhnya. Titik dunia ubin = lantai.localToWorld(lantai.userData.titikUbin(i, j)).
 Ubin asal: (2, 2), tepat di tengah lantai.
 Cincin dihitung dengan jarakDari(2, 2, i, j): cincin 1 berisi 8 ubin, cincin 2 berisi 16 ubin.
