@@ -129,7 +129,6 @@ export default function Bab({ bab, indeks, jumlah, entri, memuat, tenang, sudahP
                     {bab.dalam.kutipan && (
                       <figure className="!mt-6 border-l-2 border-[#DCC38A] bg-[#DCC38A]/[0.06] py-4 pl-5 pr-4">
                         <blockquote className="font-serif text-[17px] italic leading-relaxed text-[#F6F4E9]/90 md:text-lg">“{bab.dalam.kutipan.replace(/^["“]|["”]$/g, "")}”</blockquote>
-                        <figcaption className="mt-3 text-[10px] uppercase tracking-[0.22em] text-[#DCC38A]/80">Dari naskah asli</figcaption>
                       </figure>
                     )}
                   </Lapisan>
