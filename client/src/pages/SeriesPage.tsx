@@ -19,6 +19,8 @@ export type RingkasSeri = {
   gambar?: string | null;
   penulis?: string;
   tampilan?: "cerita" | "pemuda" | "pahlawan" | "naskah";
+  /** Slug catatan yang menjadi dasar seri, bila ada. */
+  tulisan?: string | null;
 };
 
 /** "Rabu, 21 Oktober 2026 · 15.00 WIB" (jamnya mengikuti jadwal rilis seri itu). */
@@ -59,6 +61,12 @@ function BarisSeri({ item }: { item: RingkasSeri }) {
         <div className="max-w-2xl">
           <span className="evidence-kicker block max-md:sr-only">Seri {nomor}</span>
           <h2 className="text-shadow-cinematic mt-3 font-serif text-3xl leading-tight md:text-5xl">{item.judul ?? `Seri ${nomor}`}</h2>
+          {item.tulisan && (
+            // z-10: tetap bisa diklik di atas lapisan tautan "Baca seri" yang menutupi seluruh baris.
+            <Link href={`/catatan/${item.tulisan}`} className="relative z-10 mt-1 inline-flex items-center gap-1.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--gold))] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[hsl(var(--gold))]">
+              Baca tulisannya <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          )}
           {(item.subjudul || item.ringkasan) && <p className="mt-4 leading-relaxed text-white/75 md:text-lg">{item.subjudul || item.ringkasan}</p>}
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
             {segera ? (
@@ -68,9 +76,12 @@ function BarisSeri({ item }: { item: RingkasSeri }) {
             ) : (
               <>
                 {pratinjau && <span className="border border-[hsl(var(--gold))]/60 px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--gold))]">Pratinjau admin</span>}
-                <span className="inline-flex items-center gap-2 bg-[hsl(var(--gold))] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--evidence))] transition-transform motion-safe:group-hover:-translate-y-0.5">
-                  Baca seri <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-1" aria-hidden="true" />
-                </span>
+                {/* Tautan ini meregang (after:inset-0) sehingga seluruh baris bisa diklik, tanpa membungkus tautan lain. */}
+                <Link href={`/series/${item.slug}`} className="outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[hsl(var(--gold))]">
+                  <span className="inline-flex items-center gap-2 bg-[hsl(var(--gold))] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--evidence))] transition-transform motion-safe:group-hover:-translate-y-0.5">
+                    Baca seri <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
                 <span className="text-sm text-white/60">{item.terbit ? "Terbit" : "Dijadwalkan"} {labelWaktu(item.rilis)}</span>
               </>
             )}
@@ -82,13 +93,7 @@ function BarisSeri({ item }: { item: RingkasSeri }) {
 
   return (
     <li className="border-t border-white/10 last:border-b">
-      {segera ? (
-        <div className="relative block overflow-hidden bg-[#071610] text-white">{isi}</div>
-      ) : (
-        <Link href={`/series/${item.slug}`} className="group relative block overflow-hidden bg-[#071610] text-white outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[hsl(var(--gold))]">
-          {isi}
-        </Link>
-      )}
+      <div className={`${segera ? "" : "group "}relative block overflow-hidden bg-[#071610] text-white`}>{isi}</div>
     </li>
   );
 }

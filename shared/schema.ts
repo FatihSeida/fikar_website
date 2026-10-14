@@ -156,7 +156,7 @@ const optionalHttpsUrl = z.string().trim().max(2048).refine((value) => {
   } catch {
     return false;
   }
-}, "Tautan harus berupa URL HTTPS").nullable().optional();
+}, "Tautan harus diawali https:// (contoh: https://kumparan.com/artikel)").nullable().optional();
 
 export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true, urutan: true }).extend({
   image: internalOrHttpsImage,
@@ -168,15 +168,15 @@ export const insertGallerySchema = createInsertSchema(gallery).omit({ id: true, 
 });
 
 export const insertNoteSchema = createInsertSchema(notes).omit({ id: true }).extend({
-  title: z.string().trim().min(3).max(180),
-  slug: z.string().trim().min(3).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh berisi huruf kecil, angka, dan tanda hubung"),
-  excerpt: z.string().trim().min(10).max(500),
-  content: z.string().min(20).max(200_000),
-  tag: z.string().trim().min(2).max(40),
-  date: z.string().trim().min(2).max(40),
+  title: z.string().trim().min(3, "Judul minimal 3 karakter").max(180, "Judul maksimal 180 karakter"),
+  slug: z.string().trim().min(3, "Slug minimal 3 karakter").max(120, "Slug maksimal 120 karakter").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh berisi huruf kecil, angka, dan tanda hubung"),
+  excerpt: z.string().trim().min(10, "Ringkasan minimal 10 karakter").max(500, "Ringkasan maksimal 500 karakter"),
+  content: z.string().min(20, "Konten terlalu pendek, minimal 20 karakter").max(200_000, "Konten terlalu panjang"),
+  tag: z.string().trim().min(2, "Tag minimal 2 karakter").max(40, "Tag maksimal 40 karakter"),
+  date: z.string().trim().min(2, "Tanggal minimal 2 karakter").max(40, "Tanggal maksimal 40 karakter"),
   coverImage: internalOrHttpsImage.nullable().optional(),
   sourceUrl: optionalHttpsUrl,
-  sourceName: z.string().trim().max(100).nullable().optional(),
+  sourceName: z.string().trim().max(100, "Nama media maksimal 100 karakter").nullable().optional(),
 });
 
 export const insertPageSchema = createInsertSchema(pages).omit({ id: true }).extend({

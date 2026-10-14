@@ -11,6 +11,8 @@ export type InfoSeri = {
   penulis: string;
   tautanMedia?: string | null;
   namaMedia?: string | null;
+  /** Slug catatan yang menjadi dasar seri ini, bila ada. */
+  tulisan?: string | null;
 };
 
 /**

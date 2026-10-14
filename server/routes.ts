@@ -13,6 +13,7 @@ import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan
 import { auditSudahDibuka, JUMLAH_SOAL_INTI } from "@shared/audit";
 import { isProduction } from "./env";
 import { registerKampanyeRoutes } from "./kampanye";
+import { opiniIndonesiaEmas } from "./konten/opiniIndonesiaEmas";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -320,6 +321,7 @@ export async function registerRoutes(
   app.post("/api/notes", requireAdmin, async (req, res) => {
     const parsed = insertNoteSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (await storage.getNote(parsed.data.slug)) return res.status(409).json({ message: "Slug ini sudah dipakai catatan lain. Ubah slug-nya." });
     const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
     const note = await storage.createNote(data);
     res.status(201).json(note);
@@ -330,6 +332,10 @@ export async function registerRoutes(
     if (!id) return res.status(400).json({ message: "ID catatan tidak valid" });
     const parsed = insertNoteSchema.partial().safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (parsed.data.slug) {
+      const dipakai = await storage.getNote(parsed.data.slug);
+      if (dipakai && dipakai.id !== id) return res.status(409).json({ message: "Slug ini sudah dipakai catatan lain. Ubah slug-nya." });
+    }
     const data = parsed.data.content ? { ...parsed.data, content: sanitizeHtml(parsed.data.content) } : parsed.data;
     const note = await storage.updateNote(id, data);
     res.json(note);
@@ -614,6 +620,7 @@ async function seedDatabase() {
       tag: "Ketenagakerjaan", date: "3 Mei 2023", coverImage: "/ahmad/gallery-aksi-advokasi.webp",
       sourceUrl: "https://www.radarnusantara.com/2023/05/aksi-tolak-uu-cipta-kerja-may-day-hari.html?m=1", sourceName: "Radar Nusantara",
     },
+    opiniIndonesiaEmas,
   ];
   for (const seed of noteSeeds) {
     if (!(await storage.getNote(seed.slug))) await storage.createNote(seed);
