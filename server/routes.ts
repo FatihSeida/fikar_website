@@ -320,6 +320,7 @@ export async function registerRoutes(
   app.post("/api/notes", requireAdmin, async (req, res) => {
     const parsed = insertNoteSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (await storage.getNote(parsed.data.slug)) return res.status(409).json({ message: "Slug ini sudah dipakai catatan lain. Ubah slug-nya." });
     const data = { ...parsed.data, content: sanitizeHtml(parsed.data.content) };
     const note = await storage.createNote(data);
     res.status(201).json(note);
@@ -330,6 +331,10 @@ export async function registerRoutes(
     if (!id) return res.status(400).json({ message: "ID catatan tidak valid" });
     const parsed = insertNoteSchema.partial().safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: validationMessage(parsed.error) });
+    if (parsed.data.slug) {
+      const dipakai = await storage.getNote(parsed.data.slug);
+      if (dipakai && dipakai.id !== id) return res.status(409).json({ message: "Slug ini sudah dipakai catatan lain. Ubah slug-nya." });
+    }
     const data = parsed.data.content ? { ...parsed.data, content: sanitizeHtml(parsed.data.content) } : parsed.data;
     const note = await storage.updateNote(id, data);
     res.json(note);

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, isiGalat, queryClient } from "@/lib/queryClient";
+import { unggahGambar } from "@/lib/unggah";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,22 +43,21 @@ function EditorSeri({ seri }: { seri: SeriAdmin }) {
       queryClient.invalidateQueries({ queryKey: [`/api/seri/${seri.slug}`] });
       toast({ title: "Tersimpan", description: `Naskah Series ${seri.nomor} diperbarui.` });
     },
-    onError: (galat: Error) => toast({ title: "Gagal menyimpan", description: galat.message.replace(/^\d+: /, ""), variant: "destructive" }),
+    onError: (galat) => toast({ title: "Gagal menyimpan", description: isiGalat(galat), variant: "destructive" }),
   });
 
-  const unggahGambar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const berkas = e.target.files?.[0];
+  const pilihGambar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const berkas = input.files?.[0];
     if (!berkas) return;
     setUnggah(true);
-    const data = new FormData();
-    data.append("file", berkas);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: data });
-      const isi = await res.json();
-      setForm((lama) => ({ ...lama, gambar: isi.url }));
-    } catch {
-      toast({ title: "Gagal", description: "Gagal mengunggah gambar", variant: "destructive" });
+      const url = await unggahGambar(berkas);
+      setForm((lama) => ({ ...lama, gambar: url }));
+    } catch (galat) {
+      toast({ title: "Gambar belum terunggah", description: galat instanceof Error ? galat.message : isiGalat(galat), variant: "destructive" });
     }
+    input.value = "";
     setUnggah(false);
   };
 
@@ -75,7 +75,7 @@ function EditorSeri({ seri }: { seri: SeriAdmin }) {
       </div>
       <div>
         <Label>Gambar sampul (opsional)</Label>
-        <Input type="file" accept="image/*" onChange={unggahGambar} />
+        <Input type="file" accept="image/*" onChange={pilihGambar} />
         {unggah && <p className="mt-1 text-sm text-muted-foreground">Mengunggah…</p>}
         {form.gambar && (
           <div className="relative mt-2">

@@ -133,7 +133,7 @@ app.use((req, res, next) => {
       ? (err.code === "LIMIT_FILE_SIZE" ? 413 : 400)
       : err.status || err.statusCode || 500;
     const message = err instanceof multer.MulterError
-      ? (err.code === "LIMIT_FILE_SIZE" ? "Ukuran gambar melebihi batas 5 MB" : "Berkas unggahan tidak valid")
+      ? (err.code === "LIMIT_FILE_SIZE" ? "Ukuran gambar melebihi batas 5 MB" : "Berkas harus berupa gambar JPG, PNG, atau WebP")
       : status >= 500
         ? "Terjadi kesalahan pada server"
         : err.message || "Permintaan tidak dapat diproses";

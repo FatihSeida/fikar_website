@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, isiGalat } from "@/lib/queryClient";
+import { unggahGambar } from "@/lib/unggah";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +111,7 @@ function GalleryManager() {
       setDialogOpen(false);
       toast({ title: "Berhasil", description: "Item galeri berhasil ditambahkan" });
     },
+    onError: (galat) => toast({ title: "Item galeri belum tersimpan", description: isiGalat(galat), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -120,21 +122,20 @@ function GalleryManager() {
       queryClient.invalidateQueries({ queryKey: ["/api/gallery"] });
       toast({ title: "Berhasil", description: "Item galeri berhasil dihapus" });
     },
+    onError: (galat) => toast({ title: "Item galeri belum terhapus", description: isiGalat(galat), variant: "destructive" }),
   });
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      setImageUrl(data.url);
-    } catch {
-      toast({ title: "Gagal", description: "Gagal mengunggah gambar", variant: "destructive" });
+      setImageUrl(await unggahGambar(file));
+    } catch (galat) {
+      toast({ title: "Gambar belum terunggah", description: galat instanceof Error ? galat.message : isiGalat(galat), variant: "destructive" });
     }
+    input.value = "";
     setUploading(false);
   };
 
@@ -241,6 +242,13 @@ function NotesManager() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "", sourceUrl: "", sourceName: "" });
   const [coverUploading, setCoverUploading] = useState(false);
+  // Alasan penolakan tetap tampil di atas tombol Simpan; toast saja cepat hilang dan dialognya panjang.
+  const [galatSimpan, setGalatSimpan] = useState("");
+  const gagalSimpan = (judul: string) => (galat: unknown) => {
+    const pesan = isiGalat(galat);
+    setGalatSimpan(pesan);
+    toast({ title: judul, description: pesan, variant: "destructive" });
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof form) => {
@@ -251,6 +259,7 @@ function NotesManager() {
       resetForm();
       toast({ title: "Berhasil", description: "Catatan berhasil ditambahkan" });
     },
+    onError: gagalSimpan("Catatan belum tersimpan"),
   });
 
   const updateMutation = useMutation({
@@ -262,6 +271,7 @@ function NotesManager() {
       resetForm();
       toast({ title: "Berhasil", description: "Catatan berhasil diperbarui" });
     },
+    onError: gagalSimpan("Perubahan belum tersimpan"),
   });
 
   const deleteMutation = useMutation({
@@ -272,11 +282,13 @@ function NotesManager() {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
       toast({ title: "Berhasil", description: "Catatan berhasil dihapus" });
     },
+    onError: (galat) => toast({ title: "Catatan belum terhapus", description: isiGalat(galat), variant: "destructive" }),
   });
 
   const resetForm = () => {
     setForm({ title: "", slug: "", excerpt: "", content: "", tag: "", date: "", coverImage: "", sourceUrl: "", sourceName: "" });
     setEditingNote(null);
+    setGalatSimpan("");
     setDialogOpen(false);
   };
 
@@ -297,6 +309,7 @@ function NotesManager() {
   };
 
   const handleSubmit = () => {
+    setGalatSimpan("");
     if (editingNote) {
       updateMutation.mutate({ id: editingNote.id, data: form });
     } else {
@@ -309,18 +322,17 @@ function NotesManager() {
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
     setCoverUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      setForm(prev => ({ ...prev, coverImage: data.url }));
-    } catch {
-      toast({ title: "Gagal", description: "Gagal mengunggah gambar", variant: "destructive" });
+      const url = await unggahGambar(file);
+      setForm(prev => ({ ...prev, coverImage: url }));
+    } catch (galat) {
+      toast({ title: "Gambar belum terunggah", description: galat instanceof Error ? galat.message : isiGalat(galat), variant: "destructive" });
     }
+    input.value = "";
     setCoverUploading(false);
   };
 
@@ -436,6 +448,7 @@ function NotesManager() {
                   data-testid="input-note-cover"
                 />
               </div>
+              {galatSimpan && <p className="text-sm text-destructive" role="alert" data-testid="text-note-error">{galatSimpan}</p>}
               <Button
                 onClick={handleSubmit}
                 disabled={!form.title || !form.slug || !form.content || createMutation.isPending || updateMutation.isPending}
@@ -505,6 +518,7 @@ function PageEditor() {
       queryClient.invalidateQueries({ queryKey: ["/api/pages", "pemikiran-ide"] });
       toast({ title: "Berhasil", description: "Halaman berhasil disimpan" });
     },
+    onError: (galat) => toast({ title: "Halaman belum tersimpan", description: isiGalat(galat), variant: "destructive" }),
   });
 
   if (isLoading) return <p className="text-muted-foreground">Memuat...</p>;

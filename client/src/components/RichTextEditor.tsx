@@ -29,6 +29,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { isiGalat } from "@/lib/queryClient";
+import { unggahGambar } from "@/lib/unggah";
 
 interface RichTextEditorProps {
   content: string;
@@ -36,6 +39,7 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
@@ -85,21 +89,17 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     const file = e.target.files?.[0];
     if (!file || !editor) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      editor.chain().focus().setImage({ src: data.url }).run();
-    } catch {
-      alert("Gagal mengunggah gambar");
+      const url = await unggahGambar(file);
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (galat) {
+      toast({ title: "Gambar belum terunggah", description: galat instanceof Error ? galat.message : isiGalat(galat), variant: "destructive" });
     }
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }, [editor]);
+  }, [editor, toast]);
 
   if (!editor) return null;
 
