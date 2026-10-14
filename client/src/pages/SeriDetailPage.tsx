@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 import { Link, useRoute } from "wouter";
@@ -8,14 +8,16 @@ import SiteFooter from "@/components/sections/SiteFooter";
 import KolomTanggapan from "@/components/KolomTanggapan";
 import PetaSuaraKader from "@/components/PetaSuaraKader";
 import { SegeraHadir } from "@/components/SegeraHadir";
+import { muatAdegan, punyaCerita } from "@/components/cerita/alat";
 import { proseKelas } from "@/pages/NoteDetail";
 import { labelTerbit } from "@/pages/SeriesPage";
 import type { Seri } from "@shared/schema";
 import type { CeritaSeri } from "@shared/cerita";
 import type { InfoSeri } from "@/components/seri/tipe";
 
-// Tampilan khusus dimuat terpisah: cerita interaktif membawa three.js, kerangka membawa grafik.
-const CeritaInteraktif = lazy(() => import("@/components/cerita/CeritaInteraktif"));
+// Tampilan khusus dimuat terpisah: cerita interaktif membawa mesin adegan, kerangka membawa grafik.
+const muatCerita = () => import("@/components/cerita/CeritaInteraktif");
+const CeritaInteraktif = lazy(muatCerita);
 const SeriPemuda = lazy(() => import("@/components/seri/SeriPemuda"));
 const SeriPahlawan = lazy(() => import("@/components/seri/SeriPahlawan"));
 
@@ -85,6 +87,13 @@ export default function SeriDetailPage() {
   const [, params] = useRoute("/series/:slug");
   const slug = params?.slug ?? "";
   const { data: seri, isLoading, error } = useQuery<SeriLengkap>({ queryKey: [`/api/seri/${slug}`], enabled: !!slug });
+
+  // Kode dan adegan cerita diunduh bersamaan dengan datanya, bukan menunggu data tiba lebih dulu.
+  useEffect(() => {
+    if (!punyaCerita(slug)) return;
+    void muatCerita();
+    void muatAdegan(slug);
+  }, [slug]);
 
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">Memuat seri…</div>;

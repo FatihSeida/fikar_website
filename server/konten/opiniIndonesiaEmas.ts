@@ -27,7 +27,8 @@ const paragraf = [
   `Pertanyaannya kini kembali kepada kader angkatan hari ini. Di tengah karang yang makin banyak, di bagian mana dari perahu ini kita memilih berdiri?`,
 ];
 
-const referensi = [
+/** Dipakai juga oleh rujukan di penutup Series 1, supaya daftarnya tidak ditulis dua kali. */
+export const referensi = [
   `Hatta, Mohammad. 1948. "Mendayung antara Dua Karang." Keterangan pemerintah di depan Badan Pekerja KNIP, Yogyakarta, 2 September 1948.`,
   `Bisnis.com. 2025. "Indonesia Resmi Jadi Anggota Penuh BRICS menurut Pemerintah Brasil." 7 Januari 2025. https://kabar24.bisnis.com/read/20250107/19/1829430/indonesia-resmi-jadi-anggota-penuh-brics-menurut-pemerintah-brasil`,
   `Bisnis.com. 2026. "Ini Pidato Lengkap Prabowo di Board of Peace: Komitmen Perdamaian dan 8.000 Pasukan untuk Gaza." 20 Februari 2026. https://kabar24.bisnis.com/read/20260220/15/1954344/ini-pidato-lengkap-prabowo-di-board-of-peace-komitmen-perdamaian-dan-8000-pasukan-untuk-gaza`,

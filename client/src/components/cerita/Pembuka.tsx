@@ -4,20 +4,18 @@ import { ArrowDown, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import type { CeritaSeri } from "@shared/cerita";
 import type { InfoSeri } from "@/components/seri/tipe";
-import { DaftarIsi, TombolUlangi } from "./DaftarIsi";
+import { DaftarIsi } from "./DaftarIsi";
 import { duaAngka, paragraf } from "./alat";
 
-/** Halaman pembuka cerita: judul, caption seri, penulis, cara membaca, dan daftar isi. */
+/** Halaman pembuka cerita: judul, caption seri, penulis, cara membaca, dan daftar isi yang bisa dilompati. */
 
 type PropsPembuka = {
   seri: InfoSeri;
   cerita: CeritaSeri;
-  sampai: number;
   menit: number;
   tenang: boolean;
   onMulai: () => void;
   onPilih: (id: string) => void;
-  onUlangi: () => void;
 };
 
 const tanggal = (waktu: number) => new Date(waktu).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
@@ -25,15 +23,13 @@ const tanggal = (waktu: number) => new Date(waktu).toLocaleDateString("id-ID", {
 const caraMembaca = [
   "Gulir pelan. Gambar di samping bergerak mengikuti bacaanmu.",
   "Buka penjelasan tambahan bila ingin tahu lebih dalam.",
-  "Tekan “Saya paham” untuk membuka bagian berikutnya.",
+  "Boleh melompat ke bagian mana saja lewat daftar isi.",
 ];
 
-const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, cerita, sampai, menit, tenang, onMulai, onPilih, onUlangi }, ref) {
+const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, cerita, menit, tenang, onMulai, onPilih }, ref) {
   const jumlah = cerita.bab.length;
   const nomor = `Series ${duaAngka(seri.nomor)}`;
   const label = cerita.pembuka.label.trim();
-  const lanjutan = sampai > 0 && sampai < jumlah;
-  const selesai = sampai >= jumlah;
   const masuk = (tunda: number) => (tenang ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.9, delay: tunda, ease: [0.22, 1, 0.36, 1] as const } });
 
   return (
@@ -99,9 +95,8 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
 
           <motion.div {...masuk(0.36)} className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
             <button type="button" onClick={onMulai} className="inline-flex items-center gap-2 bg-[#DCC38A] px-7 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#071610] shadow-[0_14px_40px_-14px_rgba(220,195,138,0.7)] transition-transform hover:-translate-y-0.5">
-              {selesai ? "Baca penutup" : lanjutan ? `Lanjutkan dari bagian ${sampai + 1}` : "Mulai membaca"} <ArrowDown className="h-4 w-4" />
+              Mulai membaca <ArrowDown className="h-4 w-4" />
             </button>
-            {sampai > 0 && <TombolUlangi onUlangi={onUlangi} />}
             <Link href="/series" className="inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-[#DCC38A]">
               Semua seri <ArrowRight className="h-4 w-4" />
             </Link>
@@ -121,10 +116,10 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
           <div className="border border-[#DCC38A]/20 bg-[#04110c]/55 backdrop-blur-sm">
             <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
               <h2 id="judul-daftar-isi" className="evidence-kicker font-sans font-normal">Daftar isi</h2>
-              <span className="text-xs text-white/45">{Math.min(sampai, jumlah)} dari {jumlah} dipahami</span>
+              <span className="text-xs text-white/45">{jumlah} bagian</span>
             </div>
             <div className="py-2">
-              <DaftarIsi bab={cerita.bab} sampai={sampai} aktif={-1} onPilih={onPilih} ringkas />
+              <DaftarIsi bab={cerita.bab} aktif={-1} onPilih={onPilih} ringkas />
             </div>
           </div>
         </motion.aside>

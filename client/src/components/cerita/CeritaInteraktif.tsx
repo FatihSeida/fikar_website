@@ -7,20 +7,20 @@ import type { PropsHalamanSeri } from "@/components/seri/tipe";
 import LatarHidup from "./LatarHidup";
 import Pembuka from "./Pembuka";
 import Bab from "./Bab";
-import { BagianTerkunci, Penutup } from "./Penutup";
+import { Penutup } from "./Penutup";
 import { DaftarIsiMengambang } from "./DaftarIsi";
-import { gulirKe, useDaftarAdegan, useKemajuan } from "./alat";
+import { gulirKe, useDaftarAdegan } from "./alat";
 
 /**
- * Cerita interaktif Series 1 dan 2: pembuka, bagian-bagian bergambar yang
- * terbuka satu per satu setelah pembaca menandai paham, penutup, lalu kolom
- * tanggapan kader. Kemajuan disimpan per seri di perangkat pembaca.
+ * Cerita interaktif Series 1 dan 2: pembuka, bagian-bagian bergambar, penutup,
+ * lalu kolom tanggapan kader. Semua bagian terbuka sejak awal; pembaca bebas
+ * menggulir atau melompat lewat daftar isi.
  */
 
 const hitungMenit = (cerita: CeritaSeri) => {
   const teks = [
     cerita.pembuka.pengantar,
-    ...cerita.bab.flatMap((b) => [b.judul, b.inti, ...(b.poin ?? []), b.lanjut?.isi ?? "", b.dalam?.isi ?? "", b.dalam?.kutipan ?? "", b.pahami]),
+    ...cerita.bab.flatMap((b) => [b.judul, b.inti, ...(b.poin ?? []), b.lanjut?.isi ?? "", b.dalam?.isi ?? "", b.dalam?.kutipan ?? ""]),
     cerita.penutup.isi,
   ].join(" ");
   return Math.max(3, Math.round(teks.split(/\s+/).filter(Boolean).length / 200));
@@ -38,17 +38,31 @@ function useTerlihat(rootMargin = "0px") {
   return [setEl, ya] as const;
 }
 
+/**
+ * Mesin 3D (sekitar 800 KB sebelum dikompres) tidak ikut diunduh saat halaman dibuka.
+ * Ia diunduh sesudah halaman selesai digambar dan peramban senggang, supaya sudah siap
+ * ketika pembaca menggulir ke adegan pertama. Dilewati bila pembaca menghemat kuota.
+ */
+function useMuatMesin3D() {
+  useEffect(() => {
+    const koneksi = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (koneksi?.saveData) return;
+    const muat = () => { void import("./Kanvas3D"); };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(muat, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(muat, 2000);
+    return () => window.clearTimeout(id);
+  }, []);
+}
+
 export default function CeritaInteraktif({ seri, cerita, tanggapan }: PropsHalamanSeri & { cerita: CeritaSeri }) {
   const tenang = useReducedMotion() ?? false;
-  const jumlah = cerita.bab.length;
-  const { sampai, paham, ulangi } = useKemajuan(seri.slug, jumlah);
   const daftar = useDaftarAdegan(seri.slug);
-  const [putaran, setPutaran] = useState(0);
-  const [tuju, setTuju] = useState<string | null>(null);
   const [aktif, setAktif] = useState(-1);
-  // Bagian yang dibuka selama kunjungan ini diberi animasi masuk; yang sudah terbuka sebelumnya langsung tampil.
-  const awalTerbuka = useRef(sampai);
   const menit = useMemo(() => hitungMenit(cerita), [cerita]);
+  useMuatMesin3D();
 
   const [refPembuka, pembukaTerlihat] = useTerlihat();
   const [refCerita, ceritaTerlihat] = useTerlihat();
@@ -71,30 +85,10 @@ export default function CeritaInteraktif({ seri, cerita, tanggapan }: PropsHalam
     );
     wadah.querySelectorAll("section[id]").forEach((s) => pengamat.observe(s));
     return () => pengamat.disconnect();
-  }, [cerita.bab, sampai, putaran]);
-
-  useEffect(() => {
-    if (!tuju) return;
-    setTuju(null);
-    // Tunggu bagian baru selesai digambar sebelum digulir ke sana.
-    requestAnimationFrame(() => requestAnimationFrame(() => gulirKe(tuju, tenang)));
-  }, [tuju, tenang]);
-
-  const tandaiPaham = useCallback((indeks: number) => {
-    paham(indeks);
-    setTuju(indeks + 1 < jumlah ? cerita.bab[indeks + 1].id : "penutup");
-  }, [paham, jumlah, cerita.bab]);
-
-  const mulaiLagi = useCallback(() => {
-    ulangi();
-    awalTerbuka.current = 0;
-    setPutaran((p) => p + 1);
-    setAktif(-1);
-    if (cerita.bab[0]) setTuju(cerita.bab[0].id);
-  }, [ulangi, cerita.bab]);
+  }, [cerita.bab]);
 
   const pilih = useCallback((id: string) => gulirKe(id, tenang), [tenang]);
-  const mulai = () => gulirKe(sampai >= jumlah ? "penutup" : cerita.bab[Math.min(sampai, jumlah - 1)]?.id ?? "penutup", tenang);
+  const mulai = () => gulirKe(cerita.bab[0]?.id ?? "penutup", tenang);
 
   const sisiCahaya = aktif < 0 || pembukaTerlihat ? "kanan" : aktif % 2 === 0 ? "kanan" : "kiri";
 
@@ -108,37 +102,26 @@ export default function CeritaInteraktif({ seri, cerita, tanggapan }: PropsHalam
           ref={refPembuka}
           seri={seri}
           cerita={cerita}
-          sampai={sampai}
           menit={menit}
           tenang={tenang}
           onMulai={mulai}
           onPilih={pilih}
-          onUlangi={mulaiLagi}
         />
 
         <div ref={wadahBab}>
-          {cerita.bab.map((bab, i) => i <= sampai && (
+          {cerita.bab.map((bab, i) => (
             <Bab
-              key={`${bab.id}-${putaran}`}
+              key={bab.id}
               bab={bab}
               indeks={i}
-              jumlah={jumlah}
               entri={daftar?.[bab.adegan]}
               memuat={daftar === null}
               tenang={tenang}
-              sudahPaham={i < sampai}
-              baru={i > awalTerbuka.current}
-              onPaham={() => tandaiPaham(i)}
-              onLanjut={() => gulirKe(i + 1 < jumlah ? cerita.bab[i + 1].id : "penutup", tenang)}
             />
           ))}
         </div>
 
-        {sampai < jumlah ? (
-          <BagianTerkunci bab={cerita.bab} sampai={sampai} />
-        ) : (
-          <Penutup key={`penutup-${putaran}`} cerita={cerita} baru={awalTerbuka.current < jumlah} tenang={tenang} onUlangi={mulaiLagi} />
-        )}
+        <Penutup cerita={cerita} tenang={tenang} />
       </main>
 
       <section ref={refTanggapan} aria-label="Tanggapan kader" className="relative bg-background px-5 pb-24 pt-16 text-foreground md:px-8">
@@ -150,10 +133,8 @@ export default function CeritaInteraktif({ seri, cerita, tanggapan }: PropsHalam
       <DaftarIsiMengambang
         tampil={!pembukaTerlihat && !tanggapanTerlihat && aktif >= 0}
         bab={cerita.bab}
-        sampai={sampai}
         aktif={aktif}
         onPilih={pilih}
-        onUlangi={mulaiLagi}
         tenang={tenang}
       />
     </div>

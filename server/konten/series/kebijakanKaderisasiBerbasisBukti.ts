@@ -33,8 +33,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Inilah persoalan yang hendak dijawab HMI Evidence. HMI tidak membutuhkan aturan baru. HMI membutuhkan ingatan yang dapat dibaca bersama.",
         },
-        pahami:
-          "HMI tidak kekurangan aturan; yang kurang adalah ingatan yang bisa dibaca bersama.",
       },
       {
         id: "bab-2",
@@ -58,8 +56,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Ingatan organisasi tersimpan di kepala orang. Ketika orangnya pergi, ingatannya ikut pergi, dan pengurus berikutnya mulai membaca masalah dari awal.",
         },
-        pahami:
-          "Dokumen sebenarnya banyak, tetapi karena bentuknya beragam dan hilang saat pengurus berganti, ingatan organisasi ikut hilang.",
       },
       {
         id: "bab-3",
@@ -83,8 +79,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Organisasi berbasis bukti tidak lain adalah penerapan kualitas insan akademis itu pada cara HMI mengurus dirinya sendiri.",
         },
-        pahami:
-          "Bukti adalah jejak yang bisa ditelusuri asal-usulnya, dan cara berpikir ini berakar pada nilai HMI sendiri.",
       },
       {
         id: "bab-4",
@@ -107,8 +101,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Sertifikat tetap dicetak, SK tetap ditandatangani, surat tetap dikirim. Yang bertambah hanyalah identitas yang membuat setiap dokumen dapat ditemukan, diverifikasi, dan dihubungkan dengan dokumen lain.",
         },
-        pahami:
-          "Identitas dokumen adalah perubahan kecil, yaitu cara dokumen memperkenalkan dirinya, tanpa mengubah cara pengurus bekerja.",
       },
       {
         id: "bab-5",
@@ -132,8 +124,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Setiap tingkatan harus merasakan dokumennya lebih mudah dibuat, lebih aman disimpan, dan lebih mudah ditemukan kembali sebelum diminta mengirim apa pun ke atas.",
         },
-        pahami:
-          "Memori organisasi tumbuh dari banyak dokumen beridentitas yang tersusun dari komisariat sampai PB, dan hanya hidup kalau manfaat datang lebih dulu.",
       },
       {
         id: "bab-6",
@@ -156,8 +146,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Organisasi untuk pertama kalinya dapat mengetahui di titik mana kader berhenti, tanpa meminta siapa pun membuat laporan tambahan.",
         },
-        pahami:
-          "Dengan membaca dokumen yang sudah ada, kita bisa melihat perjalanan kader dan tahu di titik mana ia berhenti.",
       },
       {
         id: "bab-7",
@@ -181,8 +169,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Laporan empat bulanan yang diwajibkan ART dapat tersusun dari jejak yang sudah ada, bukan disusun dari nol menjelang tenggat. Serah terima kepengurusan memindahkan pengetahuan, bukan hanya jabatan.",
         },
-        pahami:
-          "Tata kelola bisa dibaca sepanjang periode lewat SK dan surat yang beridentitas, sehingga masalah terlihat lebih awal dan pengetahuan ikut berpindah.",
       },
       {
         id: "bab-8",
@@ -205,8 +191,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Perbedaan pendapat tetap ada, tetapi diperdebatkan di atas dasar yang dapat diperiksa bersama, bukan di atas kecurigaan.",
         },
-        pahami:
-          "Kebijakan yang baik bertumpu pada gambaran keadaan yang bisa diperiksa bersama, bukan pada perkiraan atau suasana forum.",
       },
       {
         id: "bab-9",
@@ -230,8 +214,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Identitas dokumen adalah benang yang menjahit siklus ini. Karena itu, meningkatkan cara HMI mencatat identitas dokumen pada dasarnya berarti meningkatkan kemampuan HMI untuk memutuskan, mengelola, dan mengkader dirinya sendiri.",
         },
-        pahami:
-          "Kaderisasi, tata kelola, dan kebijakan adalah satu siklus, dan identitas dokumen adalah benang yang menjaganya tetap tersambung.",
       },
       {
         id: "bab-10",
@@ -255,8 +237,6 @@ export function ceritaKebijakanKaderisasiBerbasisBukti(): CeritaSeri {
           kutipan:
             "Identitas dokumen adalah fondasi, bukan langit-langit. Ia mampu memperlihatkan keberadaan, waktu, pelaku, dan keterhubungan: apakah sesuatu terjadi, kapan, oleh siapa, dan berkaitan dengan apa.",
         },
-        pahami:
-          "HMI Evidence masuk pelan-pelan, dijaga aturan data yang jelas, dan identitas dokumen hanyalah fondasi, bukan titik akhir.",
       },
     ],
     penutup: {

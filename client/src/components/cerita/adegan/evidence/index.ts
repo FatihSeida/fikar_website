@@ -1,15 +1,17 @@
+import { lazy } from "react";
 import type { DaftarAdegan } from "../../kontrak";
-import AdeganAturan from "./AdeganAturan";
-import AdeganIdentitas from "./AdeganIdentitas";
-import AdeganIngatan from "./AdeganIngatan";
-import AdeganJejak from "./AdeganJejak";
-import AdeganKaderisasi from "./AdeganKaderisasi";
-import AdeganKebijakan from "./AdeganKebijakan";
-import AdeganMemori from "./AdeganMemori";
-import AdeganMenyusup from "./AdeganMenyusup";
-import AdeganSiklus from "./AdeganSiklus";
-import AdeganTataKelola from "./AdeganTataKelola";
+const AdeganAturan = lazy(() => import("./AdeganAturan"));
+const AdeganIdentitas = lazy(() => import("./AdeganIdentitas"));
+const AdeganIngatan = lazy(() => import("./AdeganIngatan"));
+const AdeganJejak = lazy(() => import("./AdeganJejak"));
+const AdeganKaderisasi = lazy(() => import("./AdeganKaderisasi"));
+const AdeganKebijakan = lazy(() => import("./AdeganKebijakan"));
+const AdeganMemori = lazy(() => import("./AdeganMemori"));
+const AdeganMenyusup = lazy(() => import("./AdeganMenyusup"));
+const AdeganSiklus = lazy(() => import("./AdeganSiklus"));
+const AdeganTataKelola = lazy(() => import("./AdeganTataKelola"));
 
+// Tiap adegan diunduh terpisah, hanya saat pembaca mendekatinya.
 /** Adegan Series 2 (Kebijakan Kaderisasi Berbasis Bukti). Kunci sama dengan `adegan` di isi cerita. */
 export const adeganEvidence: DaftarAdegan = {
   "bukti-aturan": {

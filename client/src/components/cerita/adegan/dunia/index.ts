@@ -1,15 +1,17 @@
+import { lazy } from "react";
 import type { DaftarAdegan } from "../../kontrak";
-import Adegan1947 from "./Adegan1947";
-import AdeganPerahu from "./AdeganPerahu";
-import AdeganKarangBaru from "./AdeganKarangBaru";
-import AdeganTeknologi from "./AdeganTeknologi";
-import AdeganJejakHmi from "./AdeganJejakHmi";
-import AdeganDuaWajah from "./AdeganDuaWajah";
-import AdeganModal from "./AdeganModal";
-import Adegan2045 from "./Adegan2045";
-import AdeganMendayung from "./AdeganMendayung";
-import AdeganGoInternational from "./AdeganGoInternational";
+const Adegan1947 = lazy(() => import("./Adegan1947"));
+const AdeganPerahu = lazy(() => import("./AdeganPerahu"));
+const AdeganKarangBaru = lazy(() => import("./AdeganKarangBaru"));
+const AdeganTeknologi = lazy(() => import("./AdeganTeknologi"));
+const AdeganJejakHmi = lazy(() => import("./AdeganJejakHmi"));
+const AdeganDuaWajah = lazy(() => import("./AdeganDuaWajah"));
+const AdeganModal = lazy(() => import("./AdeganModal"));
+const Adegan2045 = lazy(() => import("./Adegan2045"));
+const AdeganMendayung = lazy(() => import("./AdeganMendayung"));
+const AdeganGoInternational = lazy(() => import("./AdeganGoInternational"));
 
+// Tiap adegan diunduh terpisah, hanya saat pembaca mendekatinya.
 /** Adegan Series 1 (Kaderisasi Go International). Kunci sama dengan `adegan` di isi cerita. */
 export const adeganDunia: DaftarAdegan = {
   "dunia-1947": { jenis: "3d", Komponen: Adegan1947, alt: "Perahu kecil berlayar di laut malam di antara dua karang besar, lambang Indonesia yang harus mendayung di antara Amerika Serikat dan Uni Soviet." },

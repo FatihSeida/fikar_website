@@ -37,10 +37,18 @@ Baca bersama `aturan-kerja-agen.md`. Kontrak kode sudah ada dan tidak diubah age
 
 ## Perilaku cerita interaktif
 
-- Setiap bab menampilkan `label`, `judul`, `inti`, dan `poin`. Tombol `lanjut.judul` membuka lapis kedua; setelah itu tombol `dalam.judul` membuka lapis ketiga (beserta `kutipan` naskah asli bila ada). Adegan menerima `lapis` (0, 1, 2) dan boleh menambah detail.
-- Di akhir bab ada kotak "Sudah paham?" berisi kalimat `pahami` dan tombol "Saya paham, lanjutkan". Bab berikutnya baru terbuka setelah tombol ini ditekan. Pembaca yang kembali bisa langsung melihat bab yang sudah dibuka.
-- Kemajuan disimpan per seri di `localStorage` (dibungkus try/catch). Ada daftar isi (bab yang sudah terbuka bisa diulang) dan tombol "Ulangi dari awal".
+- Setiap bab menampilkan `label`, `judul`, `inti`, dan `poin`. Tombol `lanjut.judul` membuka lapis kedua; setelah itu tombol `dalam.judul` membuka lapis ketiga (beserta `kutipan` bila ada; kutipan harus sama persis dengan tulisan yang menjadi dasar seri, tanpa label sumber). Adegan menerima `lapis` (0, 1, 2) dan boleh menambah detail.
+- Semua bab terbuka sejak awal. Tidak ada kunci, tombol "Saya paham", atau ringkasan di akhir bab; pembaca bebas menggulir atau melompat lewat daftar isi.
+- Daftar isi di pojok kiri bawah menunjukkan bab yang sedang dibaca dan bisa dipakai melompat ke bab atau penutup mana pun.
 - Setelah bab terakhir: `penutup`, `rujukan` (bila ada), lalu `tanggapan` dari props (kolom tanggapan kader, berlatar terang).
+
+## Performa
+
+- Mesin 3D (react-three-fiber dan three.js, sekitar 800 KB sebelum dikompres) berada di berkas terpisah (`Kanvas3D`). Ia tidak diunduh saat halaman dibuka, melainkan saat peramban senggang, dan kanvas 3D baru dipasang setelah pembaca mulai menggulir.
+- Setiap adegan adalah `lazy`: hanya adegan yang didekati pembaca yang diunduh.
+- Paling banyak dua kanvas WebGL sekaligus. Resolusi dibatasi 1,5 (1,25 di perangkat sederhana) dan gerak latar sekitar 25 gambar per detik (15 di perangkat sederhana).
+- Latar halaman tidak memakai `mix-blend-mode` dan menggeser kilau dengan transform, supaya tidak memicu tata letak atau pencampuran ulang tiap frame.
+- Layar pembuka situs (2,5 detik) tidak dipasang bila halaman dibuka langsung di `/series/...`.
 
 ## Rancangan bab dan adegan
 
