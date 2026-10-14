@@ -63,6 +63,14 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
             {cerita.pembuka.judul}
           </motion.h1>
 
+          {seri.tulisan && (
+            <motion.div {...masuk(0.12)} className="mt-3">
+              <Link href={`/catatan/${seri.tulisan}`} className="inline-flex items-center gap-2 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#DCC38A] underline-offset-4 hover:underline">
+                Baca tulisannya <ArrowRight className="h-4 w-4" />
+              </Link>
+            </motion.div>
+          )}
+
           {seri.subjudul && (
             <motion.p {...masuk(0.16)} className="mt-6 max-w-2xl font-serif text-xl italic leading-snug text-[#DCC38A] md:text-2xl">
               {seri.subjudul}

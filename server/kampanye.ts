@@ -28,9 +28,11 @@ type Pembantu = { requireAdmin: Middleware; sanitizeHtml: (html: string) => stri
  * Empat seri di tab Series. Judul dan caption disimpan di server supaya baru
  * terbaca dua hari sebelum terbit; caption dipakai bila admin belum mengisi subjudul.
  */
-const daftarSeri: { slug: string; nomor: number; judul: string; caption: string; fitur: FiturRilis; tampilan: TampilanSeri }[] = [
+const daftarSeri: { slug: string; nomor: number; judul: string; caption: string; fitur: FiturRilis; tampilan: TampilanSeri; tulisan?: string }[] = [
   {
+    // `tulisan` adalah slug catatan yang menjadi dasar seri; seri menautkannya dan catatannya menautkan balik.
     slug: "kaderisasi-go-international", nomor: 1, judul: "Kaderisasi Go International", fitur: "series-1", tampilan: "cerita",
+    tulisan: "kontribusi-hmi-menyongsong-indonesia-emas-2045",
     caption: "Dari Yogyakarta 1947 sampai seratus tahun HMI: kader hanya bisa melangkah jauh ke dunia bila rumahnya rukun.",
   },
   {
@@ -212,6 +214,7 @@ export async function registerKampanyeRoutes(app: Express, { requireAdmin, sanit
           gambar: isi?.gambar ?? null,
           penulis: isi?.penulis ?? "Ahmad Zulfikar",
           tampilan: awal.tampilan,
+          tulisan: awal.tulisan ?? null,
         } : {}),
       };
     }));
@@ -225,7 +228,7 @@ export async function registerKampanyeRoutes(app: Express, { requireAdmin, sanit
     // Sudah waktunya terbit tetapi naskah belum diisi: pengunjung tidak melihat halaman kosong.
     if (!isi || (!punyaIsi(awal, isi.isi) && isProduction && !req.session?.isAdmin)) return res.status(404).json({ message: "Naskah seri ini sedang disiapkan" });
     const cerita = awal.tampilan === "cerita" ? ceritaSeri[awal.slug]?.() : undefined;
-    res.json({ ...isi, subjudul: isi.subjudul || awal.caption, rilis: RILIS[awal.fitur], tampilan: awal.tampilan, ...(cerita ? { cerita } : {}) });
+    res.json({ ...isi, subjudul: isi.subjudul || awal.caption, rilis: RILIS[awal.fitur], tampilan: awal.tampilan, tulisan: awal.tulisan ?? null, ...(cerita ? { cerita } : {}) });
   });
 
   app.get("/api/seri/:slug/tanggapan", async (req, res) => {

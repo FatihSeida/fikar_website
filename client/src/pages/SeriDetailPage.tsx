@@ -19,7 +19,7 @@ const CeritaInteraktif = lazy(() => import("@/components/cerita/CeritaInteraktif
 const SeriPemuda = lazy(() => import("@/components/seri/SeriPemuda"));
 const SeriPahlawan = lazy(() => import("@/components/seri/SeriPahlawan"));
 
-type SeriLengkap = Seri & { rilis: number; tampilan?: "cerita" | "pemuda" | "pahlawan" | "naskah"; cerita?: CeritaSeri };
+type SeriLengkap = Seri & { rilis: number; tampilan?: "cerita" | "pemuda" | "pahlawan" | "naskah"; cerita?: CeritaSeri; tulisan?: string | null };
 
 /**
  * Ajakan di tengah atau akhir tulisan, disisipkan admin dengan [[ajakan-kuis]].
@@ -115,7 +115,7 @@ export default function SeriDetailPage() {
 
   const info: InfoSeri = {
     slug: seri.slug, nomor: seri.nomor, judul: seri.judul, subjudul: seri.subjudul, rilis: seri.rilis,
-    penulis: seri.penulis, tautanMedia: seri.tautanMedia, namaMedia: seri.namaMedia,
+    penulis: seri.penulis, tautanMedia: seri.tautanMedia, namaMedia: seri.namaMedia, tulisan: seri.tulisan,
   };
   const memuat = <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--evidence))] text-white/70">Memuat seri…</div>;
   const tanggapan = <KolomTanggapan slug={seri.slug} />;

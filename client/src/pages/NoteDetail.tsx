@@ -1,8 +1,11 @@
 import { useRoute } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useNote } from "@/hooks/use-content";
+import type { RingkasSeri } from "@/pages/SeriesPage";
+import { labelWaktu } from "@shared/rilis";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
@@ -14,6 +17,10 @@ export const proseKelas =
 export default function NoteDetail() {
   const [, params] = useRoute("/catatan/:slug");
   const { data: note, isLoading, error } = useNote(params?.slug || "");
+  // Catatan yang menjadi dasar sebuah seri menautkan ke serinya. Server hanya mengirim `tulisan`
+  // bersama judul seri, jadi tautan baru muncul saat seri itu boleh tampil.
+  const { data: daftarSeri } = useQuery<RingkasSeri[]>({ queryKey: ["/api/seri"], staleTime: 60_000, enabled: !!note });
+  const seri = daftarSeri?.find((item) => item.tulisan === note?.slug);
 
   if (isLoading) {
     return (
@@ -66,6 +73,21 @@ export default function NoteDetail() {
             <h1 className="mb-7 max-w-3xl font-serif text-4xl leading-[1.12] md:text-6xl">
               {note.title}
             </h1>
+
+            {seri?.judul && (
+              <Link
+                href={`/series/${seri.slug}`}
+                className="group mb-7 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-l-2 border-accent pl-4"
+                data-testid="link-note-series"
+              >
+                <span className="eyebrow">Series {String(seri.nomor).padStart(2, "0")}</span>
+                <span className="font-serif text-lg text-foreground transition-colors group-hover:text-primary">{seri.judul}</span>
+                <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-primary">
+                  {seri.terbit ? "Baca versi interaktifnya" : `Segera terbit · ${labelWaktu(seri.rilis)}`}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </span>
+              </Link>
+            )}
 
             <p className="measure text-lg text-muted-foreground">{note.excerpt}</p>
 
