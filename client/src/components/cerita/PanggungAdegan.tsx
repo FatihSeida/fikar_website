@@ -1,19 +1,17 @@
-import { Component, Suspense, useEffect, useRef, useState, useSyncExternalStore, type MutableRefObject, type ReactNode } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Component, lazy, Suspense, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import type { MotionValue } from "framer-motion";
 import type { EntriAdegan, Lapis } from "./kontrak";
 
 /**
- * Wadah adegan satu bagian. Adegan baru dipasang saat wadahnya mendekati layar.
- * Kanvas WebGL paling banyak dua sekaligus (yang paling dekat ke tengah layar),
- * digambar hanya saat ada perubahan (frameloop "demand"), dengan resolusi
- * dibatasi 1,75. Tanpa WebGL, atau bila adegan gagal, tampil kartu keterangan.
- *
- * Catatan untuk adegan 3D: mesin hanya menyediakan kanvas transparan, kamera
- * bawaan (fov 35, posisi [0, 0, 10]) dan progres. Cahaya, kabut, dan posisi
- * kamera diatur adegan sendiri. Selama wadah terlihat dan gerak tidak dikurangi,
- * mesin meminta gambar baru sekitar 30 kali per detik untuk gerak latar.
+ * Wadah adegan satu bagian. Adegan baru dipasang saat wadahnya mendekati layar,
+ * dan masing-masing diunduh terpisah. Kanvas WebGL paling banyak dua sekaligus
+ * (yang paling dekat ke tengah layar) dan baru dipasang setelah pembaca mulai
+ * menggulir; mesin 3D-nya (Kanvas3D) diunduh terpisah dari halaman cerita.
+ * Tanpa WebGL, atau bila adegan gagal, tampil kartu keterangan.
  */
+
+// Mesin 3D diunduh hanya bila ada adegan 3D yang perlu dipasang.
+const Kanvas3D = lazy(() => import("./Kanvas3D"));
 
 // ——— Batas dua kanvas WebGL
 
@@ -109,32 +107,16 @@ class Penahan extends Component<{ cadangan: ReactNode; children: ReactNode }, { 
   }
 }
 
-/** Menyalurkan progres gulir ke ref adegan dan meminta gambar baru setiap kali berubah. */
-function Jembatan({ nilai, progres, terlihat, tenang }: { nilai: MotionValue<number>; progres: MutableRefObject<number>; terlihat: boolean; tenang: boolean }) {
-  const invalidate = useThree((s) => s.invalidate);
+/** Benar setelah pembaca mulai menggulir (atau halaman dibuka di tengah). Sebelum itu tidak ada kanvas yang perlu dipasang. */
+function useSudahMenggulir() {
+  const [sudah, setSudah] = useState(() => typeof window !== "undefined" && window.scrollY > 4);
   useEffect(() => {
-    progres.current = nilai.get();
-    invalidate();
-    return nilai.on("change", (v) => {
-      progres.current = v;
-      invalidate();
-    });
-  }, [nilai, progres, invalidate]);
-  useEffect(() => {
-    if (!terlihat || tenang) return;
-    let id = 0;
-    let lalu = 0;
-    const detak = (t: number) => {
-      id = requestAnimationFrame(detak);
-      if (t - lalu >= 32) {
-        lalu = t;
-        invalidate();
-      }
-    };
-    id = requestAnimationFrame(detak);
-    return () => cancelAnimationFrame(id);
-  }, [terlihat, tenang, invalidate]);
-  return null;
+    if (sudah) return;
+    const saatGulir = () => { if (window.scrollY > 4) setSudah(true); };
+    window.addEventListener("scroll", saatGulir, { passive: true });
+    return () => window.removeEventListener("scroll", saatGulir);
+  }, [sudah]);
+  return sudah;
 }
 
 type PropsPanggung = {
@@ -146,28 +128,6 @@ type PropsPanggung = {
   tenang: boolean;
   judul: string;
 };
-
-function Kanvas3D({ entri, progres, lapis, tenang, terlihat }: { entri: Extract<EntriAdegan, { jenis: "3d" }>; progres: MotionValue<number>; lapis: Lapis; tenang: boolean; terlihat: boolean }) {
-  const ref = useRef(progres.get());
-  const Adegan = entri.Komponen;
-  return (
-    <Canvas
-      flat
-      frameloop="demand"
-      dpr={[1, 1.75]}
-      camera={{ fov: 35, position: [0, 0, 10], near: 0.1, far: 200 }}
-      gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
-      onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
-      style={{ position: "absolute", inset: 0 }}
-      aria-hidden="true"
-    >
-      <Jembatan nilai={progres} progres={ref} terlihat={terlihat} tenang={tenang} />
-      <Suspense fallback={null}>
-        <Adegan progres={ref} lapis={lapis} tenang={tenang} />
-      </Suspense>
-    </Canvas>
-  );
-}
 
 /** Kartu tenang pengganti adegan: tanpa WebGL, adegan gagal, atau kunci adegan tidak dikenal. */
 function KartuCadangan({ teks, catatan }: { teks: string; catatan: string }) {
@@ -198,7 +158,8 @@ export default function PanggungAdegan({ id, entri, memuat, progres, lapis, tena
   const terlihat = useDiLayar(el, "0px");
   const tigaDimensi = entri?.jenis === "3d";
   const webgl = tigaDimensi ? webglTersedia() : true;
-  const izin = useIzinKanvas(id, el, dekat && tigaDimensi && webgl);
+  const sudahMenggulir = useSudahMenggulir();
+  const izin = useIzinKanvas(id, el, dekat && tigaDimensi && webgl && sudahMenggulir);
   const alt = entri?.alt ?? `Gambar untuk bagian "${judul}" sedang disiapkan.`;
 
   let isi: ReactNode;
@@ -210,7 +171,9 @@ export default function PanggungAdegan({ id, entri, memuat, progres, lapis, tena
       <Penahan cadangan={<KartuCadangan teks={entri.alt} catatan="Gambar 3D tidak bisa ditampilkan" />}>
         {/* Tepi kanvas memudar supaya adegan menyatu dengan latar halaman. */}
         <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,#000_8%,#000_92%,transparent)] lg:[mask-image:radial-gradient(ellipse_closest-side_at_50%_50%,#000_74%,transparent_100%)]">
-          <Kanvas3D entri={entri} progres={progres} lapis={lapis} tenang={tenang} terlihat={terlihat} />
+          <Suspense fallback={<Menunggu />}>
+            <Kanvas3D entri={entri} progres={progres} lapis={lapis} tenang={tenang} terlihat={terlihat} />
+          </Suspense>
         </div>
       </Penahan>
     );
@@ -219,7 +182,9 @@ export default function PanggungAdegan({ id, entri, memuat, progres, lapis, tena
     const Adegan = entri.Komponen;
     isi = (
       <Penahan cadangan={<KartuCadangan teks={entri.alt} catatan="Gambar tidak bisa ditampilkan" />}>
-        <Adegan progres={progres} lapis={lapis} tenang={tenang} />
+        <Suspense fallback={<Menunggu />}>
+          <Adegan progres={progres} lapis={lapis} tenang={tenang} />
+        </Suspense>
       </Penahan>
     );
   }

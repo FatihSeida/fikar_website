@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
  * Latar hijau gelap cerita interaktif yang hidup tetapi tenang: cahaya radial
  * yang berpindah mengikuti sisi adegan, garis kontur tipis, butiran cahaya emas
  * yang melayang pelan dan saling tersambung bila berdekatan, serta tekstur
- * halus. Butiran digambar di kanvas 2D 30 kali per detik dan berhenti saat
+ * halus. Butiran digambar di kanvas 2D sekitar 25 kali per detik dan berhenti saat
  * tab tersembunyi, saat pembaca di luar cerita, atau bila gerak dikurangi.
  */
 
@@ -126,7 +126,7 @@ function useButiranCahaya(kanvas: RefObject<HTMLCanvasElement>, tenang: boolean,
       id = requestAnimationFrame(putar);
       if (document.hidden) return;
       const dt = lalu ? Math.min(0.1, (t - lalu) / 1000) : 0;
-      if (dt && dt < 0.031) return;
+      if (dt && dt < 0.04) return;
       lalu = t;
       gambar(t, dt);
     };
@@ -152,24 +152,26 @@ export default function LatarHidup({ tenang, sisi, jalan }: { tenang: boolean; s
   const geserKontur = useTransform(scrollY, (y) => -(y * 0.04) % 400);
   useButiranCahaya(kanvas, tenang, jalan);
 
-  const posisiCahaya = sisi === "kiri" ? "22%" : sisi === "kanan" ? "78%" : "50%";
+  // Kilau latar berpindah dengan transform (digambar kartu grafis), bukan `left` yang memicu tata letak ulang setiap frame.
+  const geser = sisi === "kiri" ? "22vw" : sisi === "kanan" ? "78vw" : "50vw";
+  const letakkan = { transform: `translate(calc(${geser} - 50%), -50%)` };
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#071610]">
       <div className="absolute inset-0 bg-[radial-gradient(90%_60%_at_50%_-10%,rgba(14,138,79,0.16),transparent_70%),radial-gradient(70%_50%_at_50%_115%,rgba(11,42,30,0.9),transparent_70%)]" />
       <div
-        className="absolute top-1/2 h-[95vmax] w-[95vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(14,138,79,0.2),rgba(14,138,79,0.06)_55%,transparent)] transition-[left] duration-[2400ms] ease-in-out"
-        style={{ left: posisiCahaya }}
+        className="absolute left-0 top-1/2 h-[95vmax] w-[95vmax] rounded-full bg-[radial-gradient(closest-side,rgba(14,138,79,0.2),rgba(14,138,79,0.06)_55%,transparent)] will-change-transform transition-transform duration-[2400ms] ease-in-out"
+        style={letakkan}
       />
       <div
-        className="absolute top-[38%] h-[46vmax] w-[46vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(220,195,138,0.09),transparent)] transition-[left] duration-[3000ms] ease-in-out"
-        style={{ left: posisiCahaya }}
+        className="absolute left-0 top-[38%] h-[46vmax] w-[46vmax] rounded-full bg-[radial-gradient(closest-side,rgba(220,195,138,0.09),transparent)] will-change-transform transition-transform duration-[3000ms] ease-in-out"
+        style={letakkan}
       />
-      <motion.div className="absolute -inset-x-[10%] -top-[10%] h-[140%]" style={{ y: tenang ? 0 : geserKontur }}>
+      <motion.div className="absolute -inset-x-[10%] -top-[10%] h-[140%] will-change-transform" style={{ y: tenang ? 0 : geserKontur }}>
         <motion.svg
           viewBox="0 0 1440 900"
           preserveAspectRatio="xMidYMid slice"
-          className="h-full w-full"
+          className="h-full w-full will-change-transform"
           animate={tenang ? undefined : { x: [0, 26, -14, 0], rotate: [0, 0.6, -0.4, 0] }}
           transition={{ duration: 90, ease: "easeInOut", repeat: Infinity }}
         >
@@ -179,7 +181,8 @@ export default function LatarHidup({ tenang, sisi, jalan }: { tenang: boolean; s
         </motion.svg>
       </motion.div>
       <canvas ref={kanvas} className="absolute inset-0 h-full w-full" />
-      <div className="absolute inset-0 opacity-[0.11] mix-blend-soft-light" style={{ backgroundImage: `url("${BUTIR}")` }} />
+      {/* Butiran halus tanpa mode campur warna: `mix-blend-mode` layar penuh memaksa seluruh latar dihitung ulang setiap frame. */}
+      <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: `url("${BUTIR}")` }} />
       <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_50%,transparent_55%,rgba(2,8,6,0.55))]" />
     </div>
   );

@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { ArrowDown, Check, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { BabCerita } from "@shared/cerita";
 import type { EntriAdegan, Lapis } from "./kontrak";
 import PanggungAdegan from "./PanggungAdegan";
@@ -9,21 +9,16 @@ import { duaAngka, paragraf } from "./alat";
 /**
  * Satu bagian cerita: dua kolom bergantian (bagian ganjil penjelasan di kiri,
  * genap di kanan), adegan menempel selama bagian digulir. Di ponsel adegan
- * menempel di atas setinggi 40% layar. Penjelasan dibuka bertahap, lalu
- * pembaca menandai paham untuk membuka bagian berikutnya.
+ * menempel di atas setinggi 40% layar. Penjelasan tambahan dibuka bertahap,
+ * dan bagian berikutnya selalu bisa dibaca tanpa syarat.
  */
 
 type PropsBab = {
   bab: BabCerita;
   indeks: number;
-  jumlah: number;
   entri: EntriAdegan | undefined;
   memuat: boolean;
   tenang: boolean;
-  sudahPaham: boolean;
-  baru: boolean;
-  onPaham: () => void;
-  onLanjut: () => void;
 };
 
 const MULUS = [0.22, 1, 0.36, 1] as const;
@@ -65,14 +60,13 @@ function Lapisan({ tingkat, judul, terbuka, onUbah, tenang, children }: { tingka
   );
 }
 
-export default function Bab({ bab, indeks, jumlah, entri, memuat, tenang, sudahPaham, baru, onPaham, onLanjut }: PropsBab) {
+export default function Bab({ bab, indeks, entri, memuat, tenang }: PropsBab) {
   const ref = useRef<HTMLElement>(null);
   const [lapis, setLapis] = useState<Lapis>(0);
-  // Progres 0 saat bagian mulai masuk layar, 1 saat ujung bagian (kotak "Sudah paham?") terlihat.
+  // Progres 0 saat bagian mulai masuk layar, 1 saat ujung bagian terlihat.
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.8", "end end"] });
   const progres = useSpring(scrollYProgress, { stiffness: 110, damping: 26, mass: 0.5, restDelta: 0.0005 });
   const teksKiri = indeks % 2 === 0;
-  const terakhir = indeks === jumlah - 1;
   const idJudul = `${bab.id}-judul`;
 
   const ubahLanjut = () => setLapis(lapis >= 1 ? 0 : 1);
@@ -80,13 +74,10 @@ export default function Bab({ bab, indeks, jumlah, entri, memuat, tenang, sudahP
   const munculPoin = tenang ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "0px 0px -12% 0px" }, transition: { duration: 0.7, ease: MULUS } };
 
   return (
-    <motion.section
+    <section
       ref={ref}
       id={bab.id}
       aria-labelledby={idJudul}
-      initial={baru && !tenang ? { opacity: 0, y: 48 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: MULUS }}
       className="container relative mx-auto flex scroll-mt-[60px] flex-col px-5 md:px-8 lg:grid lg:scroll-mt-0 lg:grid-cols-12 lg:gap-x-14"
     >
       {/* Penjelasan */}
@@ -138,26 +129,6 @@ export default function Bab({ bab, indeks, jumlah, entri, memuat, tenang, sudahP
           </div>
         )}
 
-        {/* Gerbang pemahaman */}
-        <div className="mt-[9vh] border border-[#DCC38A]/30 bg-[#04110c]/75 p-6 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)] backdrop-blur-sm md:p-8 lg:mt-[14vh]">
-          <p className="evidence-kicker">Sudah paham?</p>
-          <p className="mt-3 font-serif text-xl leading-snug text-[#F6F4E9] md:text-2xl">{bab.pahami}</p>
-          {sudahPaham ? (
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <span className="inline-flex items-center gap-2 text-sm text-[#DCC38A]"><Check className="h-4 w-4" /> Sudah kamu pahami</span>
-              <button type="button" onClick={onLanjut} className="inline-flex items-center gap-2 text-sm text-white/70 underline-offset-4 transition-colors hover:text-white hover:underline">
-                {terakhir ? "Ke penutup" : "Ke bagian berikutnya"} <ArrowDown className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <>
-              <button type="button" onClick={onPaham} className="mt-6 inline-flex items-center gap-2 bg-[#DCC38A] px-6 py-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#071610] shadow-[0_10px_30px_-10px_rgba(220,195,138,0.6)] transition-transform hover:-translate-y-0.5">
-                Saya paham, lanjutkan <ArrowDown className="h-4 w-4" />
-              </button>
-              <p className="mt-3 text-xs leading-relaxed text-white/50">{terakhir ? "Penutup terbuka setelah tombol ini ditekan." : "Bagian berikutnya terbuka setelah tombol ini ditekan."}</p>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Adegan: menempel di atas pada ponsel, di kolom samping pada layar lebar */}
@@ -170,6 +141,6 @@ export default function Bab({ bab, indeks, jumlah, entri, memuat, tenang, sudahP
           <PanggungAdegan id={bab.id} entri={entri} memuat={memuat} progres={progres} lapis={lapis} tenang={tenang} judul={bab.judul} />
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

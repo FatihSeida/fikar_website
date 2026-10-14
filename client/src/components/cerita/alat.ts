@@ -1,54 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { DaftarAdegan } from "./kontrak";
 
 /**
- * Alat kecil mesin cerita: kemajuan pembaca di localStorage, pemuat daftar
- * adegan per seri, dan pembantu teks. Semua akses penyimpanan dibungkus
- * try/catch supaya halaman tetap jalan di jendela privat atau saat diblokir.
+ * Alat kecil mesin cerita: pemuat daftar adegan per seri dan pembantu teks.
+ * Semua bagian cerita terbuka sejak awal; pembaca bebas menggulir atau melompat.
  */
-
-const kunciSimpan = (slug: string) => `cerita-seri:${slug}`;
-
-function bacaSimpanan(slug: string): number {
-  try {
-    const mentah = window.localStorage.getItem(kunciSimpan(slug));
-    if (!mentah) return 0;
-    const data = JSON.parse(mentah) as { sampai?: unknown };
-    return typeof data.sampai === "number" && Number.isFinite(data.sampai) ? Math.max(0, Math.floor(data.sampai)) : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function tulisSimpanan(slug: string, sampai: number) {
-  try {
-    window.localStorage.setItem(kunciSimpan(slug), JSON.stringify({ sampai, waktu: Date.now() }));
-  } catch {
-    // Penyimpanan tidak tersedia: kemajuan hanya berlaku selama halaman terbuka.
-  }
-}
-
-/**
- * `sampai` = jumlah bagian yang sudah ditandai paham. Bagian ke-i (mulai 0)
- * terbuka bila i <= sampai; penutup terbuka bila sampai >= jumlah.
- */
-export function useKemajuan(slug: string, jumlah: number) {
-  const [sampai, setSampai] = useState(() => Math.min(bacaSimpanan(slug), jumlah));
-  const [kembali] = useState(() => bacaSimpanan(slug) > 0);
-  const awal = useRef(true);
-
-  useEffect(() => {
-    if (awal.current) {
-      awal.current = false;
-      return;
-    }
-    tulisSimpanan(slug, sampai);
-  }, [slug, sampai]);
-
-  const paham = useCallback((indeks: number) => setSampai((s) => Math.max(s, indeks + 1)), []);
-  const ulangi = useCallback(() => setSampai(0), []);
-  return { sampai: Math.min(sampai, jumlah), paham, ulangi, kembali };
-}
 
 // Adegan setiap seri dimuat terpisah supaya pembaca satu seri tidak ikut mengunduh adegan seri lain.
 const pemuatAdegan: Record<string, () => Promise<DaftarAdegan>> = {
@@ -56,18 +12,31 @@ const pemuatAdegan: Record<string, () => Promise<DaftarAdegan>> = {
   "kebijakan-kaderisasi-berbasis-bukti": () => import("./adegan/evidence").then((m) => m.adeganEvidence),
 };
 
+/** Seri yang tampil sebagai cerita interaktif. */
+export const punyaCerita = (slug: string) => slug in pemuatAdegan;
+
+const adeganDimuat = new Map<string, Promise<DaftarAdegan>>();
+
+/** Memuat daftar adegan satu seri. Dipanggil lebih awal pun tidak mengunduh dua kali. */
+export function muatAdegan(slug: string): Promise<DaftarAdegan> {
+  const muat = pemuatAdegan[slug];
+  if (!muat) return Promise.resolve({});
+  let janji = adeganDimuat.get(slug);
+  if (!janji) {
+    janji = muat();
+    adeganDimuat.set(slug, janji);
+    janji.catch(() => adeganDimuat.delete(slug));
+  }
+  return janji;
+}
+
 /** `null` selama memuat; daftar kosong bila seri tidak punya adegan atau gagal dimuat. */
 export function useDaftarAdegan(slug: string): DaftarAdegan | null {
   const [daftar, setDaftar] = useState<DaftarAdegan | null>(null);
   useEffect(() => {
     let hidup = true;
-    const muat = pemuatAdegan[slug];
-    if (!muat) {
-      setDaftar({});
-      return;
-    }
     setDaftar(null);
-    muat()
+    muatAdegan(slug)
       .then((hasil) => { if (hidup) setDaftar(hasil); })
       .catch((galat) => {
         console.warn("Adegan seri gagal dimuat", galat);

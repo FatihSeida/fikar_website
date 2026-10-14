@@ -5,7 +5,7 @@
  *
  * Setiap bab punya tiga lapis penjelasan. Pembaca selalu melihat `inti`; makin
  * banyak yang dibuka, makin dalam penjelasannya (`lanjut`, lalu `dalam`).
- * Bab berikutnya terbuka setelah pembaca menandai sudah paham bab ini.
+ * Semua bab terbuka sejak awal.
  */
 
 export type LapisPenjelasan = {
@@ -30,10 +30,8 @@ export type BabCerita = {
   poin?: string[];
   /** Lapis kedua: penjelasan lebih lanjut. */
   lanjut?: LapisPenjelasan;
-  /** Lapis ketiga: lebih dalam lagi, boleh memuat kutipan naskah asli. */
+  /** Lapis ketiga: lebih dalam lagi, boleh memuat kutipan kalimat tulisan yang menjadi dasar seri (harus sama persis). */
   dalam?: LapisPenjelasan & { kutipan?: string };
-  /** Satu kalimat yang dipahami pembaca sebelum lanjut ke bab berikutnya. */
-  pahami: string;
 };
 
 export type CeritaSeri = {
