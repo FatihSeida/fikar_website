@@ -31,6 +31,9 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
   const jumlah = cerita.bab.length;
   const nomor = `Series ${duaAngka(seri.nomor)}`;
   const label = cerita.pembuka.label.trim();
+  // Judul "utama: anak judul" tampil dua tingkat supaya judul panjang tidak memenuhi sampul.
+  const judul = cerita.pembuka.judul;
+  const pisah = judul.indexOf(": ");
   const masuk = (tunda: number) => (tenang ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.9, delay: tunda, ease: [0.22, 1, 0.36, 1] as const } });
 
   return (
@@ -57,7 +60,15 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
           </motion.div>
 
           <motion.h1 {...masuk(0.08)} id="judul-cerita" className="mt-7 text-balance font-serif text-[2.6rem] font-medium leading-[1.05] text-[#F6F4E9] md:text-7xl xl:text-[5.4rem]">
-            {cerita.pembuka.judul}
+            {pisah > 0 ? (
+              <>
+                {judul.slice(0, pisah)}
+                <span className="sr-only">: </span>
+                <span className="mt-4 block text-[0.42em] leading-[1.2] text-[#DCC38A]">{judul.slice(pisah + 2)}</span>
+              </>
+            ) : (
+              judul
+            )}
           </motion.h1>
 
           {seri.tulisan && (

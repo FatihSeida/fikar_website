@@ -31,7 +31,7 @@ type Pembantu = { requireAdmin: Middleware; sanitizeHtml: (html: string) => stri
 const daftarSeri: { slug: string; nomor: number; judul: string; caption: string; fitur: FiturRilis; tampilan: TampilanSeri; tulisan?: string }[] = [
   {
     // `tulisan` adalah slug catatan yang menjadi dasar seri; seri menautkannya dan catatannya menautkan balik.
-    slug: "kaderisasi-go-international", nomor: 1, judul: "Kaderisasi Go International", fitur: "series-1", tampilan: "cerita",
+    slug: "kaderisasi-go-international", nomor: 1, judul: "Kontribusi HMI Menyongsong Indonesia Emas 2045: HMI, Indonesia, dan Dunia", fitur: "series-1", tampilan: "cerita",
     tulisan: "kontribusi-hmi-menyongsong-indonesia-emas-2045",
     caption: "Dari Yogyakarta 1947 sampai seratus tahun HMI: kader hanya bisa melangkah jauh ke dunia bila rumahnya rukun.",
   },

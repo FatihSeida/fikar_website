@@ -11,7 +11,7 @@ export function ceritaKaderisasiGoInternational(): CeritaSeri {
     slug: "kaderisasi-go-international",
     pembuka: {
       label: "Series 01",
-      judul: "Kaderisasi Go International",
+      judul: "Kontribusi HMI Menyongsong Indonesia Emas 2045: HMI, Indonesia, dan Dunia",
       pengantar:
         "Kamu akan menyusuri satu cerita panjang, dari sebuah ruang kuliah di Yogyakarta tahun 1947 sampai seratus tahun HMI pada 2047. Pelan-pelan kamu akan paham kenapa rukun di dalam rumah menjadi syarat untuk melangkah jauh ke dunia, dan apa yang bisa kita kerjakan agar Indonesia tampil lebih depan dan bercahaya di panggung dunia. Ikuti sebuah perahu kecil yang harus mendayung di antara dua karang.",
     },
