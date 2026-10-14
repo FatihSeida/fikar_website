@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -85,10 +85,13 @@ function Router() {
 }
 
 function App() {
+  // Layar pembuka 2,5 detik hanya untuk pembukaan awal di halaman biasa. Halaman cerita (/series/...)
+  // punya keadaan memuat sendiri, jadi tidak ditunda dan tidak mengunci gulir. Diputuskan sekali dari alamat awal.
+  const [tampilkanPembuka] = useState(() => !window.location.pathname.startsWith("/series/"));
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppLoader />
+        {tampilkanPembuka && <AppLoader />}
         <Toaster />
         <Router />
       </TooltipProvider>
