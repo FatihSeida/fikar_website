@@ -98,7 +98,15 @@ export default function NoteDetail() {
               judul={note.title}
               pesan={`Baca “${note.title}” oleh Ahmad Zulfikar.`}
               namaFile={`story-catatan-${note.slug.slice(0, 40)}.png`}
-              story={{ label: note.tag, judul: note.title, isi: potongKata(note.excerpt, 230), tautan: "ahmadzulfikar.com/catatan" }}
+              story={{
+                label: note.tag,
+                judul: note.title,
+                isi: potongKata(note.excerpt, 230),
+                tautan: "ahmadzulfikar.com/catatan",
+                gambarSiap: note.slug === "kontribusi-hmi-menyongsong-indonesia-emas-2045"
+                  ? "/ahmad/story-kontribusi-hmi-2045-v1.png"
+                  : undefined,
+              }}
             />
           </header>
 
