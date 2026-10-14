@@ -81,7 +81,7 @@ export default function TanggapanPanel() {
               </div>
               <p className="mt-3 whitespace-pre-line leading-relaxed">{t.isi}</p>
               <p className="mt-3 text-sm text-muted-foreground">
-                {t.nama ? `${t.nama} · ` : ""}{t.komisariat} · Cabang {t.cabang}{t.kota ? ` · dikirim dari ${t.kota}` : ""}
+                {[t.nama || "Anonim", t.komisariat, t.cabang && `Cabang ${t.cabang}`, t.kota && `dikirim dari ${t.kota}`].filter(Boolean).join(" · ")}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {t.status !== "tampil" && <Button size="sm" onClick={() => ubahStatus.mutate({ id: t.id, status: "tampil" })}>Tampilkan</Button>}
