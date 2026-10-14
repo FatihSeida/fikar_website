@@ -270,7 +270,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTanggapan(data: InsertTanggapan): Promise<Tanggapan> {
-    const [item] = await this.db.insert(tanggapan).values(data).returning();
+    const [item] = await this.db.insert(tanggapan).values({ ...data, komisariat: data.komisariat ?? "", cabang: data.cabang ?? "" }).returning();
     return item;
   }
 
@@ -530,7 +530,7 @@ export class MemStorage implements IStorage {
 
   async createTanggapan(data: InsertTanggapan): Promise<Tanggapan> {
     const item: Tanggapan = {
-      id: this.id(), createdAt: new Date(), seriSlug: data.seriSlug, komisariat: data.komisariat, cabang: data.cabang,
+      id: this.id(), createdAt: new Date(), seriSlug: data.seriSlug, komisariat: data.komisariat ?? "", cabang: data.cabang ?? "",
       nama: data.nama ?? null, isi: data.isi, status: "baru", kota: data.kota ?? null, provinsi: data.provinsi ?? null,
     };
     this.tanggapanItems.push(item);

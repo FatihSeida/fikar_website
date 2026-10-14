@@ -3,36 +3,36 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, MessageSquareText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import PilihCabang, { namaCabangDipilih } from "@/components/PilihCabang";
 import InfoPersetujuan from "@/components/InfoPersetujuan";
 import { queryClient } from "@/lib/queryClient";
 
+/** `komisariat` dan `cabang` hanya ada pada tanggapan lama; tanggapan baru tidak menanyakannya. */
 type TanggapanPublik = { id: number; createdAt: string; komisariat: string; cabang: string; nama: string | null; isi: string };
 
 const tanggalPendek = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 
+/** Penulis, wilayah (hanya bila ada pada tanggapan lama), dan tanggal. Tanpa nama berarti anonim. */
+const keterangan = (item: TanggapanPublik) =>
+  [
+    item.nama || "Anonim",
+    item.komisariat && `Komisariat ${item.komisariat.replace(/^komisariat\s+/i, "")}`,
+    item.cabang && `Cabang ${item.cabang}`,
+    tanggalPendek(item.createdAt),
+  ].filter(Boolean).join(" · ");
+
 /**
- * Kolom tanggapan di akhir setiap seri. Komisariat dan cabang wajib supaya
- * tanggapan bisa dibaca per wilayah; nama pribadi boleh kosong. Tanggapan baru
- * tampil setelah dibaca moderator.
+ * Kolom tanggapan di akhir setiap seri. Cukup tulis tanggapan; nama boleh
+ * dikosongkan (anonim). Tanggapan baru tampil setelah dibaca moderator.
  */
 export default function KolomTanggapan({ slug }: { slug: string }) {
   const kunci = [`/api/seri/${slug}/tanggapan`];
   const { data: daftar = [] } = useQuery<TanggapanPublik[]>({ queryKey: kunci });
-  const [komisariat, setKomisariat] = useState("");
-  const [cabangPilihan, setCabangPilihan] = useState("");
-  const [cabangLain, setCabangLain] = useState("");
   const [nama, setNama] = useState("");
   const [isi, setIsi] = useState("");
   const [kirim, setKirim] = useState<"diam" | "mengirim" | "terkirim" | "gagal">("diam");
   const [pesanGalat, setPesanGalat] = useState("");
 
-  const cabang = namaCabangDipilih(cabangPilihan, cabangLain);
-  const kurang = komisariat.trim().length < 2 || cabang.length < 2
-    ? "Isi nama komisariat dan cabang."
-    : isi.trim().length < 10
-      ? "Tulis tanggapan minimal 10 karakter."
-      : "";
+  const kurang = isi.trim().length < 10 ? "Tulis tanggapan minimal 10 karakter." : "";
 
   const kirimTanggapan = async () => {
     setKirim("mengirim");
@@ -41,7 +41,7 @@ export default function KolomTanggapan({ slug }: { slug: string }) {
       const res = await fetch(`/api/seri/${slug}/tanggapan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ komisariat, cabang, nama, isi }),
+        body: JSON.stringify({ nama, isi }),
       });
       if (res.ok) {
         setKirim("terkirim");
@@ -60,9 +60,9 @@ export default function KolomTanggapan({ slug }: { slug: string }) {
   return (
     <section id="tanggapan" className="scroll-mt-24 border-t border-border pt-12">
       <p className="eyebrow text-primary">Tanggapan kader</p>
-      <h2 className="mt-4 font-serif text-3xl leading-tight">Bagaimana pengalaman di komisariat dan cabangmu?</h2>
+      <h2 className="mt-4 font-serif text-3xl leading-tight">Bagaimana tanggapanmu atas Series ini?</h2>
       <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">
-        Tanggapanmu menjadi bahan perbaikan ke depan. Sebutkan komisariat dan cabangmu supaya suara setiap wilayah terbaca. Nama pribadi boleh dikosongkan.
+        Tanggapanmu menjadi bahan perbaikan ke depan. Tulis namamu, atau kosongkan bila ingin anonim.
       </p>
 
       {kirim === "terkirim" ? (
@@ -73,11 +73,7 @@ export default function KolomTanggapan({ slug }: { slug: string }) {
         </div>
       ) : (
         <div className="mt-8 grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Input value={komisariat} onChange={(e) => setKomisariat(e.target.value)} maxLength={120} placeholder="Nama komisariat" aria-label="Nama komisariat" />
-            <PilihCabang pilihan={cabangPilihan} setPilihan={setCabangPilihan} lainnya={cabangLain} setLainnya={setCabangLain} />
-          </div>
-          <Input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={80} placeholder="Nama (opsional)" aria-label="Nama" />
+          <Input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={80} placeholder="Nama (kosongkan bila ingin anonim)" aria-label="Nama" />
           <div>
             <Textarea value={isi} onChange={(e) => setIsi(e.target.value)} maxLength={2000} rows={5} placeholder="Tulis tanggapan, pengalaman, atau koreksimu atas tulisan ini." aria-label="Tanggapan" />
             <p className="mt-1 text-right text-xs tabular-nums text-muted-foreground">{isi.length}/2000</p>
@@ -100,9 +96,7 @@ export default function KolomTanggapan({ slug }: { slug: string }) {
             {daftar.map((item) => (
               <li key={item.id} className="border border-border bg-background p-5">
                 <p className="whitespace-pre-line leading-relaxed">{item.isi}</p>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {item.nama ? `${item.nama} · ` : ""}Komisariat {item.komisariat.replace(/^komisariat\s+/i, "")} · Cabang {item.cabang} · {tanggalPendek(item.createdAt)}
-                </p>
+                <p className="mt-3 text-xs text-muted-foreground">{keterangan(item)}</p>
               </li>
             ))}
           </ol>

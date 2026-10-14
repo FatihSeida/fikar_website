@@ -92,6 +92,7 @@ export const tanggapan = pgTable("tanggapan", {
   id: serial("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   seriSlug: text("seri_slug").notNull(),
+  // Kolom lama (wajib di database). Formulir sekarang tidak menanyakannya, jadi tanggapan baru berisi teks kosong.
   komisariat: text("komisariat").notNull(),
   cabang: text("cabang").notNull(),
   nama: text("nama"),
@@ -277,10 +278,8 @@ export const ubahSeriSchema = z.object({
   namaMedia: teksOpsional(100),
 });
 
-/** Tanggapan kader: komisariat dan cabang wajib, nama pribadi boleh kosong. */
+/** Tanggapan atas seri: cukup nama (boleh kosong, berarti anonim) dan isi tanggapan. */
 export const insertTanggapanSchema = z.object({
-  komisariat: teksPendek(2, 120),
-  cabang: teksPendek(2, 80),
   nama: teksOpsional(80),
   isi: teksPendek(10, 2000),
 });
@@ -297,7 +296,8 @@ export const lengkapiKirimanSchema = z.object({
 export type Seri = typeof seri.$inferSelect;
 export type UbahSeri = z.infer<typeof ubahSeriSchema>;
 export type Tanggapan = typeof tanggapan.$inferSelect;
-export type InsertTanggapan = z.infer<typeof insertTanggapanSchema> & { seriSlug: string; kota?: string | null; provinsi?: string | null };
+/** `komisariat` dan `cabang` hanya terisi pada tanggapan lama; tanggapan baru menyimpannya sebagai teks kosong. */
+export type InsertTanggapan = z.infer<typeof insertTanggapanSchema> & { seriSlug: string; komisariat?: string; cabang?: string; kota?: string | null; provinsi?: string | null };
 export type KirimanFitur = typeof kirimanFitur.$inferSelect;
 export type InsertKirimanFitur = Omit<typeof kirimanFitur.$inferInsert, "id" | "createdAt">;
 
