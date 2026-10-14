@@ -8,6 +8,7 @@ import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { insertGallerySchema, insertNoteSchema, insertMasalahSchema, insertKunjunganSchema, insertHasilKuisSchema, lengkapiHasilKuisSchema, statusMasalahIds } from "@shared/schema";
 import { lookupGeo } from "./geo";
 import { galeriBawaan, galeriSeedLama } from "@shared/galeri";
+import { urutkanCatatan } from "@shared/urutanCatatan";
 import { namaKota, namaProvinsi } from "./wilayah";
 import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan";
 import { auditSudahDibuka, JUMLAH_SOAL_INTI } from "@shared/audit";
@@ -305,7 +306,7 @@ export async function registerRoutes(
 
   // --- Catatan ---
   app.get("/api/notes", async (_req, res) => {
-    res.json(await cachePublik.ambil("catatan", () => storage.getNotes()));
+    res.json(await cachePublik.ambil("catatan", async () => urutkanCatatan(await storage.getNotes())));
   });
 
   app.get("/api/notes/:slug", async (req, res) => {
