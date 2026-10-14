@@ -251,9 +251,14 @@ export async function buatStory(isi: IsiStory): Promise<Blob> {
   return await new Promise<Blob>((selesai, gagal) => kanvas.toBlob((blob) => (blob ? selesai(blob) : gagal(new Error("Gambar gagal dibuat"))), "image/png"));
 }
 
-export type HasilBagikan = "dibagikan" | "diunduh" | "batal";
+/** "ulang": lembar bagikan ditolak karena ketukan sudah terlalu lama; gambarnya siap, ketuk sekali lagi. */
+export type HasilBagikan = "dibagikan" | "diunduh" | "batal" | "ulang";
 
-export async function bagikanGambar(blob: Blob, namaFile: string, judul: string): Promise<HasilBagikan> {
+/**
+ * `izinUlang` dipakai saat gambar baru saja dibuat sesudah ketukan: sebagian peramban HP
+ * menolak lembar bagikan bila jedanya terlalu lama, dan ketukan kedua akan berhasil.
+ */
+export async function bagikanGambar(blob: Blob, namaFile: string, judul: string, izinUlang = false): Promise<HasilBagikan> {
   const berkas = new File([blob], namaFile, { type: "image/png" });
   if (navigator.canShare?.({ files: [berkas] })) {
     try {
@@ -261,6 +266,7 @@ export async function bagikanGambar(blob: Blob, namaFile: string, judul: string)
       return "dibagikan";
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return "batal";
+      if (izinUlang && error instanceof DOMException && error.name === "NotAllowedError") return "ulang";
     }
   }
   const url = URL.createObjectURL(blob);
