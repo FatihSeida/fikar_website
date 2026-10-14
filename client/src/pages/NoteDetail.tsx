@@ -104,7 +104,7 @@ export default function NoteDetail() {
                 isi: potongKata(note.excerpt, 230),
                 tautan: "ahmadzulfikar.com/catatan",
                 gambarSiap: note.slug === "kontribusi-hmi-menyongsong-indonesia-emas-2045"
-                  ? "/ahmad/story-kontribusi-hmi-2045-v1.png"
+                  ? "/ahmad/story-kontribusi-hmi-2045-v2.png"
                   : undefined,
               }}
             />
