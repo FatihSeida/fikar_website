@@ -8,6 +8,7 @@ import { proseKelas } from "@/pages/NoteDetail";
 import { labelWaktu } from "@shared/rilis";
 import HasilBangun from "./pahlawan/HasilBangun";
 import LatarPahlawan from "./pahlawan/LatarPahlawan";
+import BagikanSeri from "./BagikanSeri";
 import type { PropsHalamanSeri } from "./tipe";
 
 /**
@@ -62,6 +63,7 @@ export default function SeriPahlawan({ seri, naskah, tanggapan }: PropsHalamanSe
           {seri.subjudul && (
             <p className="mt-8 max-w-2xl border-l border-[hsl(var(--gold))] pl-6 text-lg leading-relaxed text-white/80 md:text-xl">{seri.subjudul}</p>
           )}
+          <BagikanSeri seri={seri} className="mt-8" />
           <p className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/65">
             <span>Oleh <span className="text-white">{seri.penulis}</span></span>
             <span aria-hidden="true">·</span>

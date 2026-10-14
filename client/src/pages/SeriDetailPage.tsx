@@ -9,6 +9,7 @@ import KolomTanggapan from "@/components/KolomTanggapan";
 import PetaSuaraKader from "@/components/PetaSuaraKader";
 import { SegeraHadir } from "@/components/SegeraHadir";
 import { muatAdegan, punyaCerita } from "@/components/cerita/alat";
+import BagikanSeri from "@/components/seri/BagikanSeri";
 import { proseKelas } from "@/pages/NoteDetail";
 import { labelTerbit } from "@/pages/SeriesPage";
 import type { Seri } from "@shared/schema";
@@ -153,6 +154,7 @@ export default function SeriDetailPage() {
             </div>
             <h1 className="mb-7 font-serif text-4xl leading-[1.12] md:text-6xl">{seri.judul}</h1>
             {seri.subjudul && <p className="measure text-xl leading-relaxed text-muted-foreground">{seri.subjudul}</p>}
+            <BagikanSeri seri={info} gelap={false} className="mt-8" />
             <p className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
               <span>Oleh <span className="text-foreground">{seri.penulis}</span></span>
               <span aria-hidden="true">·</span>

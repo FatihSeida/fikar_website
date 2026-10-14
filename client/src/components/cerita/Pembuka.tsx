@@ -4,6 +4,7 @@ import { ArrowDown, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import type { CeritaSeri } from "@shared/cerita";
 import type { InfoSeri } from "@/components/seri/tipe";
+import BagikanSeri from "@/components/seri/BagikanSeri";
 import { DaftarIsi } from "./DaftarIsi";
 import { duaAngka, paragraf } from "./alat";
 
@@ -72,6 +73,10 @@ const Pembuka = forwardRef<HTMLElement, PropsPembuka>(function Pembuka({ seri, c
               {seri.subjudul}
             </motion.p>
           )}
+
+          <motion.div {...masuk(0.2)} className="mt-7">
+            <BagikanSeri seri={seri} />
+          </motion.div>
 
           <motion.div {...masuk(0.24)} className="mt-7 max-w-2xl space-y-4 text-[17px] leading-[1.75] text-white/75 md:text-lg">
             {paragraf(cerita.pembuka.pengantar).map((p, i) => <p key={i}>{p}</p>)}

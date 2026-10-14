@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { labelWaktu } from "@shared/rilis";
 import type { InfoSeri } from "../tipe";
+import BagikanSeri from "../BagikanSeri";
 
 const RADIUS_CINCIN = [70, 135, 210, 300, 400];
 // Titik emas di cincin: [indeks cincin, sudut derajat, jeda kedip]
@@ -84,6 +85,7 @@ export default function HeroPemuda({ seri }: { seri: InfoSeri }) {
         </p>
         <h1 className="mt-6 max-w-3xl font-serif text-[2.5rem] leading-[1.08] md:text-6xl lg:text-7xl">{seri.judul}</h1>
         {seri.subjudul && <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/75 md:text-xl">{seri.subjudul}</p>}
+        <BagikanSeri seri={seri} className="mt-8" />
 
         <p className="mt-9 flex flex-col gap-y-1.5 text-sm text-white/60 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
           <span>Oleh <span className="text-white">{seri.penulis}</span></span>

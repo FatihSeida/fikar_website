@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import { useNote } from "@/hooks/use-content";
 import type { RingkasSeri } from "@/pages/SeriesPage";
 import { labelWaktu } from "@shared/rilis";
+import BagikanHalaman, { potongKata } from "@/components/BagikanHalaman";
 import Navbar from "@/components/Navbar";
 import PaperGrain from "@/components/PaperGrain";
 import SiteFooter from "@/components/sections/SiteFooter";
@@ -91,6 +92,14 @@ export default function NoteDetail() {
 
             <p className="measure text-lg text-muted-foreground">{note.excerpt}</p>
 
+            <BagikanHalaman
+              className="mt-8"
+              path={`/catatan/${note.slug}`}
+              judul={note.title}
+              pesan={`Baca “${note.title}” oleh Ahmad Zulfikar.`}
+              namaFile={`story-catatan-${note.slug.slice(0, 40)}.png`}
+              story={{ label: note.tag, judul: note.title, isi: potongKata(note.excerpt, 230), tautan: "ahmadzulfikar.com/catatan" }}
+            />
           </header>
 
           {note.coverImage && (
