@@ -13,6 +13,7 @@ import { batas, buatCacheSingkat, buatPenghitung, kunciIp } from "./perlindungan
 import { auditSudahDibuka, JUMLAH_SOAL_INTI } from "@shared/audit";
 import { isProduction } from "./env";
 import { registerKampanyeRoutes } from "./kampanye";
+import { opiniIndonesiaEmas } from "./konten/opiniIndonesiaEmas";
 import { z } from "zod/v4";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
@@ -619,6 +620,7 @@ async function seedDatabase() {
       tag: "Ketenagakerjaan", date: "3 Mei 2023", coverImage: "/ahmad/gallery-aksi-advokasi.webp",
       sourceUrl: "https://www.radarnusantara.com/2023/05/aksi-tolak-uu-cipta-kerja-may-day-hari.html?m=1", sourceName: "Radar Nusantara",
     },
+    opiniIndonesiaEmas,
   ];
   for (const seed of noteSeeds) {
     if (!(await storage.getNote(seed.slug))) await storage.createNote(seed);
